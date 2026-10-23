@@ -1,0 +1,443 @@
+/*
+ *
+ *     ① **只引 theme + utilities**，不引 preflight（= Tailwind 的全局重置不会进文档）
+ *        ⇒ 不会碰 legacy 的任何既有样式（legacy 的 39 段样式照旧说了算）。
+ *     ② **加前缀**（`prefix(xlr)`）⇒ 工具类只在写成 **`xlr:` + 工具名** 时才生效
+ *        （⚠ **v4 的前缀是「冒号命名空间」写法**，实测：`xlr:flex` ⇒ 产物里是 `.xlr\:flex{display:flex}`；
+ *          不是 v3 那种连字符写法 `xlr-flex` —— 写成 `xlr-flex` **不产生任何规则**，别踩这个坑）。
+ *        ⇒ legacy 的既有类名（`ring` / `flex` / `hidden` …）**不可能**再命中 Tailwind 的工具类。
+ *     ③ 两段都用 `@import … layer(...)` 引 ⇒ Tailwind 的规则落在 **CSS cascade layer** 里，
+ *        而 legacy 的规则是**未分层**的 ⇒ 未分层规则优先级更高 ⇒ Tailwind **不会**意外压过旧界面
+ *        （这是"零像素风险"的技术保证；将来做新组件时若要 Tailwind 压旧样式，得显式处理层）。
+ *
+ * ★ 2026-10-13 修复（现象：「贰·起卦」屏走宫盘上多出一圈 1px 深色方框 = 1204 像素）：
+ *   本文件**第一版漏了上面第 ② 条的前缀**（只做了"关 preflight"，与本头注不符）⇒ Tailwind 按扫描到的
+ *   候选类名生成工具类，而 legacy 的走宫盘元素 class 就叫 **`ring`**，正好命中 Tailwind 的同名工具类 `.ring`
+ *   加上 `prefix(xlr)` 后 Tailwind 只生成 `xlr:*` 工具类 ⇒ 与 legacy 的既有类名**不可能**再撞。
+ *   ⚠ 前缀写在哪一段有讲究（实测）：写在 `utilities.css` 那行**不生效**（该段内部没有 `@theme`，
+ *     修饰符被丢弃）；写在 **`theme.css` 那行才生效**（Tailwind 把 `prefix(…)` 挂到 `@theme` 上）。
+ *   复跑判据：`node 构建检查`（在场 / 层声明 / 零变量撞车）+
+ *   `powershell tools/(本地脚本) -MaxReps 9`（预期那条 1204 像素归零）。
+ *
+ * 体积：加前缀后，文档里**没有任何 `xlr:*` 类**被用到 ⇒ utilities 层实际不产出工具类
+ *   （实测产物里那个 Tailwind 样式块只剩 82 字符 = 版权注释 + `@layer utilities;`），也不产出主题变量
+ *   （v4 只输出被生成工具类引用到的变量）⇒ Tailwind 现在**零 footprint**，直到有人写 `xlr:*`。
+ */
+@import "tailwindcss/theme.css" layer(theme) prefix(xlr);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* ★ 铜古皮肤模块（2026-10-14 v4）：**独立文件**，只在 `html[data-skin="tonggu"]` 下生效。
+   放在这里（未分层）⇒ 与 legacy 的未分层规则同层，靠「选择器更具体 + 涂装属性 !important」取胜；
+   模块自己的结构 = 变量 → 可复用类（.tg-cast/.tg-frame/…）→ 末尾一节才映射到 legacy 选择器。 */
+/*
+   ⇒ 这一行在手机端暂时停用，皮肤适配批再补（届时把 apps/desktop-web/src/skins/** 搬一份过来）。
+@import "./skins/tonggu/tonggu.css";
+*/
+
+/*
+   与桌面端产物里 legacy 块的**相对位置一致**：桌面端 tailwind 在 head、legacy 5 块在 body 与文档尾
+   ⇒ 相对顺序 = tailwind 在前、legacy 在后（本文件里就是这一行的位置）。
+   生成器：tools/port-mobile-css.mjs（6 块，块序 = 早期产物文档顺序，见 变更记录）。 */
+@import "./styles/legacy.css";
+
+/*
+   早期版本把它归进「液态玻璃」按钮组：
+     `.sbtn,.btn,.castsw,…{background:var(--m-glass);backdrop-filter:var(--m-blur);box-shadow:inset 0 1px 0 …}`
+     ＋ `.castsw:hover{background:var(--accent-bg)}` ＋ `.castsw[aria-expanded="true"]{background:var(--accent-bg)}`
+   ⇒ 鼠标悬停 / 展开 / 某些皮肤下，它会被画成一块亮片（现象：的"方块背景"）。
+   只清「涂装」三件（底色 / 棱光阴影 / 背景模糊），**不动 border 宽度、圆角、padding**
+   ⇒ 尺寸与行位置一个像素都不动（只少一块颜色）。
+   ⚠ 为什么选这里：最终文档（`vite.doc.config.mjs`）的 CSS 入口就是本文件（`doc-entry.html` 里那条
+     `<link rel="stylesheet" href="/src/tailwind.css">`）；`src/index.css` 只服务 dev 入口，改了不进产物。
+   ⚠ 别去掉 `!important`：legacy 侧是**未分层**规则，本文件里 Tailwind 那两段在 layer 里，
+     只有「未分层 + 后出现」才稳赢；legacy 里还有一条 `html[data-step] #castToggle:active{…!important}`。 */
+.castsw, #castToggle.castsw,
+.castsw:hover, .castsw:focus, .castsw:focus-visible, .castsw:active,
+.castsw[aria-expanded="true"],
+#castToggle.castsw:hover, #castToggle.castsw:focus, #castToggle.castsw:focus-visible,
+#castToggle.castsw:active, #castToggle.castsw[aria-expanded="true"] {
+  background: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ============ 2026-10-14（现象：）· 起卦栏的校验提示行（`#err`）位置 ============
+   ★ 原文：「如果报数没报完，就点了起卦，还是会出起卦动画，等动画完结后，页面仍在问卦界面：
+     因为不足三个数。但是现在需要三个数的提示文字，位置不对劲」。
+     · `#err` 是**整条起卦栏共用**的校验行（`showErr()` 的 5 条文案都写它），源里住在 `.gobar` 里，
+       而 `.gobar` 现在是「提交箭头 ＋ 提示」的**竖排 flex**（`28-style.txt` L791-794）⇒
+       提示一出现就把箭头顶上去 **35px**（实测 454→419），
+       提示自身挤在卡片最下面（底边距卡片下沿只剩 **14px**），
+       并且与「报数 / 事类 / 详情」那排小片**几何重叠 620px²**（err 右边那一截压在小片行的带里）。
+     · 而它指的那三个数框在**下面那张卡**里（1280×900 实测 y 572–610）⇒ 提示与所指的东西脱节。
+   改法（**只改「提示行画在哪」，DOM 一个节点不动 ⇒ 结构签名 906 不变**）：
+     让提示行**脱离布局流**，钉在提交箭头**正上方**（右对齐、与箭头右缘对齐、留 6px）。
+     读数（同一工具，改前 → 改后）：箭头位置 454→419 **变成 454→454（不再动）**；
+     提示 85×20@[995,480] → **320×20@[760,428]**；与小片行重叠 620 → **0**。
+   ⚠ 别去掉 `!important`：legacy 侧 `.cbar .gobar .err{max-width:min(320px,52vw);text-align:right;
+     font-size:12px}` 是**未分层**同特异性规则、且在文档里**排在本文件之后** ——
+     实测不加 `!important` 时只有 `position` 生效，`max-width`/`text-align` 全被旧规则压回去
+     （现象：盒子被挤成 46px 宽、文字折成 3 行）。
+   ⚠ 只给 `.gobar` 加 `position:relative`（它里面只有箭头和这行提示）；
+     **不要**改成给 `.cbar` 加定位 —— 那会把整条栏的 `offsetParent` 换掉，
+     牵连 `.spill` 药丸（`offsetLeft`）与日期弹层 `.dppop` 的参照。 */
+.cbar .gobar { position: relative !important; }
+.cbar .gobar .err {
+  position: absolute !important;
+  right: 0;
+  bottom: calc(100% + 6px);
+  margin: 0;
+  width: min(320px, 52vw);
+  max-width: min(320px, 52vw) !important;
+  text-align: right !important;
+}
+
+/* ============ 三宫具象入口隐藏（★ 2026-10-15，(会话)，用户点「1.a」）============
+   背景：早期实现那条总闸 `window.XLR_XIANG = false; document.documentElement.classList.add('no-xiang')`
+   （上游产物 L675–681，注释原话「2026-10-07 三宫具象暂下架，已定『解的不好』；想重新启用就把 XLR_XIANG 改成 true」）
+   在  删「早期实现内联脚本段」时没被搬过来 ⇒ `XLR_XIANG === undefined`、`html` 上没有 `no-xiang`
+   ⇒ legacy 那句 `.no-xiang .chk{display:none!important}` 从来没生效 ⇒ 勾选框露出来
+   （实测：勾选框 display:flex @204,456 872×22 可见）。
+   ⇒ 这里按 `for` 直接隐掉入口：**不动链、不动 DOM 结构**。
+      JS 仍读得到 `#optXiang.checked`；逻辑侧 `withXiang` 本来就恒 false，
+      起卦那句 `window.XLR_XIANG ? document.getElementById('optXiang').checked : false` 也照旧 ⇒ 行为不变。
+   ⚠ 隐藏后下方内容整体上移 22px —— 这正是 `no-xiang` 生效时本来就该有的布局。
+      改它必须重跑已归档的 `tools/port-legacy-css.mjs`（缺源 exit 2）⇒ 本文件才是「仓内自己的样式」的落点。 */
+label.chk[for="optXiang"] { display: none !important; }
+
+/*
+   背景（实测）：那套 `.askbox/.ask-h/.ask-line/.ask-note` 样式**早期版本是靠 JS 注入**的
+   （上游 `现代版-预览.html` L2413–2441，`<style id="askStyle">`）， 砍「早期实现内联脚本」时
+   它跟着没了 ⇒ 产物里 `.askbox` 一条规则都没有（`grep '\.askbox' 新版-现代.html` = 0 命中）。
+   两个后果，都是用户看见的那个：
+     ① `#askBox` 的 class 是 `askbox off`，但 `.askbox.off{display:none!important}` 不存在
+        ⇒ **隐藏失效** ⇒ 断辞还没出来，「接着问」就已经露在页面上；
+     ② 没有样式 ⇒ 它直接贴在结果那块底下（原文：「直接就贴在结果页面的模块上」）。
+   ⇒ 这里把上游那份**逐字**搬回来（`off` 那条是**行为**，不是装饰）；再按的要求
+     把它做成**单独一个模块**：自己的边框/圆角/内距/浅底，而不是靠一条虚线贴在上一块下面。
+      取的变量与既有「模块」写法一致（同文件 `.xb` 那块用的 `--line2 / --accent-bg`）。
+    */
+/*
+   实测拆账：卡片自带 margin-bottom:72px ＋ #right 的行距 26px ＋ 本条自带 margin-top 22px = **120px**。
+   ⇒ 只在「这条真的露出来」时，把卡片那 72px 和本条那 22px 都收掉，只留结果列自带的 26px 行距。
+      `:has(+ .askbox:not(.off))` ⇒ 隐藏态（模型还没解完）时卡片照旧保留 72px，不动既有版式。
+    */
+#llmPane:has(+ .askbox:not(.off)) { margin-bottom: 0; }
+/* ★ 2026-10-15（用户看图提的两点）：① 横向宽度要和断辞卡片对齐；② 样式照断辞卡片那套来。
+   **不手抄数值**：断辞卡片（`.pane.llm`，`#right` 的子节点）的底/边/影/模糊来自 legacy.css 那条
+   `.left .pane, .pane.gua, .pane.llm, .right>.pane:not(.gua):not(.llm){background:var(--m-glass);backdrop-filter:var(--m-blur);…}`
+   ⇒ 这条也带上 `pane` 类（ASKBOX_HTML 里已改成 `class="askbox pane off"`），**自动吃到同一套**，
+     八套皮肤都跟着走；这里只留它没有的东西：内距、圆角、外边距归零、宽度拉满。 */
+.askbox { margin: 0; width: 100%; }
+/* ⚠ 2026-10-15 实测踩坑：带上 `pane` 类之后，legacy 的 `.right>.pane{padding:0}` 把内距压成 0
+   ⇒ 内容（文字/输入框/按钮）全顶到边框上（原文「挤在卡片的边缘，十分拥挤」）。
+   用 **ID 选择器**压过它：(1,1,0) > (0,2,0)，不必用 !important。 */
+#right > #askBox { padding: 14px 18px; border-radius: var(--m-r-lg); }
+.ask-list:empty { display: none; }          /* 还没问过 ⇒ 不占位，输入行直接贴顶 */
+
+/*
+   （意味着，当我点击了接着问之后，接着问的按钮需要一个从按钮到太极的过渡动画）。」
+   ⚠ 太极本体（SVG 材质 / 水波环 / 月牙棱光）由 `splashMarkup.js` 的 markup 提供，**零复制**；
+      `.sl-orb` / `.sl-taiji` 的规则在 legacy.css 里本来就是**全局无前缀**的 ⇒ 这里只补
+      「尺寸 / 位置 / 从按钮长出来 / 转动」这四件开屏没有的事。 */
+#btnAskMore { position: relative; overflow: visible;
+  transition: width .36s var(--m-glide), border-radius .36s var(--m-glide), padding .36s var(--m-glide),
+              background-color .36s var(--m-glide); }
+#btnAskMore .lbl { transition: opacity .2s var(--m-glide); }
+#btnAskMore.asking { width: 48px; min-width: 48px; height: 48px; padding: 0; border-radius: 50%;
+  /* ★★ 2026-10-16 第三轮（用户：「不是歪，是莫名有个黑色边框好像」）：
+     当时 `.asking` 时按钮本体是 40×40 的深色圆（`.btn.pri` 的 accent 底），而太极 `.sl-orb` 只有 36×36
+     ⇒ 太极外面留出**约 2px 的深色圆环**，看起来就是「莫名一圈黑边框」。
+     实测（3× 采样、过中心横切线）：深色环从 r≈15.3 一直到 **r≈20.0（= 按钮边缘 40/2）**，色 (15,16,19)。
+     开屏那枚太极**本来就没有深色底**（`.sl-orb{background:none}`）⇒ 这里照它来：转起来之后要「按钮就是太极」，
+     所以 asking 时把按钮自身的皮（底/描边/投影）收掉。
+        按钮 40→**48**、太极 36→**44**（仍是外圈各留 2px，那条「黑边框」的纠正不变）；
+        同一行的输入框与按钮文字态一起抬到 **48 行高**（见下面 `.ask-line` 那条），否则一行里会一高一矮。
+         */
+  background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
+#btnAskMore.asking .lbl { opacity: 0; }
+#btnAskMore .sl-orb { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
+  margin: -22px 0 0 -22px; opacity: 0; transform: scale(.28) rotate(-40deg); pointer-events: none;
+  animation: none;                              /* 开屏那条 slOrb 入场（从上方落）在这里不重放 */
+  transition: opacity .26s var(--m-glide), transform .46s var(--m-glide); }
+#btnAskMore.asking .sl-orb { opacity: 1; transform: scale(1) rotate(0deg); }
+/* ★ 2026-10-15 用户「有点糊」：① 显示尺寸 34→36（120 单位的细线缩得越小越糊）；
+   ② 慢转交给 GPU 合成层（不提升的话浏览器每帧重采样 ⇒ 线发灰）。
+   ★★ 2026-10-16 第二轮（用户「太极太模糊」）定稿：**3D 提升要落在旋转元素自己身上，并且写进关键帧**。
+     只靠 `will-change` 不够（2026-10-15 实测过：每帧重采样 ⇒ 细线磨灰）；
+     而只用静态 `transform: translateZ(0)` 又会毒化 `from`（机理见下面 ★★）⇒ 两条一起才对：
+       · 静态那句当兜底；· 关键帧首尾都带 `translateZ(0)` ⇒ 函数列表一致 ＋ 全程 3D */
+#btnAskMore .sl-orb { will-change: transform; backface-visibility: hidden; }
+#btnAskMore.asking .sl-taiji { will-change: transform; backface-visibility: hidden; transform: translateZ(0); }
+/* 「在转」：开屏只是「液面在动」（不转）；用户这里要「转动」⇒ 给整块 SVG 一条匀速慢转 */
+#btnAskMore.asking .sl-taiji { animation: askSpin 3.6s linear infinite; }
+/* ★★ 2026-10-16 修「太极图没转动」（现象：；本机 + 真产物两端实测，手机端 390×844 同读数）：
+   若那是 `translateZ(0)` 而 `to` 是 `rotate(360deg)` ⇒ 函数列表不同 ⇒ 引擎只能退化成**矩阵插值**，
+   而两者的矩阵**都等于单位矩阵** ⇒ 每一帧都是单位矩阵 ＝ 完全不转
+   （实测改前真产物连采 18 帧全是 `matrix(1, 0, 0, 1, 0, 0)`）。
+   ⇒ 正解 = 首尾都写 `translateZ(0) rotate(…)`：函数列表一致 ⇒ 匀速插值；全程 3D ⇒ 不走重采样。
+   实测改后：逐帧 0°→11.7°→30.0°→63.4°→123.3°→253.3°→148.1°(≡508.1°) ＝ 100°/s，3.6s 一圈。
+   ⚠ 这份 CSS 与 `apps/desktop-web/src/tailwind.css` 的同名段**各自一份、内容相同** ⇒ 要改就两边各打一次。 */
+@keyframes askSpin { from { transform: translateZ(0) rotate(0deg); } to { transform: translateZ(0) rotate(360deg); } }
+#btnAskMore.asking .sl-taiji .tjHi { animation-duration: 11s; }   /* 受光漂移放慢，别跟慢转抢眼 */
+/*
+   给这一颗补两层慢动（都挂在 askTaijiMarkup.js 的类名上，**只作用于这个按钮**）：
+     ① `.atk-flow`：瓣体缓慢「晃动」＝**缝那条 S 来回摆 ±4.5°** ＋ 整体轻微涨缩 4.5%
+        ⇒ 黑白交界会像液体一样涌来涌去（纯刚体旋转做不到这个，这是非刚体动效）；
+     ② `.atk-bleed`：贴着缝的四缕渗透（墨→白 / 白→墨）缓慢明暗呼吸。
+   ⚠ 两层周期与既有动效**互不相等**（7.2s / 5.8s / 受光漂移 11s / 整块慢转 3.6s）⇒ 不锁相、看不出循环点。
+   ⚠ 只在 `.asking` 时跑（没在问就一个动效都不留）。 */
+#btnAskMore.asking .atk-flow { transform-box: fill-box; transform-origin: center;
+  animation: atkFlow 7.2s ease-in-out infinite alternate; }
+@keyframes atkFlow {
+  from { transform: rotate(-4.5deg) scale(1.005); }
+  to   { transform: rotate(4.5deg) scale(1.05); }
+}
+#btnAskMore.asking .atk-bleed { animation: atkBleed 5.8s ease-in-out infinite alternate; }
+@keyframes atkBleed { from { opacity: .62; } to { opacity: 1; } }
+/* ★ 位图候选（askTaijiImg.js）：照片/徽章类资产没有内部动效，只能靠外层「呼吸」带一点活气。
+    */
+#btnAskMore .atk-breath { position: absolute; left: 0; top: 0; width: 44px; height: 44px; display: block; }
+#btnAskMore .atk-img { width: 44px; height: 44px; display: block; }
+#btnAskMore.asking .atk-breath { animation: atkBreath 7.2s ease-in-out infinite alternate; }
+@keyframes atkBreath { from { transform: scale(1); } to { transform: scale(1.045); } }
+/* ★ 2026-10-16（）：太极放大到 44 ⇒ 这一行整体抬到 **48 行高**（输入框与按钮文字态一起），
+   否则一行里按钮 48、输入框 40，视觉上一高一矮。**只作用于断卦页那一条**（`#askBox` 内），
+    */
+#right > #askBox .ask-line input,
+#right > #askBox .ask-line #btnAskMore { height: 48px; }
+#right > #askBox .ask-line #btnAskMore { min-width: 92px; }   /* 文字态别缩成小方块 */
+/* ⚠ 这条特异性 (3,1,0) 高于 `#btnAskMore.asking` 的 (1,1,0) ⇒ 不补这一条的话，
+   「在转」时按钮仍是 92 宽、被挤到第二行（实测：输入框 264×48 一行、按钮落到下一行） */
+#right > #askBox .ask-line #btnAskMore.asking { min-width: 48px; }
+@media (prefers-reduced-motion: reduce) {
+  #btnAskMore.asking .sl-taiji,
+  #btnAskMore.asking .atk-flow,
+  #btnAskMore.asking .atk-bleed { animation: none; }
+}
+.ask-list:not(:empty) { margin-bottom: 8px; }
+.askbox.off { display: none !important; }
+.ask-h { font-size: 11.5px; color: var(--dim2, #888); margin-bottom: 7px; line-height: 1.6; }
+.ask-h b { color: var(--accent, #9c3b28); font-size: 13px; margin-right: 6px; }
+.ask-list { margin-top: 2px; }
+.ask-item { border-top: 1px solid var(--line2, rgba(128,128,128,.18)); padding: 8px 0 2px; }
+.ask-item:first-child { border-top: 0; }
+.ask-q { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.ask-q::before { content: "问 · "; font-weight: 400; color: var(--dim2, #999); }
+.ask-a { font-size: 13px; line-height: 1.75; }
+.ask-line { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0; align-items: center; }
+.ask-line input { flex: 1 1 200px; min-width: 0; padding: 7px 10px;
+  border: 1px solid var(--line2, rgba(128,128,128,.35)); border-radius: 8px;
+  background: transparent; color: inherit; font: inherit; font-size: 13px; }
+.ask-line input:focus { outline: none; border-color: var(--accent, #9c3b28); }
+.ask-note { font-size: 11.5px; color: var(--dim2, #999); margin-top: 6px; min-height: 15px; line-height: 1.6; }
+.ask-note b { color: var(--accent, #9c3b28); }
+/* 记录抽屉里那条「接着问」（同族，一并补回） */
+.cr-askbox { padding: 8px 10px 2px; border-top: 1px dashed var(--line2, rgba(128,128,128,.28)); margin-top: 8px; }
+.cr-askbox .ask-item { padding: 6px 0 2px; }
+.cr-askbox .ask-q { font-size: 12.5px; }
+.cr-askbox .ask-a { font-size: 12.5px; line-height: 1.65; }
+.cr-askbox .ask-line input { font-size: 12.5px; padding: 6px 8px; flex-basis: 150px; }
+
+/* ============================================================================
+   ① 起卦方式「时间取数 / 月日时 / 报数」：未选中不要胶囊底
+   ② 左右滑动的跟手与非线性（配合 src/data/phoneAnim.js 的 FOLLOW/EDGE_MAX/回弹）
+   ③ 到头（壹页右滑）的阻尼回弹 + 不再顺手开记录页（手势在 phoneAnim.initEdgeSwipe）
+     同族段落**不动**。
+   ============================================================================ */
+
+/* ---------- ① 起卦方式三选一：未选中不要胶囊 ----------
+   真凶是 legacy.css L4400 那条「玻璃化统一规则」：
+     html[data-step] .seg button{background:rgba(255,255,255,.065)!important;
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.14)!important; …}
+   它给**每一个**分段按钮都上了 6.5% 白底 ＋ 顶部内高光 ⇒ 三个连排看着像三颗凸起的胶囊。
+   而分段器原本的设计（legacy L2097）是「选中面交给 `.spill` 滑动药丸、按钮只留文字」，
+   被那条 !important 压掉了。这里按原设计还原：两种态都透明，面只由药丸画。
+   ⚠ 只认「起卦方式」这一组（aria-label 定位）；设置页那组「连接方式」不动。 */
+html[data-step] .seg[aria-label="起卦方式"] button,
+html[data-step] .seg[aria-label="起卦方式"] button[aria-pressed="true"] {
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+/* 未选中的字淡一档、选中的亮起来（颜色延迟点亮与药丸滑动同步） */
+html[data-step] .seg[aria-label="起卦方式"] button { color: var(--dim); transition: color .26s var(--m-ease, ease); }
+html[data-step] .seg[aria-label="起卦方式"] button[aria-pressed="true"] { color: var(--ink); }
+/* ★★ 2026-10-17 补（用户看图一：「每个都还是有背景啊」）：
+   除了底色，legacy L4366 还给**每个** `.seg button` 挂了一层 `::after` 边缘膜 ——
+   `content:''; inset:0; border-radius:inherit; padding:1px; z-index:2;
+    background:linear-gradient(152deg,rgba(255,255,255,.80) … rgba(0,0,0,.14));
+    -webkit-mask:… xor / mask-composite:exclude`（只留 1px 迎光边）。
+   一个按钮一圈亮边 ⇒ 三个连排照样读成「三颗凸起的胶囊」。
+   ⇒ 这一组把伪元素整层关掉（选中面只由 `.spill` 药丸画）。
+    */
+html[data-step] .seg[aria-label="起卦方式"] button::after { display: none !important; }
+/* 药丸的「面」稍微柔一点：玻璃皮肤下别像一块硬白 */
+html[data-step] .seg[aria-label="起卦方式"] .spill {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 1px 2px rgba(28, 25, 20, .06), 0 6px 14px -12px rgba(28, 25, 20, .22);
+}
+
+/* ---------- ② 拖动跟手 / 回弹曲线 ----------
+   跟手系数（0.86）、到头的阻尼幅度（54px）、回弹时长都在 JS 里算；
+   这里只定「过渡怎么走」。曲线 cubic-bezier(.34,1.38,.62,1) = 起步快、末尾轻微过冲 ⇒ 弹簧感。 */
+html[data-step] .swipe-follow { will-change: transform, opacity; }
+html[data-step] .swipe-back {
+  animation: none !important;
+  transition: transform var(--swback, .34s) cubic-bezier(.34, 1.38, .62, 1),
+              opacity var(--swback, .34s) ease-out !important;
+}
+
+/* ---------- ③ 新页滑入：距离更长、带一点收缩，曲线「先快后慢」的长尾 ---------- */
+@keyframes xlrSlideInL { from { opacity: 0; transform: translateX(46px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes xlrSlideInR { from { opacity: 0; transform: translateX(-46px) scale(.985); } to { opacity: 1; transform: none; } }
+html[data-swipedir="l"] .v-in { animation: xlrSlideInL .52s cubic-bezier(.16, 1, .3, 1) both !important; }
+html[data-swipedir="r"] .v-in { animation: xlrSlideInR .52s cubic-bezier(.16, 1, .3, 1) both !important; }
+/* 系统开了「减弱动态效果」⇒ 滑入也别缩放位移，直接淡入 */
+@media (prefers-reduced-motion: reduce) {
+  html[data-swipedir="l"] .v-in,
+  html[data-swipedir="r"] .v-in { animation: none !important; }
+  html[data-step] .swipe-back { transition: transform .18s ease-out, opacity .18s ease-out !important; }
+}
+
+/* ---------- ④ 开屏：减弱动效 ≠ 不要开屏（2026-10-17，用户逐字「开屏动画呢？怎么不见了？还tm给我自动跳过开屏」）
+   legacy.css 里有一条 `@media (prefers-reduced-motion:reduce){#xlrSplash{display:none!important}}`
+   —— 它把整屏开屏直接抹掉；再叠上「不建开屏」的早退，用户看到的就是"开屏被自动跳过、引导直接盖上来"。
+   开屏静态停在「点击进入」）。特异性 `html #xlrSplash`(1,0,1) > `#xlrSplash`(1,0,0) ⇒ 能压过那条 !important。 */
+@media (prefers-reduced-motion: reduce) {
+  html #xlrSplash { display: flex !important; }
+  /* ★★ 2026-10-17 续：**开屏自己的入场/退场是一次性动画**（播完就停），不属于 reduce 要抑制的
+     「持续动效」—— 系统开「减弱动效」时旧行为是"啪一下全在那儿 / 一点动画都没有"，
+     用户读成「开屏动画不见了」。这里只把开屏这条链逐条还原（legacy 原文照抄），别处一概不动。
+     特异性 1,0,1 + !important 压过 legacy 的
+     `@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}`。 */
+  html #xlrSplash { transition: opacity .5s var(--m-glide), visibility .5s var(--m-glide) !important; }
+  html #xlrSplash .sl-orb { animation: slOrb .95s var(--m-glide) both !important; }
+  html #xlrSplash .sl-title { animation: slUp .72s var(--m-glide) .12s both !important; }
+  html #xlrSplash .sl-sub { animation: slUp .7s var(--m-glide) .2s both !important; }
+  html #xlrSplash .sl-sep { animation: slUp .7s var(--m-glide) .26s both !important; }
+  html #xlrSplash .sl-motto { animation: slUp .7s var(--m-glide) .32s both !important; }
+  html #xlrSplash .sl-notes { animation: slUp .7s var(--m-glide) .44s both !important; }
+  html #xlrSplash .sl-go { animation: slUp .7s var(--m-glide) .5s both, slBreath 4.2s ease-in-out 1.6s infinite !important; }
+  html #xlrSplash .sl-hint { animation: slUp .7s var(--m-glide) .54s both !important; }
+  html.slgo .wrap { animation: slWrap .86s var(--m-glide) .6s both !important; }
+}
+
+/*
+   ① 左滑：整条左移，删除键**跟着手指一点点变宽**（像聊天应用那种），松手非线性收/开
+   ② 尾部竖三点
+   ③ 长按 / 三点 ⇒ 贴着这一行浮出的**小菜单**（图标 + 文字，删除红字），不是底部面板
+*/
+/* ---------- ① 行内结构：外面裁切，里面位移 ---------- */
+.case-row{position:relative;overflow:hidden;touch-action:pan-y}
+/* 2026-10-23 第五轮（用户：「不丝滑、不 Q 弹」）：
+   曲线换成带**过冲**的 `.18,1.35,.28,1`，时长 340ms —— 松手后先越过目标一点点再回收，
+   这就是"Q 弹"的手感；拖拽期仍然是 1:1 跟手（transition:none 由 JS 写 inline）。 */
+.case-row .cr-sw{transition:transform .34s cubic-bezier(.18,1.35,.28,1);will-change:transform}
+.case-row.sw-open .cr-sw{transform:translateX(-84px)}
+/* 删除键：拖拽期由 JS 写 inline 宽/透明度（跟手），松手撤掉 inline 后由这两条过渡接管。
+   曲线 `.22,1.08,.36,1` = 先快、末尾微微过冲 ⇒ 松手那一下有「弹回定位」的手感。 */
+.case-row .cr-del{position:absolute;right:0;top:0;bottom:0;width:0;border:0;padding:0;cursor:pointer;
+  /* 2026-10-23 用户两轮：不要「深红实块」，要**轻量红 + 一点液玻**。
+     底色是珊瑚红（#d2704f → #c9603f）留 8% 透，后面加模糊 ⇒ 白字在暖底上更松快。 */
+  background:linear-gradient(180deg, color-mix(in srgb, #d2704f 92%, transparent),
+                                      color-mix(in srgb, #c9603f 90%, transparent));
+  -webkit-backdrop-filter:blur(14px) saturate(1.25);
+  backdrop-filter:blur(14px) saturate(1.25);
+  color:#fffaf7;font-size:13.5px;letter-spacing:.08em;white-space:nowrap;
+  box-shadow:inset 1px 0 0 rgba(255,255,255,.3);
+  opacity:.42;pointer-events:none;overflow:hidden;
+  transition:width .34s cubic-bezier(.18,1.35,.28,1), opacity .22s ease}
+.case-row.sw-open .cr-del{width:84px;opacity:1;pointer-events:auto}
+/* ---------- ② 尾部竖三点 ---------- */
+.case-row .cr-more{flex:0 0 auto;margin-left:auto;padding:2px 6px;border:0;border-radius:8px;
+  background:transparent;color:var(--dim2);font:inherit;font-size:17px;line-height:1;cursor:pointer;
+  transition:opacity .16s ease;
+  -webkit-tap-highlight-color:transparent}
+/* 左滑展开后，三点跟着「让位」——不然它会压在红色删除键上（用户看图抓到的） */
+.case-row.sw-open .cr-more{opacity:0;pointer-events:none}
+/* 抽屉里（≤560 那套稿 3 版式）`.cr-h` 是 shrink-wrap 的一小条（order:2），
+   `margin-left:auto` 没有余量可推 ⇒ 三点直接钉在**这一行右上角**。 */
+#sdb .case-row .cr-more{position:absolute;right:4px;top:6px;margin:0;padding:4px 8px}
+#sdb .case-row .cr-h{padding-right:28px}
+.case-row .cr-more:active{background:var(--surface2);color:var(--ink)}
+/* ---------- ④ 详情页顶那条「‹ 返回列表 ／ 复盘」（2026-10-23 用户第二轮） ----------
+   现象：它像一条钉在屏幕上的实色板，下面滚动的内容还能从缝里透出来（看图二）。
+   原因：`.cd-bar` 是 `position:sticky; z-index:2`，而详情里的分块/卡片自己会起层叠上下文，
+   滚动时压在它上面；加上全宽无圆角，视觉上就"贴死"在屏上。
+   改法：抬到最上层 + 换成与全 App 一致的玻璃质感（模糊 + 迎光边 + 一点下垂阴影），不抢内容。 */
+#sdb .cd-bar{
+  z-index:6 !important;
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);
+  backdrop-filter:blur(20px) saturate(1.5);
+  border-bottom:1px solid color-mix(in srgb, var(--line2) 78%, transparent);
+  box-shadow:0 14px 24px -20px rgba(22,18,14,.5), inset 0 1px 0 rgba(255,255,255,.35);
+}
+#sdb .cd-bar .btn{background:transparent}
+/* 菜单背后那层压暗（pointer-events:none：只负责视觉，点击照旧落到下面，
+   再由 window 捕获层把「点菜单外面」这件事接住）。 */
+.cr-ovl{position:fixed;inset:0;z-index:899;pointer-events:none;
+  background:rgba(20,17,14,.18);animation:crFade .16s ease both}
+.cr-menu{position:fixed;z-index:900;min-width:178px;padding:5px 0;border-radius:16px;
+  /* ★★ 2026-10-23 第五轮（真凶）：`#sdb` 的 `z-index` 是 **420**，而菜单以前是 121
+     ⇒ portal 到 body 之后菜单**整体压在抽屉底下**：他看到的「一块糊白、字全没了」
+     其实是抽屉的行盖在菜单卡上面（元素截图里能读到的是抽屉的字，不是菜单的字）。
+     ⇒ 抬到 900（高于抽屉 420、设置页 600）。
+     ★ 同一轮实测：**这台机器的 Edge 里 `backdrop-filter` 恒为 none**
+     （连内联 `el.style.backdropFilter='blur(16px)'` 都算回 none；`CSS.supports` 却是 true
+      ⇒ 软件合成下被关掉了）。所以「模糊背景让字变实」不能靠 backdrop-filter 实现，
+     改成：底色几乎实色（98%）＋背后压暗一层 scrim（.cr-ovl）＋迎光边/内高光/两层投影。 */
+  background:color-mix(in srgb, var(--surface) 98%, transparent);
+  border:1px solid color-mix(in srgb, var(--line2) 58%, transparent);
+  box-shadow:0 24px 48px -26px rgba(22,18,14,.5), 0 3px 12px -8px rgba(22,18,14,.22),
+    inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(0,0,0,.04);
+  transform-origin:top left;animation:crPop .2s cubic-bezier(.22,1.08,.36,1) both}
+.cr-menu.up{transform-origin:bottom left;animation-name:crPopUp}
+/* 扁平化：整张卡就是一块面，行不再各自成「小胶囊」（原文「一块一块垒起来」） */
+.cr-mi{display:flex;align-items:center;gap:11px;width:100%;padding:11px 15px;border:0;border-radius:0;
+  background:transparent;color:var(--ink);font:inherit;font-size:14.5px;line-height:1.2;text-align:left;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:background .16s ease}
+.cr-mi:active{background:color-mix(in srgb, var(--ink) 6%, transparent)}
+.cr-mi-i{flex:0 0 auto;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.55;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.58}
+/* 删除：**轻量红**（用户两轮都说「太深、太实」）——淡朱砂，不给实色块 */
+.cr-mi.dang{color:color-mix(in srgb, #c9603f 78%, var(--ink))}
+.cr-mi.dang .cr-mi-i{opacity:.78}
+@keyframes crPop{from{opacity:0;transform:scale(.94) translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes crPopUp{from{opacity:0;transform:scale(.94) translateY(4px)}to{opacity:1;transform:none}}
+@keyframes crFade{from{opacity:0}to{opacity:1}}
+
+/* ══ 2026-10-23（现象：）：宣纸皮肤下「提问框一聚焦就变一块 80% 白」 ══════════════
+   legacy.css 里有一条 `textarea:focus, html[data-skin="xuan"] input:focus,
+   html[data-skin="xuan"] select:focus{background-color:rgba(255,255,255,.8)}`
+   —— 在宣纸这种暖纸底上，那块白就直接成了"一个显眼的文本框"（原文「按理来说不应该的」）。
+   那份 legacy 由 legacy-css.manifest.json 记整份 sha16，改不了 ⇒ 在 Tailwind 这层覆盖：
+   聚焦时底色保持透明，焦点提示仍由同一条规则里的 3px accent 环给（那部分不动）。
+   ⚠ 两端各一份（桌面/手机的 tailwind.css 不是同一个文件）。 */
+html[data-skin="xuan"] textarea:focus,
+html[data-skin="xuan"] input:focus,
+html[data-skin="xuan"] select:focus { background-color: transparent !important; }
+
+/* ══ 2026-10-23（用户第二轮报）：宣纸皮肤**没聚焦时**也能看到一块文本框 ══════════
+   真源在 legacy.css：
+     `html[data-skin="xuan"] textarea, … input, … select{
+        background-color:rgba(243,240,234,.5); border-color:rgba(27,26,23,.05);
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.6), inset 0 1px 2px rgba(28,25,20,.045)}`
+   —— 宣纸给所有输入控件都上了「半透明底 + 发丝描边 + 内影」，在那张暖纸卡片里就成了一眼能认出的文本框。
+   那份 legacy 被 manifest 锁整份 sha16 ⇒ 只能在 Tailwind 这层覆盖，且**只收提问框这一块**
+   （抽屉搜索、设置里的输入保留原样，免得别的控件失去边界）。
+   聚焦态标题：底色也透明，焦点提示仍由 `textarea:focus{box-shadow:0 0 0 3px var(--accent-bg)}` 给。 */
+html[data-skin="xuan"] #q:not(:focus) {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-skin="xuan"] #q:focus {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}

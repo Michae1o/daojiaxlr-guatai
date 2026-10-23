@@ -1,0 +1,21 @@
+{
+  "name": "@xlr/mobile-shell",
+  "private": true,
+  "version": "0.0.0",
+  "description": "道家小六壬 · 卦台 —— 安卓壳（Capacitor 6.2.0，与旧线一致；不升 7）",
+  "scripts": {
+    "add:android": "cap add android",
+    "sync": "cap sync android",
+    "apk": "cd android && gradlew.bat assembleDebug",
+    "add:ios": "cap add ios",
+    "sync:ios": "cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.0",
+    "@capacitor/core": "6.2.0",
+    "@capacitor/ios": "6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.0"
+  }
+}

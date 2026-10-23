@@ -1,0 +1,4 @@
+[toolchain]
+# ★ 必须钉住 msvc：这台机器的 rustup 默认是 gnu，Tauri 在 Windows 上要 msvc。
+#   写在项目里而不是改 rustup 全局默认，不动你其它项目。
+channel = "stable-x86_64-pc-windows-msvc"

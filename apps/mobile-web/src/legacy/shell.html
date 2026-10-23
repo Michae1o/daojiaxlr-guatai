@@ -1,0 +1,196 @@
+
+
+
+<div class="top" id="top">
+  <div class="top-in">
+    <span class="brand">道家小六壬 · 卦台</span>
+    <span class="sp"></span>
+    <button class="tbtn" id="btnSum" type="button" aria-label="记录" title="记录：卦例与准则">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 5h16M4 10h16M4 15h10M4 20h6"/></svg>
+      <span class="lbl">记录</span>
+    </button>
+    <button class="tbtn" id="btnSet" type="button">
+      <span class="dot" id="setDot"></span><span class="lbl">设置</span>
+    </button>
+    <button class="ibt" id="btnTheme" type="button" aria-label="换皮肤" title="换皮肤">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="round"><path d="M12 3.2a8.8 8.8 0 1 0 0 17.6h1.6a2.1 2.1 0 0 0 1.5-3.6 2.1 2.1 0 0 1 1.5-3.6h2.1a2.1 2.1 0 0 0 2.1-2.1A8.8 8.8 0 0 0 12 3.2z"/><circle cx="7.6" cy="11.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.4" cy="7.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.1" cy="7.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="ibt" id="btnDN" type="button" aria-label="切换白天黑夜" title="切换白天/黑夜">
+      <svg class="ic-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>
+      <svg class="ic-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="left">
+    <div class="greetwrap" id="greetWrap">
+      <div class="greet" id="greet"></div>
+      <div class="greetsub" id="greetSub"></div>
+    </div>
+    <div class="pane">
+      <div class="pane-h"><b>所问之事</b><span class="sp"></span><span id="modeHint">报数</span></div>
+      <div class="pane-b">
+        <div class="f">
+          <label for="q">问题<b>必填</b></label>
+          <textarea id="q" placeholder="问具体的事。例如「我这次面试能过吗」「我的猫走丢三天了，还能找回来吗」&#10;不要写「看看我最近运势」这类没有边界的问题——问题决定卦的取向。"></textarea>
+        </div>
+        <div class="f">
+          <details class="bgf" id="bgDet">
+            <summary>补充背景（选填，越具体越准）</summary>
+            <textarea id="bg" placeholder="相关的实际情况。例如：已婚；对方是同事；面试是下周三；猫上次在阳台丢的。"></textarea>
+          </details>
+        </div>
+        <div class="f">
+          <label>起卦方式</label>
+          <div class="seg" role="group" aria-label="起卦方式">
+            <button type="button" id="mClock" aria-pressed="true">时间取数</button>
+            <button type="button" id="mTime" aria-pressed="false">月日时</button>
+            <button type="button" id="mNum" aria-pressed="false">报数</button>
+          </div>
+          <!-- ★ 2026-10-09 口径：：「详情放到报数的右边」⇒ 从 #castFields 里搬出来，紧跟报数 -->
+          <button class="castsw" id="castToggle" type="button" aria-expanded="false" aria-controls="castFields">详情</button>
+        </div>
+
+        <div class="f" id="castFields">
+          <label id="castLb" for="n1">随口报三个数（1–9，可重复）· 起卦时辰</label>
+          <div class="row" id="rowNum">
+            <input type="number" id="n1" min="0" max="99" placeholder="第一数" inputmode="numeric">
+            <input type="number" id="n2" min="0" max="99" placeholder="第二数" inputmode="numeric">
+            <input type="number" id="n3" min="0" max="99" placeholder="第三数" inputmode="numeric">
+          </div>
+          <div class="row" id="rowTime" hidden>
+            <span class="dtw wide3">
+              <input type="text" id="dt" readonly autocomplete="off" aria-label="日期（公历）">
+              <i class="dtico" aria-hidden="true"></i>
+              <span class="dppop" id="dppop" hidden></span>
+            </span>
+          </div>
+          <div class="row rowh">
+            <select id="h2" aria-label="起卦时辰"></select>
+            <select id="h1" aria-label="起卦时辰（用）" hidden></select>
+          </div>
+          <div class="mini" id="castMini"><b>报完不要改</b>；报了 0 当 10 取，报了两位数也不重报。记得选起卦时辰。</div>
+        </div>
+
+        <!-- ★ 2026-10-09 口径：：「隔一点距离放事类选项」⇒ 事类搬到详情后面（原来在最前面） -->
+        <div class="f" id="fCat">
+          <label for="cat">事类</label>
+          <select id="cat" title="用于匹配专门判据">
+            <option value="auto">事类·自动</option>
+            <option value="marriage">婚姻 · 感情</option>
+            <option value="preg">求子 · 孕产</option>
+            <option value="money">财运 · 投资 · 借贷</option>
+            <option value="work">工作 · 事业 · 选择</option>
+            <option value="ill">疾病 · 健康 · 灾祸</option>
+            <option value="lost">失物 · 寻人</option>
+            <option value="travel">出行 · 行人</option>
+            <option value="law">官司 · 是非 · 骗局</option>
+            <option value="exam">考试 · 比赛 · 名次</option>
+            <option value="weather">天气 · 天象</option>
+            <!-- 稿3 的下拉里没有这一项（口径：：「这个根本没有，不需要它」）⇒ 摘掉；
+                 注意 CATS.general 判据本身保留：自动判类全不中时仍会落到它（a5.html autoCat）。 -->
+          </select>
+        </div>
+
+        <label class="chk" for="optXiang"><input type="checkbox" id="optXiang"><i class="ck" aria-hidden="true"></i>
+          <span><b>三宫具象</b></span></label>
+
+        <div class="gobar">
+          <button class="go" id="btnGo" type="button" aria-label="起卦" title="起卦">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M12.4 6.2l5.8 5.8-5.8 5.8"/></svg>
+          </button>
+          <div class="err" id="err"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="right" id="right">
+    <div class="pane blank" id="blank">
+      <div class="blank-band"><span>大安</span><span>留连</span><span>速喜</span><span>赤口</span><span>小吉</span><span>空亡</span></div>
+      <div class="blank-body">
+        <p class="k">左边写好问题 → 起卦。<br>六宫会从大安起数，一格一格走到落宫。</p>
+        <p class="r">起卦与断卦依据在本机算，不联网。<br>断辞那一步可以接模型。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="dlg">
+    <div class="dlg-h"><span class="t">设置</span><button class="x" id="btnClose" type="button" aria-label="关闭">×</button></div>
+    <div class="dlg-b">
+      <div class="fld">
+        <label>连接方式</label>
+        <div class="seg" role="group" aria-label="连接方式">
+          <button type="button" id="wDirect" aria-pressed="true">浏览器直连</button>
+          <button type="button" id="wProxy" aria-pressed="false">本地中转</button>
+        </div>
+        <div class="hint" id="wHint"></div>
+      </div>
+
+      <div class="fld">
+        <label>服务商（点了会填好下面的地址与模型）</label>
+        <div class="pre" id="presets"></div>
+      </div>
+
+      <div class="fld">
+        <label for="base">接口地址（Base URL，需以 /v1 结尾视服务商而定）</label>
+        <input type="text" id="base" spellcheck="false" placeholder="https://api.deepseek.com">
+      </div>
+
+      <div class="fld">
+        <label for="model">模型名（点右边 ▾ 从常用里挑，也可以自己敲）</label>
+        <div class="mdl">
+          <input type="text" id="model" spellcheck="false" placeholder="deepseek-chat" autocomplete="off">
+          <button type="button" class="dd" id="modelDd" aria-expanded="false" title="选常用模型">▾</button>
+        </div>
+        <div class="mmenu" id="modelMenu" hidden></div>
+      </div>
+
+      <div class="fld">
+        <label for="key">API Key</label>
+        <div class="row">
+          <input type="password" id="key" spellcheck="false" autocomplete="off" placeholder="sk-...">
+          <button class="btn" id="btnEye" type="button" style="flex:0 0 auto">显示</button>
+        </div>
+        <div class="hint">只存在你这台浏览器的本地存储里，<b>不会写进这个 HTML 文件</b>——所以这个文件可以随便发给别人。</div>
+      </div>
+
+      <div class="fld">
+        <label for="temp">温度（0.2 更稳、0.8 更活；解卦建议 0.5 左右）</label>
+        <input type="number" id="temp" min="0" max="2" step="0.1" value="0.5">
+      </div>
+
+      <div class="fld">
+        <button class="btn" id="btnTest" type="button">测试连接</button>
+        <div class="ok-line" id="testOut"></div>
+      </div>
+    </div>
+    <div class="dlg-f">
+      <span class="sp2"></span>
+      <button class="btn" id="btnClear" type="button">清空设置</button>
+      <button class="btn pri" id="btnSave" type="button">保存</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

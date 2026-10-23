@@ -1,0 +1,25 @@
+{
+  "name": "@xlr/mobile-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "道家小六壬 · 卦台 —— 手机端前端（React 19 + Vite 6 + Tailwind 4 + Capacitor 6.2.0）。与桌面端零共用：不 import 桌面端的组件/样式/动画。",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@xlr/shared-judgment": "*",
+    "motion": "^14.1.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^6.4.4",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "appId": "cn.xiaoliuren.guatai",
+  "appName": "道家小六壬 · 卦台",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  }
+}

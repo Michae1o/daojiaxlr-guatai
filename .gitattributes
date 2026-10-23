@@ -1,0 +1,43 @@
+# 行尾统一 LF：脚本、样式、源码都按 LF 存，避免换行差异导致构建脚本读到 CRLF。
+# Windows 的 .bat/.cmd 例外，必须是 CRLF，否则 cmd 双击一闪就没。
+
+* text=auto eol=lf
+
+apps/desktop-web/src/**        text eol=lf
+apps/mobile-web/src/**         text eol=lf
+apps/shared-judgment/**        text eol=lf
+apps/*/build/**                text eol=lf
+tools/**                       text eol=lf
+mac/**                         text eol=lf
+
+*.sh      text eol=lf
+*.command text eol=lf
+*.py      text eol=lf
+*.mjs     text eol=lf
+
+# 批处理必须 CRLF
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# 二进制别当文本处理
+*.png  binary
+*.apk  binary
+*.exe  binary
+*.bin  binary
+*.ico  binary
+
+# 加密壳是按字节产出的单文件，别让 git 改行尾
+apps/desktop-shell/web/index.html  binary
+apps/mobile-shell/www/index.html    binary
+apps/desktop-shell/web/shim.js     text eol=lf
+
+# 图片一律按二进制（别做行尾转换，会毁图）
+*.webp binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.ttf  binary
+*.woff binary
+*.woff2 binary
+

@@ -1,0 +1,27 @@
+{
+  "name": "@xlr/desktop-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "道家小六壬 · 卦台 —— 桌面端前端（React 19 + Vite 6 + Tailwind 4 + vite-plugin-singlefile）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:shell": "vite build --config vite.shell.config.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@xlr/shared-judgment": "*",
+    "gsap": "^3.15.0",
+    "motion": "^14.1.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^6.4.4",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

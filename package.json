@@ -1,0 +1,14 @@
+{
+  "name": "daojiaxlr-guatai",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "道家小六壬 · 卦台 （React 19 + Vite 6 + Tailwind 4；桌面 Tauri 2 / 手机 Capacitor 6.2.0）",
+  "workspaces": [
+    "apps/shared-judgment",
+    "apps/desktop-web",
+    "apps/mobile-web",
+    "apps/mobile-shell"
+  ],
+  "scripts": {}
+}

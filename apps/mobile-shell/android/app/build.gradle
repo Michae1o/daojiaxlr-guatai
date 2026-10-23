@@ -1,0 +1,85 @@
+apply plugin: 'com.android.application'
+
+/* 签名：仓库里不带任何签名物料（没有 .keystore、没有口令）。
+   · 不配签名 ⇒ 自动用 Android 自带的 debug 钥匙，能编、能装、能看。
+   · 想用正式钥匙发版：把 keystore.properties.example 复制成 keystore.properties 填好再编
+     （或用环境变量 XLR_KEYSTORE_PROPS 指向别处）。 */
+def xlrKsPropsFile = file(System.getenv('XLR_KEYSTORE_PROPS') ?: '../keystore.properties')
+def xlrKsProps = new Properties()
+if (xlrKsPropsFile.exists()) {
+    /* ⚠ 必须显式 UTF-8：Java 的 Properties.load(InputStream) 按 ISO-8859-1 读（Java 默认按 ISO-8859-1 读，中文会乱码） */
+    xlrKsPropsFile.withInputStream { xlrKsProps.load(new InputStreamReader(it, 'UTF-8')) }
+}
+
+android {
+    namespace "cn.xiaoliuren.guatai"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "cn.xiaoliuren.guatai"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 2610231
+        versionName "1.261023.1"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    /* 没填正式签名就直接用 Android 自带 debug 钥匙 —— 不设任何强制开关。 */
+    def xlrUseRealKey = xlrKsPropsFile.exists()
+    if (!xlrUseRealKey) {
+        println '[签名] 没填 keystore.properties ⇒ 本次用 Android 自带 debug 钥匙（能编能装）'
+    }
+    signingConfigs {
+        if (xlrUseRealKey) {
+            release {
+                storeFile file(xlrKsProps.storeFile)
+                storePassword xlrKsProps.storePassword
+                keyAlias xlrKsProps.keyAlias
+                keyPassword xlrKsProps.keyPassword
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            /* 有正式钥匙 ⇒ 带它（能覆盖安装、保数据）；无钥匙且允许试玩 ⇒ Android 自带 debug 钥匙 */
+            signingConfig xlrUseRealKey ? signingConfigs.release : signingConfigs.debug
+        }
+        release {
+            signingConfig xlrUseRealKey ? signingConfigs.release : signingConfigs.debug
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

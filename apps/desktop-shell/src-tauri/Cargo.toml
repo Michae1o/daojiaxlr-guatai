@@ -1,0 +1,23 @@
+[package]
+name = "xiaoliuren"
+version = "1.261023.1"
+edition = "2021"
+description = "小六壬 · 起卦解卦台"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-http = "2"
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# 体积优先：Tauri 本身就小，这几项再压一压
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

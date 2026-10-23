@@ -1,0 +1,123 @@
+/* ============================================================
+   skin-backdrop.css —— 「敦煌 / 莫高窟」的桌面背景（Win 端）
+   ─────────────────────────────────────────────────────────
+   2026-10-17 第一版（只补了色晕 + 纸纹）
+   2026-10-17 第二轮（用户逐字：「给 win 端的敦煌和莫高窟补一下
+       桌面背景，这一步建议你对比一下手机端和桌面端的背景区别」）
+
+   —— 对比结论（两端实测，同皮肤同视口读 computed）——
+     手机端问卦页的背景是**三层**叠出来的（`legacy.css` 手机块）：
+       · L3894 `html[data-step="q"]:not(xuan):not(bru):not(glass)`
+         ⇒ 一段**三段色阶**：顶 `mix(bg 96%,#fff)` → 42% 处 `--bg` → 底 `mix(bg 84%,#000)`
+         （页面因此有"上亮下暗"的纵深，不是一块平色）
+       · L3340 同一祖先下的 `body`
+         ⇒ `background-color: var(--bg)` ＋ 三团雾（ink 10% / accent 15% / …）
+       · L3887 `html #xlrAura{display:block}` ⇒ 四团缓慢流动的光晕（全皮肤开）
+     桌面端（第一版之前）：
+       · html 只有一条**通用**天光+暗角（`html[data-theme=…]:not(glass):not(xuan):not(bru)`，--ink 4%）
+       · body 的底色是**加密壳写死的 `#f5f3ee`**（壳 HTML 里 `html,body{background:#f5f3ee}`）
+         ⇒ 皮肤自己的 `--bg` 根本没上到页面上（只有宣纸那套用同一条路子覆盖过）
+       · 没有色阶、没有光晕
+     ⇒ 本轮补的就是这两样：**底色跟 --bg** ＋ **三段色阶**（照手机端同一公式，自动跟随每套皮肤的 --bg），
+       色晕/纸纹沿用第一版并略微提亮；光晕**不在这里开**（桌面端 `#xlrAura` 的四团是写死的玻璃蓝紫，
+       不是变量色，要开得先给这两个皮肤写一套自己的四团，见文件末尾"下一步"）。
+
+   —— 为什么放这里而不是 styles/legacy.css ——
+     legacy.css 由 tools/assemble-desktop.mjs 按 legacy-css.manifest.json 逐块切回，
+     （先例：@import "./skins/tonggu/tonggu.css"），所以补丁落这个独立文件。
+
+   —— 顺序（背景层从**上**到**下**，CSS 列表第一个画在最上）——
+     ① 天光/色晕（radial，半透明）
+     ② 纸纹（--m-paper；深色皮肤用反相的那份）
+     ③ 三段色阶（**不透明**，放最底当"底色纵深"）
+   ============================================================ */
+
+/* ---------- 0. 反相纸纹（深色皮肤用） ----------
+   原 --m-paper 的两个 rect 是 feTurbulence 灰度噪声，在暖褐底上等于「黑上黑」，看不见。
+   这里把噪声反相成白颗粒，透明度压到 1/3 左右。
+   ⚠ feColorMatrix 只去色不反相，反相要 feComponentTransfer 的 slope=-1。 */
+html[data-skin="mg"] {
+  --m-paper-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='-1' intercept='1'/%3E%3CfeFuncG type='linear' slope='-1' intercept='1'/%3E%3CfeFuncB type='linear' slope='-1' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='-1' intercept='1'/%3E%3CfeFuncG type='linear' slope='-1' intercept='1'/%3E%3CfeFuncB type='linear' slope='-1' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23m)' opacity='0.09'/%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.30'/%3E%3C/svg%3E");
+}
+
+/* ---------- 1. 敦煌：沙壁 + 壁画重彩（浅色皮肤） ----------
+   色值全部来自皮肤表里那几个中国传统色（zhongguose）：
+   花青 #2376B7 · 石绿 #57C3C2 · 沙石黄 #E5B751 · 枣红 #7C1823
+   ★ 底色与色阶照手机端公式（--bg 自动跟随皮肤，换肤不用改这条）。 */
+html[data-skin="dh"],
+html[data-skin="dh"] body,
+html[data-skin="dh"] .setscreen,
+html[data-skin="dh"] #sdb .sdb-p {
+  background-color: var(--bg) !important;
+  background-image:
+    radial-gradient(1100px 520px at 50% -6%, rgba(255, 252, 242, .62), rgba(255, 252, 242, 0) 62%),
+    radial-gradient(950px 680px at 88% 8%, rgba(35, 118, 183, .10), rgba(35, 118, 183, 0) 70%),
+    radial-gradient(660px 520px at 6% 30%, rgba(229, 183, 81, .15), rgba(229, 183, 81, 0) 72%),
+    radial-gradient(820px 560px at 10% 90%, rgba(87, 195, 194, .09), rgba(87, 195, 194, 0) 72%),
+    radial-gradient(900px 520px at 50% 106%, rgba(124, 24, 35, .08), rgba(124, 24, 35, 0) 62%),
+    var(--m-paper),
+    /* ③ 三段色阶（手机端同一条公式） */
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 96%, #fff) 0%,
+      var(--bg) 42%,
+      color-mix(in srgb, var(--bg) 84%, #000) 100%) !important;
+  background-size: auto, auto, auto, auto, auto, 240px 240px, auto !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+}
+
+/* 首启引导：只留天光 + 纸纹 + 色阶（引导卡自己不透明，底下不需要重彩） */
+html[data-skin="dh"] .onb {
+  background-color: var(--bg) !important;
+  background-image:
+    radial-gradient(1100px 520px at 50% -6%, rgba(255, 252, 242, .62), rgba(255, 252, 242, 0) 62%),
+    var(--m-paper),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 96%, #fff) 0%,
+      var(--bg) 42%,
+      color-mix(in srgb, var(--bg) 84%, #000) 100%) !important;
+  background-size: auto, 240px 240px, auto !important;
+  background-repeat: no-repeat, repeat, no-repeat !important;
+}
+
+/* ---------- 2. 莫高窟：暖褐壁 + 提灯入窟（深色皮肤） ----------
+   没有「天光」—— 顶部换成提灯打在壁上的暖金光；
+   右上群青（#1772B4）做冷调对比，左下一点点金；
+   倒数第二层是周缘压暗，把画面收进洞里；最底是三段色阶（深底上 = 顶微亮、底部更沉）。 */
+html[data-skin="mg"],
+html[data-skin="mg"] body,
+html[data-skin="mg"] .setscreen,
+html[data-skin="mg"] #sdb .sdb-p {
+  background-color: var(--bg) !important;
+  background-image:
+    radial-gradient(1000px 560px at 50% -8%, rgba(229, 183, 81, .17), rgba(229, 183, 81, 0) 64%),
+    radial-gradient(900px 640px at 86% 10%, rgba(23, 114, 180, .20), rgba(23, 114, 180, 0) 70%),
+    radial-gradient(700px 560px at 8% 78%, rgba(229, 183, 81, .09), rgba(229, 183, 81, 0) 72%),
+    radial-gradient(1200px 900px at 50% 46%, rgba(8, 4, 2, 0) 38%, rgba(8, 4, 2, .55) 100%),
+    var(--m-paper-l),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 96%, #fff) 0%,
+      var(--bg) 42%,
+      color-mix(in srgb, var(--bg) 84%, #000) 100%) !important;
+  background-size: auto, auto, auto, auto, 220px 220px, auto !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+}
+
+html[data-skin="mg"] .onb {
+  background-color: var(--bg) !important;
+  background-image:
+    radial-gradient(1000px 560px at 50% -8%, rgba(229, 183, 81, .17), rgba(229, 183, 81, 0) 64%),
+    var(--m-paper-l),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 96%, #fff) 0%,
+      var(--bg) 42%,
+      color-mix(in srgb, var(--bg) 84%, #000) 100%) !important;
+  background-size: auto, 220px 220px, auto !important;
+  background-repeat: no-repeat, repeat, no-repeat !important;
+}
+
+/* ============================================================
+   （手机端 `html #xlrAura{display:block}` 全皮肤开）。桌面端这四团颜色是**写死**的
+   玻璃蓝紫（#68 98 ff / #7a a8 ff / #b4 8c ff / #78 dccd），不是 --a1/--a2/--a3 变量，
+   直接开会让敦煌满屏冷蓝。要开就得先给 dh / mg 各写一套四团（敦煌＝花青/沙石黄/石绿/枣红，
+   莫高窟＝群青/金/枣红），再 `html[data-skin="dh"] #xlrAura{display:block}`。
+   ============================================================ */

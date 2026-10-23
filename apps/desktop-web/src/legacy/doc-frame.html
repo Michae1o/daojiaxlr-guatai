@@ -1,0 +1,23 @@
+<!-- 文档帧（head 开 / body 开 / 收尾三段），**逐字节**取自早期产物切段：
+     · @head@      = parts/01-text.txt（261 字符 sha16 222726f1d43101ec）
+     · @body-open@ = parts/07-text.txt（16 字符 sha16 2d9a12a84f251224）
+     · @tail@      = parts/39-text.txt（17 字符 sha16 1f3a0cf746539d78）
+     用途：D-⑤ 砍段之后产品仍要有一份完整文档外壳 —— 这三段原先是 parts 里仅有的「文档头/尾」，
+     现在搬进本仓当资产。组装器（tools/assemble-desktop.mjs）按下面三行标记切开使用，标记本身不进产物。
+     注意：三个片段一律逐字，不要手改。 -->
+<!--@head@-->
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>道家小六壬 · 卦台</title>
+<meta name="description" content="小六壬 · 卦台：输入问题与背景，报数或月日时起卦，本地规则引擎出判据，可接模型出断辞。">
+<!--@body-open@-->
+
+</head>
+<body>
+<!--@tail@-->
+
+</body>
+</html>

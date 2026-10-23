@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1, viewport-fit=cover">
+<title>道家小六壬 · 卦台</title>
+<meta name="description" content="小六壬 · 卦台：输入问题与背景，报数或月日时起卦，本地规则引擎出判据，可接模型出断辞。">
+<script>
+(function () {
+  try {
+    var s = localStorage.getItem('xlr-theme');
+    var m = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', s || (m ? 'dark' : 'light'));
+  } catch (e) { }
+})();
+</script>
+
+
+<script>
+/* skinPrepaint.js —— **由工具生成，由工具生成，不要手改**（首屏预绘 = 皮肤 + 明暗）
+   来源：apps/desktop-web/src/legacy/parts/32-script.txt（换皮肤模块 IIFE 里解析期那几块）
+   生成：node tools/extract-skin-prepaint.mjs
+   规矩：**提取不重写** —— 下面每一段都是从源文件**逐字节切片**搬来的原文；工具每次运行都做四条核对。
+        改行为要改 legacy 源再重跑本工具（本文件升为真源）。
+   ⚠ 本文件是**经典脚本**（不是 ES module）⇒ 由产出链（tools/make-doc-entry.mjs）内联进 HTML。
+     不能改成模块：皮肤/明暗必须在**画第一帧之前**定到 html 上，defer 模块赶不上第一帧。
+   ⚠ 工具加的外包装（不是 legacy 正文）：外层 IIFE、末尾 apply(cur)、以及只读登记 window.__xlrPrepaint。
+   ⚠ 源里「挂 window.XLR_SKINS / XLR_SKIN_APPLY / XLR_SKIN_CUR」那三行**不在这里** ——
+     由本仓模块在模块期指向本仓实现（src/shell/main.jsx 的 mountSkins；模块期晚于解析期 ⇒ 本仓赢）。
+   源 sha16 = 306931ad3e1f1bca
+*/
+(function () {
+var SKINS = [
+    { k: 'bw', n: '黑白', t: '浅 · 无色相', bg: '#f4f4f5', ac: '#0f1013' },
+    { k: 'hei', n: '黑夜', t: '深 · 无色相', bg: '#131316', ac: '#e8e8ec' },
+    { k: 'glass', n: '梦幻', t: '浅 · 流光', bg: '#e9edf6', ac: '#3f6bf0' },
+    { k: 'xuan', n: '宣纸', t: '浅 · 朱砂', bg: '#f5f3ee', ac: '#9c3b28' },
+    { k: 'qing', n: '青瓷', t: '浅 · 靛青', bg: '#eef2f1', ac: '#2f6f6b' },
+    { k: 'dou', n: '豆沙', t: '浅 · 陶土', bg: '#f6f1ea', ac: '#a8543c' },
+    { k: 'bru', n: '卡通', t: '浅 · 高对比', bg: '#ffffff', ac: '#e8442a' },
+    /* ★ 2026-10-10 口径：：「删除夜蓝、鎏金、终端、墨这四个主题，加入一个黑夜模式
+       （黑白主题的黑色换皮）」⇒ 四个深色主题（mo/term/jin/ye）从表里摘掉，
+       补一个 'hei' 黑夜 = 黑白那套无色相配色的深底版（同一个灰阶体系，反相）。 */
+    /* ★ 2026-10-09 口径：「了解一下敦煌莫高窟配色，加入我们软件」——
+       色值取自**国色官网 zhongguose.com**（国内可访问）的真实中国传统色：
+         花青 #2376B7 · 石绿 #57C3C2 · 沙石黄 #E5B751 · 枣红 #7C1823 · 杏黄 #F28E16 · 群青 #1772B4
+       敦煌 = 白天站窟外看壁画（沙壁底 + 花青/石绿 + 枣红）；莫高窟 = 夜里提灯进窟（暖褐 + 金 + 群青）。 */
+    { k: 'dh', n: '敦煌', t: '浅 · 沙壁石窟', bg: '#FBF2DE', ac: '#7C1823' },
+    { k: 'mg', n: '莫高窟', t: '深 · 提灯入窟', bg: '#2A1A12', ac: '#E5B751' }
+  ];
+SKINS.push({"k":"tonggu","n":"铜古","t":"浅 · 西周青铜","bg":"#E9E6DF","ac":"#33402F"});
+var DARK = { hei: 1, mg: 1 };
+var KEY = 'xlr-skin';
+var cur = null;
+  try { cur = localStorage.getItem(KEY); } catch (e) { }
+  var known = false;
+  for (var i = 0; i < SKINS.length; i++) if (SKINS[i].k === cur) known = true;
+  if (!known) cur = 'bw';
+function apply(k) {
+    cur = k;
+    var r = document.documentElement;
+    r.setAttribute('data-skin', k);
+    // 明暗跟着皮肤走，否则源码里那套 data-theme 变量会把颜色盖回去
+    r.setAttribute('data-theme', DARK[k] ? 'dark' : 'light');
+    try { localStorage.setItem(KEY, k); } catch (e) { }
+    var m = document.querySelector('.skinmenu');
+    if (m) {
+      var bs = m.querySelectorAll('button[data-k]');
+      for (var j = 0; j < bs.length; j++) {
+        bs[j].setAttribute('aria-current', bs[j].getAttribute('data-k') === k ? 'true' : 'false');
+      }
+    }
+  }
+/* ★ 本仓外包装（**不属于** legacy 正文；见文件头）：
+   ① 若 storage 里那个值**在我们表里**就用它 —— 源的回落判定只认它自己那份 9 套表，而本仓表更全（含追加皮肤）；
+      真不在表里的非法值不受影响（保持源的回落 bw）。
+   ② 只读登记 window.__xlrPrepaint（判据据此证「这段确实在解析期跑过」）＋ 暴露 apply 备用。
+   ③ **守护**：legacy 的 32-script（body 中段）也在解析期跑，它那份 9 套表不认新皮肤 ⇒ 会把 html 上的
+      data-skin 覆盖成它的回落值、并把回落值写回 storage（实测：开机第一眼永远是默认皮肤）。
+      这里用 MutationObserver 盯着 data-skin，被改走就按本仓那份合法值改回来。
+      ⚠ 为什么用 Observer 而不是「在 body 末尾再内联一段脚本」：后者会**往 DOM 里加节点**，
+      ⚠ 自身 setAttribute 也会触发一次回调 —— 那时值已经是对的，比一下就不动（不会循环）。
+      ⚠ **DCL 时断开**：用户切肤都发生在 DCL 之后，不能被这个守护改回去；装配侧（mountSkins）再断一次，双保险。 */
+var want = null;
+try { want = localStorage.getItem(KEY); } catch (eW) { }
+for (var q = 0; q < SKINS.length; q++) if (SKINS[q].k === want) { cur = want; }
+apply(cur);
+window.__xlrPrepaintApply = apply;
+window.__xlrPrepaint = {
+  skin: cur,
+  theme: document.documentElement.getAttribute('data-theme'),
+  readyState: document.readyState,
+  at: Date.now()
+};
+try {
+  var guard = new MutationObserver(function () {
+    if (document.documentElement.getAttribute('data-skin') !== cur) {
+      try { apply(cur); } catch (eA) { }
+    }
+  });
+  guard.observe(document.documentElement, { attributes: true, attributeFilter: ['data-skin'] });
+  window.__xlrPrepaintGuard = guard;
+  document.addEventListener('DOMContentLoaded', function () { try { guard.disconnect(); } catch (eD) { } }, { once: true });
+} catch (eG) { }
+})();
+</script>
+<link rel="stylesheet" href="/src/tailwind.css">
+</head>
+<body>
+
+
+
+<div class="top" id="top">
+  <div class="top-in">
+    <span class="brand">道家小六壬 · 卦台</span>
+    <span class="sp"></span>
+    <button class="tbtn" id="btnSum" type="button" aria-label="记录" title="记录：卦例与准则">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 5h16M4 10h16M4 15h10M4 20h6"/></svg>
+      <span class="lbl">记录</span>
+    </button>
+    <button class="tbtn" id="btnSet" type="button">
+      <span class="dot" id="setDot"></span><span class="lbl">设置</span>
+    </button>
+    <button class="ibt" id="btnTheme" type="button" aria-label="换皮肤" title="换皮肤">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="round"><path d="M12 3.2a8.8 8.8 0 1 0 0 17.6h1.6a2.1 2.1 0 0 0 1.5-3.6 2.1 2.1 0 0 1 1.5-3.6h2.1a2.1 2.1 0 0 0 2.1-2.1A8.8 8.8 0 0 0 12 3.2z"/><circle cx="7.6" cy="11.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.4" cy="7.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.1" cy="7.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="ibt" id="btnDN" type="button" aria-label="切换白天黑夜" title="切换白天/黑夜">
+      <svg class="ic-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>
+      <svg class="ic-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="left">
+    <div class="greetwrap" id="greetWrap">
+      <div class="greet" id="greet"></div>
+      <div class="greetsub" id="greetSub"></div>
+    </div>
+    <div class="pane">
+      <div class="pane-h"><b>所问之事</b><span class="sp"></span><span id="modeHint">报数</span></div>
+      <div class="pane-b">
+        <div class="f">
+          <label for="q">问题<b>必填</b></label>
+          <textarea id="q" placeholder="问具体的事。例如「我这次面试能过吗」「我的猫走丢三天了，还能找回来吗」&#10;不要写「看看我最近运势」这类没有边界的问题——问题决定卦的取向。"></textarea>
+        </div>
+        <div class="f">
+          <details class="bgf" id="bgDet">
+            <summary>补充背景（选填，越具体越准）</summary>
+            <textarea id="bg" placeholder="相关的实际情况。例如：已婚；对方是同事；面试是下周三；猫上次在阳台丢的。"></textarea>
+          </details>
+        </div>
+        <div class="f">
+          <label>起卦方式</label>
+          <div class="seg" role="group" aria-label="起卦方式">
+            <button type="button" id="mClock" aria-pressed="true">时间取数</button>
+            <button type="button" id="mTime" aria-pressed="false">月日时</button>
+            <button type="button" id="mNum" aria-pressed="false">报数</button>
+          </div>
+          <!-- ★ 2026-10-09 口径：：「详情放到报数的右边」⇒ 从 #castFields 里搬出来，紧跟报数 -->
+          <button class="castsw" id="castToggle" type="button" aria-expanded="false" aria-controls="castFields">详情</button>
+        </div>
+
+        <div class="f" id="castFields">
+          <label id="castLb" for="n1">随口报三个数（1–9，可重复）· 起卦时辰</label>
+          <div class="row" id="rowNum">
+            <input type="number" id="n1" min="0" max="99" placeholder="第一数" inputmode="numeric">
+            <input type="number" id="n2" min="0" max="99" placeholder="第二数" inputmode="numeric">
+            <input type="number" id="n3" min="0" max="99" placeholder="第三数" inputmode="numeric">
+          </div>
+          <div class="row" id="rowTime" hidden>
+            <span class="dtw wide3">
+              <input type="text" id="dt" readonly autocomplete="off" aria-label="日期（公历）">
+              <i class="dtico" aria-hidden="true"></i>
+              <span class="dppop" id="dppop" hidden></span>
+            </span>
+          </div>
+          <div class="row rowh">
+            <select id="h2" aria-label="起卦时辰"></select>
+            <select id="h1" aria-label="起卦时辰（用）" hidden></select>
+          </div>
+          <div class="mini" id="castMini"><b>报完不要改</b>；报了 0 当 10 取，报了两位数也不重报。记得选起卦时辰。</div>
+        </div>
+
+        <!-- ★ 2026-10-09 口径：：「隔一点距离放事类选项」⇒ 事类搬到详情后面（原来在最前面） -->
+        <div class="f" id="fCat">
+          <label for="cat">事类</label>
+          <select id="cat" title="用于匹配专门判据">
+            <option value="auto">事类·自动</option>
+            <option value="marriage">婚姻 · 感情</option>
+            <option value="preg">求子 · 孕产</option>
+            <option value="money">财运 · 投资 · 借贷</option>
+            <option value="work">工作 · 事业 · 选择</option>
+            <option value="ill">疾病 · 健康 · 灾祸</option>
+            <option value="lost">失物 · 寻人</option>
+            <option value="travel">出行 · 行人</option>
+            <option value="law">官司 · 是非 · 骗局</option>
+            <option value="exam">考试 · 比赛 · 名次</option>
+            <option value="weather">天气 · 天象</option>
+            <!-- 稿3 的下拉里没有这一项（口径：：「这个根本没有，不需要它」）⇒ 摘掉；
+                 注意 CATS.general 判据本身保留：自动判类全不中时仍会落到它（a5.html autoCat）。 -->
+          </select>
+        </div>
+
+        <label class="chk" for="optXiang"><input type="checkbox" id="optXiang"><i class="ck" aria-hidden="true"></i>
+          <span><b>三宫具象</b></span></label>
+
+        <div class="gobar">
+          <button class="go" id="btnGo" type="button" aria-label="起卦" title="起卦">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M12.4 6.2l5.8 5.8-5.8 5.8"/></svg>
+          </button>
+          <div class="err" id="err"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="right" id="right">
+    <div class="pane blank" id="blank">
+      <div class="blank-band"><span>大安</span><span>留连</span><span>速喜</span><span>赤口</span><span>小吉</span><span>空亡</span></div>
+      <div class="blank-body">
+        <p class="k">左边写好问题 → 起卦。<br>六宫会从大安起数，一格一格走到落宫。</p>
+        <p class="r">起卦与断卦依据在本机算，不联网。<br>断辞那一步可以接模型。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="dlg">
+    <div class="dlg-h"><span class="t">设置</span><button class="x" id="btnClose" type="button" aria-label="关闭">×</button></div>
+    <div class="dlg-b">
+      <div class="fld">
+        <label>连接方式</label>
+        <div class="seg" role="group" aria-label="连接方式">
+          <button type="button" id="wDirect" aria-pressed="true">浏览器直连</button>
+          <button type="button" id="wProxy" aria-pressed="false">本地中转</button>
+        </div>
+        <div class="hint" id="wHint"></div>
+      </div>
+
+      <div class="fld">
+        <label>服务商（点了会填好下面的地址与模型）</label>
+        <div class="pre" id="presets"></div>
+      </div>
+
+      <div class="fld">
+        <label for="base">接口地址（Base URL，需以 /v1 结尾视服务商而定）</label>
+        <input type="text" id="base" spellcheck="false" placeholder="https://api.deepseek.com">
+      </div>
+
+      <div class="fld">
+        <label for="model">模型名（点右边 ▾ 从常用里挑，也可以自己敲）</label>
+        <div class="mdl">
+          <input type="text" id="model" spellcheck="false" placeholder="deepseek-chat" autocomplete="off">
+          <button type="button" class="dd" id="modelDd" aria-expanded="false" title="选常用模型">▾</button>
+        </div>
+        <div class="mmenu" id="modelMenu" hidden></div>
+      </div>
+
+      <div class="fld">
+        <label for="key">API Key</label>
+        <div class="row">
+          <input type="password" id="key" spellcheck="false" autocomplete="off" placeholder="sk-...">
+          <button class="btn" id="btnEye" type="button" style="flex:0 0 auto">显示</button>
+        </div>
+        <div class="hint">只存在你这台浏览器的本地存储里，<b>不会写进这个 HTML 文件</b>——所以这个文件可以随便发给别人。</div>
+      </div>
+
+      <div class="fld">
+        <label for="temp">温度（0.2 更稳、0.8 更活；解卦建议 0.5 左右）</label>
+        <input type="number" id="temp" min="0" max="2" step="0.1" value="0.5">
+      </div>
+
+      <div class="fld">
+        <button class="btn" id="btnTest" type="button">测试连接</button>
+        <div class="ok-line" id="testOut"></div>
+      </div>
+    </div>
+    <div class="dlg-f">
+      <span class="sp2"></span>
+      <button class="btn" id="btnClear" type="button">清空设置</button>
+      <button class="btn pri" id="btnSave" type="button">保存</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="module" src="/src/shell/main.jsx"></script>
+</body>
+</html>
