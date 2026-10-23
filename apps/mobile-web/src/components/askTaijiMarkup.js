@@ -61,7 +61,7 @@ export const ASK_TAIJI_MARKUP =
           '<stop offset="1" stop-color="#ffffff" stop-opacity=".38"/>' +
         '</linearGradient>' +
         '<clipPath id="atkClip"><circle cx="18" cy="18" r="16.6"/></clipPath>' +
-        /* 只吃锯齿：0.35 单位 ≈ 1 设备像素（上一版用 0.9 ⇒ 用户判「十分模糊」） */
+        /* 只吃锯齿：0.35 单位 ≈ 1 设备像素（早前的版本用 0.9 ⇒ 用户判「十分模糊」） */
         '<filter id="atkSoft" x="-15%" y="-15%" width="130%" height="130%">' +
           '<feGaussianBlur stdDeviation="0.35"/>' +
         '</filter>' +

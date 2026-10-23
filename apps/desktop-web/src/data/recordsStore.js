@@ -20,7 +20,7 @@ export function setNotify(fn) { notifyHook = (typeof fn === 'function') ? fn : n
 function notify() { try { if (notifyHook) notifyHook(); } catch (e) { } }
 
 /* 复盘接缝（A4②）：源里 `setFb` 标「没应验」时直接调全局 `reviewCase(id)` ⇒ 这里改成钩子。
-   复盘本体（调模型 / 写准则）属 A4③；未接时**什么都不做**（＝早期版本那条「准备中…」不会起来）。 */
+   复盘本体（调模型 / 写准则）属 A4③；未接时**什么都不做**（＝早前的版本那条「准备中…」不会起来）。 */
 let reviewHookFn = null;
 export function setReviewHook(fn) { reviewHookFn = (typeof fn === 'function') ? fn : null; }
 function reviewHook(id) { try { if (reviewHookFn) reviewHookFn(id); } catch (e) { } }

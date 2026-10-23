@@ -27,7 +27,7 @@
  *   「modern 的重排把节点搬来搬去」互不干扰，也避免 React 覆盖掉 legacy 写的类/文本。
  *
  * ⇒ 组件产出：`#h2/#h1` 的 12 个时辰 option（原本由 18-script 的加载期语句灌）＋「重排前的原骨架」。
- * 🔸 与早期版本的**属性级差异（已知且无害）**：① 属性顺序由 React 归一化；② 原骨架里那三条 HTML 注释 React 不渲染
+ * 🔸 与早前的版本的**属性级差异（已知且无害）**：① 属性顺序由 React 归一化；② 原骨架里那三条 HTML 注释 React 不渲染
  *    （注释不进布局/样式，结构判据按「元素 + 文本」比对，不比对注释）。
  *
  * 旧实现整块在 `38-script` L162–275，**在 IIFE 里** ⇒ 拿不到函数引用；但源码自带三道口子，全都能用：
@@ -146,10 +146,10 @@ function useAskCore() {
          等它露出来（切「月日时」、或 clock 模式展开详情）要再扫一次 —— 这是 legacy 那个 125ms 看门狗的
          **时机确定版**等价物（不靠轮询）。 */
     const glassRescan = () => { try { GlassSelect.buildGlassSelect(); } catch (eGS) { } };
-    /* ★ 02 屏 #cat 的宽度：早期版本是在**运行期按当前选中项**的文本量宽（`modern.js` L377-383）——
+    /* ★ 02 屏 #cat 的宽度：早前的版本是在**运行期按当前选中项**的文本量宽（`modern.js` L377-383）——
          canvas `measureText` 量宽 + 36（12 左内距 + 三角与右内距）⇒ `Math.max(96, w)`，上限 `78vw`（= 304.2px @390）。
        新仓重写时这段 JS **没搬**，只剩 `styles/legacy.css` 里一条 `max-width:112px` 兜着 ⇒ 宽度恒 112、且
-       不跟随选中项（早期版本选「事类·自动」是 96，选长的会变宽）⇒ 02 屏那 16px 差 + 丢掉的行为都由这一条解释。
+       不跟随选中项（早前的版本选「事类·自动」是 96，选长的会变宽）⇒ 02 屏那 16px 差 + 丢掉的行为都由这一条解释。
        */
     const catFit = () => {
       const s = $('cat'); if (!s || !s.options || !s.options.length) return;
@@ -170,7 +170,7 @@ function useAskCore() {
       try { window.dispatchEvent(new Event('xlr:askmode')); } catch (e) { }
       glassRescan();   /* 方式一变，`.rowh/#h2` 可能刚露出来 ⇒ 补扫（同上） */
     };
-    /* #cat 换选项 ⇒ 宽度跟着重算（早期版本每次选完都重量，见上面 catFit） */
+    /* #cat 换选项 ⇒ 宽度跟着重算（早前的版本每次选完都重量，见上面 catFit） */
     on($('cat'), 'change', catFit);
     on($('cat'), 'input', catFit);
     on(nodes.mNum, 'click', function () { setModeBound('num'); modeChanged(); });

@@ -40,7 +40,7 @@ export function resolveBase(base) {
 
 export function isAnth(base) { return /\/anthropic(\/|$)/i.test(String(base || '')); }
 
-/* 返回值形如 { url, proxy, anth, base, s } —— 与早期版本 apiURL() 的 { url, proxy, s } 兼容 */
+/* 返回值形如 { url, proxy, anth, base, s } —— 与早前的版本 apiURL() 的 { url, proxy, s } 兼容 */
 export function endpoint(s) {
   s = s || {};
   if (s.wire === 'proxy') {
@@ -86,7 +86,7 @@ export function payload(s, msgs, stream, maxTokens) {
     p.temperature = isNaN(t) ? 0.5 : Math.min(1, Math.max(0, t));   /* Anthropic 只收 0–1 */
   } else {
     p = { model: s.model, messages: msgs, temperature: s.temp, stream: !!stream };
-    /* ⚠ OpenAI 那套**不加** max_tokens：早期版本就没加，而各家上限不一（Kimi 8k 那种写大了直接报错） */
+    /* ⚠ OpenAI 那套**不加** max_tokens：早前的版本就没加，而各家上限不一（Kimi 8k 那种写大了直接报错） */
   }
   if (s && s.wire === 'proxy') return { base: s.base, key: s.key, payload: p };
   return p;

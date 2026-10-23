@@ -19,7 +19,7 @@
  *     文案 `看断辞 · 结果 →`，点了切到「断辞」步）。时序取**原来的轮询间隔 350ms**
  *     （源里是 `setInterval(..., 350)` 轮询「胶囊有子节点」；落定是瞬时的 ⇒ 等价于落定后 350ms 出现）。
  *     ⚠ React 渲染而不是往 `#guaCard` 里 append：`#guaCard` 是 React 的容器，塞野节点会让「新一卦」
- *       的复用行为与早期版本不一致（早期版本是整块 innerHTML 重写 ⇒ 按钮跟着没了）。
+ *       的复用行为与早前的版本不一致（早前的版本是整块 innerHTML 重写 ⇒ 按钮跟着没了）。
  */
 import { useEffect, useState } from 'react';
 import { GONG, zhi } from '@xlr/shared-judgment';

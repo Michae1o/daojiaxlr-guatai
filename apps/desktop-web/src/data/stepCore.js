@@ -100,7 +100,7 @@ function buildStepper() {
     wrap.insertBefore(bar, wrap.firstChild);
     requestAnimationFrame(function () { placePill(false); });
     /*
-       药丸的伸缩不再「每帧量宽」（那套既会冻住——上一版的铁 bug——逐帧写宽度也会让边缘发丝级抖），
+       药丸的伸缩不再「每帧量宽」（那套既会冻住——早前的版本的铁 bug——逐帧写宽度也会让边缘发丝级抖），
        然后用纯几何公式算出目标位置：
          静止时按钮 i 的左沿 = (行宽 - 总宽)/2 + i*(收起宽+间距)      ← 行是 justify-content:center
          悬停某个按钮（它变宽 δ）⇒ 起点整体左移 δ/2，它右边的按钮各自再 +δ

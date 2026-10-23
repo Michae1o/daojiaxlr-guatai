@@ -140,7 +140,7 @@ html[data-skin="tonggu"] {
   /* 粗粝颗粒（feTurbulence 噪点，overlay 用）——铸件按钮 / 青铜板面板共用一份。 */
   --tg2-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   /* ★ 2026-10-16（用户「古朴青铜感，不是一层高光」+「丢失了原本厚重的边框」）：
-     上一版（变更记录）把铸件做成「顶亮带渐变 + 冷白受光 + 细铜金内描边」⇒ 读成玻璃反光、边框变细。
+     早前的版本（变更记录）把铸件做成「顶亮带渐变 + 冷白受光 + 细铜金内描边」⇒ 读成玻璃反光、边框变细。
      现按素材**逐像素量过**（header-pill normal：面色 L≈62 rgb(51,60,54)、外圈深描边 L≈15~50、
      顶缘铜金受光、无大块亮带）：深青铜渐变（无亮顶带）＋ feTurbulence 噪点（overlay，粗粝颗粒）。 */
   --tg2-cast-bg: var(--tg2-grain), linear-gradient(180deg, #5A634F 0%, #40483E 30%, #2F372E 60%, #2A3129 82%, #3A4238 100%);
@@ -860,7 +860,7 @@ html[data-skin="tonggu"] .mfoot .mf-bar { color: #6F6A5A; }
    ============================================================================ */
 
 /* ---- 4.1 开屏（#xlrSplash）—— ★ 2026-10-16 **整体撤回**，不做任何涂装 ----
-   因为这一版开屏做的并不好」⇒ 上一版（T 批 2）给开屏加的四角角饰 / 标题两侧装饰线 /
+   因为这一版开屏做的并不好」⇒ 早前的版本（T 批 2）给开屏加的四角角饰 / 标题两侧装饰线 /
    铜金刻线 / 印章式「进入」钮 **全部撤掉**。
    撤掉之后开屏 = 别的皮肤那套原样结构（`#xlrSplash` 的底与各段文字都走变量 color-mix），
     */

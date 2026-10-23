@@ -474,7 +474,7 @@ function initEdgeSwipe() {
 }
 
 /* ===== 进场（源 `modern.js` L1269–L1281）=====
- * 早期版本是**全局** `animateIn`：开屏收掉那一下由早期实现内联脚本 `try{ animateIn() }catch{ }` 调它
+ * 早前的版本是**全局** `animateIn`：开屏收掉那一下由早期实现内联脚本 `try{ animateIn() }catch{ }` 调它
  * ⇒ `.left` 拿到 `.v-in`，播 `vIn`（0.42s 淡入上移）。
  * 本仓  删段后那个全局没了，只剩那个 `try{...}catch{}` 的调用点 ⇒ **静默失败**
  * （实测：旧 `.left class="left v-in"` / `anim=vIn`；新 `.left class="left"` / `anim=none`）。
@@ -507,7 +507,7 @@ function installGuideRetry() {
   if (window.__xlrGuideRetry) return;
   window.__xlrGuideRetry = 1;
   var tries = 0;
-  /* ★ 加固（2026-10-15 **非早期版本原样，已标注**）——早期版本这条闸只认「此刻有没有 #xlrSplash」，
+  /* ★ 加固（2026-10-15 **非早前的版本原样，已标注**）——早前的版本这条闸只认「此刻有没有 #xlrSplash」，
      慢机上会踩空窗：实测（CPU 节流 6×）新载荷 t=797ms 时开屏**尚未建出**（页面上只有加密壳的
      `.boot.out`），t=1329ms 才建出 ⇒ 撞进 797–1329ms 这一拍就判定「开屏已退场」⇒ 抢先把引导层
      弹出来盖住开屏（用户真机报「开屏被自动跳过」）。

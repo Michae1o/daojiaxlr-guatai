@@ -1628,7 +1628,7 @@ html[data-skin="xuan"] .onb{
   border-color:var(--m-glass-line);
   box-shadow:inset 0 1px 0 var(--m-glass-hi),0 1px 2px rgba(28,25,20,.05);
 }
-/* 主按钮：纯平（去掉上一版顶光渐变 + 内高光 —— 那是 Web2.0 拟物）
+/* 主按钮：纯平（去掉早前的版本顶光渐变 + 内高光 —— 那是 Web2.0 拟物）
    hover 只留一点柔影 + 微亮，不复活立体感 */
 .cbar .go:hover,.btn.pri:hover,.sbtn.pri:hover{
   box-shadow:0 10px 22px -12px var(--accent-line);
@@ -1791,7 +1791,7 @@ html[data-step] #castPanel.auto .nwrap{border-style:dashed;background:transparen
 
 /*
    两条一起改，缺一条都还会晃：
-   ① 曲线：去掉一切「超调回弹」（上一版 --m-spring 过头了）⇒ 换成**临界阻尼**的缓出
+   ① 曲线：去掉一切「超调回弹」（早前的版本 --m-spring 过头了）⇒ 换成**临界阻尼**的缓出
       （起手快、尾巴长而稳，全程不过冲），这也是「非线性」——非线性 ≠ 必须弹。
    ② 布局：标签改成**预留位置**（宽度恒定），展开只做透明度+一点点位移 ⇒
       悬停时旁边两个字**一动不动**；而且按钮宽度不再变化，药丸的伸缩变成纯 CSS 过渡，
@@ -2263,8 +2263,8 @@ html[data-skin="glass"] body{background:transparent}
    设置页必须自己有一层**不透明**底（皮肤底色；光晕层在它下面，这里就是要盖住它）。 */
 html[data-skin="glass"] .setscreen{background:var(--bg)}
 /*
-   所以这里就是**早期版本那四团光原样拿过来**（rgba/尺寸/位置与原来一一对应），
-   只多了一个极慢的位移+呼吸缩放；不再自己加色、不再加深（上一版我加了更浓的四团，已否）。
+   所以这里就是**早前的版本那四团光原样拿过来**（rgba/尺寸/位置与原来一一对应），
+   只多了一个极慢的位移+呼吸缩放；不再自己加色、不再加深（早前的版本我加了更浓的四团，已否）。
    只用 transform（合成器），不做 blur（每帧重算，必卡）。 */
 #xlrAura{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:-1;
   pointer-events:none;overflow:hidden;display:none}
@@ -2886,11 +2886,11 @@ html[data-theme="dark"] .cbar .go[disabled]:hover{
 html.sl-anim .cbar{opacity:0 !important;pointer-events:none}
 html.sl-nogo .cbar .go{opacity:0 !important}      /* 箭头（起卦键）动画全程不出现，最后才淡入 */
 /* 把开屏层里**除那枚按钮之外**的东西一次性淡出（珠子/标题/副题/箴言/三条提示/轴线）。
-   逐条列类名会漏——上一版就漏掉了标题与箴言，画面上表现成"标题压着重影、文字没退干净"。
+   逐条列类名会漏——早前的版本就漏掉了标题与箴言，画面上表现成"标题压着重影、文字没退干净"。
    用 :not() 一网打尽，并且带 !important，免得再被别的规则压回去。 */
 #xlrSplash.txtout .sl-in > *:not(.sl-go){opacity:0 !important;transition:opacity .26s ease}
 #xlrSplash.txtout > .sl-axis{opacity:0 !important;transition:opacity .26s ease}   /* 顶上那条轴在 .sl-in 外面 */
-/* ⚠ 压的是**整个 .wrap**：上一版只压 .left，结果宽屏那套容器（「所问之事」表单）在动画期间露出来，
+/* ⚠ 压的是**整个 .wrap**：早前的版本只压 .left，结果宽屏那套容器（「所问之事」表单）在动画期间露出来，
    用户看到的就是"每次都闪出一个页」"。 */
 /* ⚠ 开屏层在场时（html.sl-on）必须把首次配置引导压住：
    开屏层的背景是**半透明**的主题色，底下那层引导会透出来 ——
@@ -2913,7 +2913,7 @@ html.sl-on #onbLayer{opacity:0 !important;pointer-events:none !important}
    第二拍（sl-late）  ：卡里的字/快捷选项/发送键依次淡入，**之后**才是顶栏、问候语这些"其他东西"。 */
 html.sl-cinew .cbar > *{opacity:0 !important;transform:translateY(7px) !important}
 /*
-   所以球展开的全程要**连真卡的玻璃壳一起压住**（上一版只压了卡里的内容，壳早就躺在屏幕上，
+   所以球展开的全程要**连真卡的玻璃壳一起压住**（早前的版本只压了卡里的内容，壳早就躺在屏幕上，
    看起来就成了"球往一个已经存在的框里长"）。屏幕上只允许有"球→方框"这一个东西在长大；
    等球长到与卡完全重合那一帧（1340ms）再放壳 —— 那时两者位置与外观一致，交接看不出接缝。 */
 /*
@@ -3053,7 +3053,7 @@ html[data-swipedir="r"] .v-in{animation:vSlideInR .46s cubic-bezier(.22,1,.36,1)
    结论：搜索框 + 抽屉底部那枚「设置」都是**窄屏专用的**（a8c/a8b 的注释写得很清楚：
    窄屏才隐藏「记录 / N 则」、窄屏才把顶栏 #btnSet 收掉、入口搬到抽屉底部）。
    但这两块 markup 是**两端共用**的 ⇒ 宽屏（电脑端）凭空多出这两样。
-   所以宽屏这边是**藏掉**，不是「给它补样式」（我上一版给它补样式＝把手机端的东西留下了 ✗）。
+   所以宽屏这边是**藏掉**，不是「给它补样式」（早前的版本给它补样式＝把手机端的东西留下了 ✗）。
    ========================================================================== */
 @media (min-width:821px){
   /* 顶部那行：记录 · N 则 ·（搜索框在宽屏不存在）· × —— 靠 .sp 撑开把 × 顶到右边 */

@@ -13,10 +13,10 @@
  * Step 2 落**静态 DOM**（结构与文案逐字等价）；**Step 4 落交互**（本地 16 项，见下）。
  *
  * ===== Step 4：交互（本地 16 项；出网 3 项按 早期实现 / 早期实现① **留待**，按钮 DOM 保留、功能不接）=====
- * 逐条对应早期版本监听器（源行号 = `20-script.txt` / `22-script.txt`，均逐字照抄语义）：
- *   · 关：`#sdbClose` / `#sdbMask`（22 L159-160）· Esc（22 L170，早期版本就绑在 `#sdb` 上）
+ * 逐条对应早前的版本监听器（源行号 = `20-script.txt` / `22-script.txt`，均逐字照抄语义）：
+ *   · 关：`#sdbClose` / `#sdbMask`（22 L159-160）· Esc（22 L170，早前的版本就绑在 `#sdb` 上）
  *   · 标签 `.stab`（22 L167-169 → `sdbTab` L138-147）
- *   · 搜索 `#sdbQ`（22 L162-166；早期版本写 `window.__sdbQ`，这边**镜像**着写）
+ *   · 搜索 `#sdbQ`（22 L162-166；早前的版本写 `window.__sdbQ`，这边**镜像**着写）
  *   · 行点击→详情 / `[data-back]`（`bindCaseBox` L454-467）
  *   · `[data-fb]`（L468-470 → `setFb`）· `[data-del]`（`sdbFootDel` L231-243 + L471-473）
  *   · `[data-note]`（L474-478，**原生 `change`**，不是 `input`）
@@ -24,11 +24,11 @@
  *   · `[data-norule]`（L482-488 **逐字照抄**）· `[data-delrule]`（`renderRules` L447-449 → `delRule`）
  *   · 底栏六分支（`sdbFootAct` L244-280，**分支顺序照抄**）：`[data-set]` / `[data-restore]` /
  *     `[data-purge]` / `[data-purgeall]` / `[data-open]` / `[data-clear]`（两段式 `data-armed` 4 秒）
- * 事件挂法：早期版本是"按元素各挂一遍"，这边改成**根节点上一处捕获 + 一处冒泡**；
- *   分支判据与早期版本**同序、同选择器**（`sdbFootDel` 是捕获阶段 ⇒ `onClickCapture`）。
+ * 事件挂法：早前的版本是"按元素各挂一遍"，这边改成**根节点上一处捕获 + 一处冒泡**；
+ *   分支判据与早前的版本**同序、同选择器**（`sdbFootDel` 是捕获阶段 ⇒ `onClickCapture`）。
  * 出网三条的现状（2026-10-13 A4③ 更新）：
  *   ③ 复盘的流式渲染（`RV_SYS` + `readSSE`）—— **已接**（同一份切片）
- *   ② `[data-ask]`（接着问）—— **仍未接**：早期版本由 `26-script.txt` L762-763 的 document 委托 → `openRecAsk`
+ *   ② `[data-ask]`（接着问）—— **仍未接**：早前的版本由 `26-script.txt` L762-763 的 document 委托 → `openRecAsk`
  */
 import { useEffect, useRef, useState } from 'react';
 import { RecordsStore } from '../data/recordsStore.js';
@@ -114,8 +114,8 @@ function TrashRows({ dead, msMode, msSel }) {
 }
 
 /* 底栏（`sdbFootHtml` L162–191，逐字照抄；`n` = 当前可见条数）
-   `armed` = 早期版本 `[data-clear]` 的 `data-armed` 两段式（`sdbFootAct` L267-279）：
-   第一下只改属性+文案、4 秒内再点才真清空。早期版本是**直接改 DOM**（`setAttribute`/`textContent`），
+   `armed` = 早前的版本 `[data-clear]` 的 `data-armed` 两段式（`sdbFootAct` L267-279）：
+   第一下只改属性+文案、4 秒内再点才真清空。早前的版本是**直接改 DOM**（`setAttribute`/`textContent`），
    这边进 state 由 React 渲染 —— 终态 DOM 等价（`data-armed="1"` + 文案「再点一次：清空记录」）。 */
 function Foot({ n, dead, armed, trashOpen, onTrashToggle, msMode, msSel }) {
   const sel = msSel || [];
@@ -159,7 +159,7 @@ function Foot({ n, dead, armed, trashOpen, onTrashToggle, msMode, msSel }) {
 }
 
 /* 一条卦例（`renderCases` L335–354 的单条分支）
-   `going` = 早期版本 `sdbFootDel` 在行上打的退场标记（L241 `.case-row.going`）；
+   `going` = 早前的版本 `sdbFootDel` 在行上打的退场标记（L241 `.case-row.going`）；
    CSS 命中 `#sdbCases .case-row.going`（`28-style.txt` L2447）⇒ 260ms 退场后 250ms 真删。 */
 function CaseRow({ r, first, going }) {
   const dd = dayOf(r.t);
@@ -238,8 +238,8 @@ export default function Records({ open = false, onClose }) {
   const [rules, setRules] = useState(() => readRules());
   const [tab, setTab] = useState('cases');
   const [q, setQ] = useState(() => String((typeof window !== 'undefined' && window.__sdbQ) || ''));
-  const [detailId, setDetailId] = useState('');   /* ⇔ 早期版本 `window.__sdbDetail`（bindCaseBox L458 / L464-465） */
-  const [trashId, setTrashId] = useState('');     /* ⇔ 早期版本 `[data-open]` 那条「直接写 box」的临时详情（L264） */
+  const [detailId, setDetailId] = useState('');   /* ⇔ 早前的版本 `window.__sdbDetail`（bindCaseBox L458 / L464-465） */
+  const [trashId, setTrashId] = useState('');     /* ⇔ 早前的版本 `[data-open]` 那条「直接写 box」的临时详情（L264） */
   /* ★ 2026-10-22（现象：「点了彻底删就返回到列表去了、回收站收起来，不能连着删」）：
      回收站那一栏改成 **受 state 控制**（原来 open 只住在 DOM 上，任何一次刷新就没了）。
      `keepTrash` = 「这次刷新是回收站里的动作引起的」⇒ 刷新后照样展开，人留在回收站里连着删。 */
@@ -248,12 +248,12 @@ export default function Records({ open = false, onClose }) {
   /* ★ 2026-10-22（要求）：回收站多选 —— msMode=多选态，msSel=选中的 id 列表 */
   const [msMode, setMsMode] = useState(false);
   const [msSel, setMsSel] = useState([]);
-  const [armed, setArmed] = useState(false);      /* ⇔ 早期版本 `[data-clear]` 的 `data-armed`（L270-277） */
+  const [armed, setArmed] = useState(false);      /* ⇔ 早前的版本 `[data-clear]` 的 `data-armed`（L270-277） */
   /* ★ A4③：待复盘的记录 id —— 点「没应验」后**不能当场调** `reviewCase`（React 的 setState 是异步的，
-     那一刻 `#rv-<id>` 还没渲染出来；早期版本是 setFb → renderSdb 同步重建 DOM 后再调）。
-     所以先记下 id，等下面那个 effect（跑在渲染提交之后）再跑 ⇒ 与早期版本的先后顺序一致。 */
+     那一刻 `#rv-<id>` 还没渲染出来；早前的版本是 setFb → renderSdb 同步重建 DOM 后再调）。
+     所以先记下 id，等下面那个 effect（跑在渲染提交之后）再跑 ⇒ 与早前的版本的先后顺序一致。 */
   const [rvPending, setRvPending] = useState('');
-  const [goingId, setGoingId] = useState('');     /* ⇔ 早期版本 `.case-row.going`（L241） */
+  const [goingId, setGoingId] = useState('');     /* ⇔ 早前的版本 `.case-row.going`（L241） */
   const alive = useRef(true);
   const rootRef = useRef(null);
   const timers = useRef([]);
@@ -273,16 +273,16 @@ export default function Records({ open = false, onClose }) {
       setCases(readCases());
       setDead(readCasesRaw().filter((r) => r.deleted));
       setRules(readRules());
-      /* 下面三个在早期版本是「住在 DOM 上」的临时态，一次重渲染（innerHTML 重建）就没了 ⇒ 同步清掉：
-         ⚠ 但**详情态例外**：早期版本详情分支（L297-305）只重写 `#sdbCases`，**不动底栏**（`sdbFootWire`
+      /* 下面三个在早前的版本是「住在 DOM 上」的临时态，一次重渲染（innerHTML 重建）就没了 ⇒ 同步清掉：
+         ⚠ 但**详情态例外**：早前的版本详情分支（L297-305）只重写 `#sdbCases`，**不动底栏**（`sdbFootWire`
            只在列表渲染里被调）⇒ 那时底栏还是上一轮列表留下的旧节点，`data-armed` / 展开的回收站
            都还留在它上面。所以这两项按 `detailIdRef` 分叉。 */
       setTrashId('');   /* `renderCases` 会重写 box ⇒ 临时详情被抹（L292-305）—— 这条**不分叉** */
       setGoingId('');   /* 底栏/行节点被替换 ⇒ `going` 随节点走（L201-209） */
       if (!detailIdRef.current) {
         setArmed(false);  /* 底栏随 innerHTML 重建 ⇒ `data-armed` 不保留（L168 + L357） */
-        /* 同理：早期版本重建底栏 ⇒ 展开着的「回收站」`<details>` 会跟着合上（`open` 随旧节点消失）；
-           React 复用同一个 `<details>` 节点、不会自己合 ⇒ 这里照早期版本的时机手动合上。
+        /* 同理：早前的版本重建底栏 ⇒ 展开着的「回收站」`<details>` 会跟着合上（`open` 随旧节点消失）；
+           React 复用同一个 `<details>` 节点、不会自己合 ⇒ 这里照早前的版本的时机手动合上。
              回收站里的动作（彻底删 / 还原 / 清空回收站）打 keepTrash 标 ⇒ 这一次刷新**保持展开**。 */
         if (keepTrash.current) { keepTrash.current = false; setTrashOpen(true); }
         else setTrashOpen(false);
@@ -297,7 +297,7 @@ export default function Records({ open = false, onClose }) {
     };
   }, []);
 
-  /* 打开抽屉：早期版本入口是 `sdbOpen('cases')`（22-script L177）⇒ `sdbTab('cases')` + 末尾一次 `renderSdb()`（20 L126-132）*/
+  /* 打开抽屉：早前的版本入口是 `sdbOpen('cases')`（22-script L177）⇒ `sdbTab('cases')` + 末尾一次 `renderSdb()`（20 L126-132）*/
   useEffect(() => {
     if (!open) return;
     setTab('cases');
@@ -313,7 +313,7 @@ export default function Records({ open = false, onClose }) {
     return () => clearTimeout(t);
   }, [armed]);
 
-  /* `[data-note]`：早期版本绑的是**原生 change**（`bindCaseBox` L474-478），不是 input。
+  /* `[data-note]`：早前的版本绑的是**原生 change**（`bindCaseBox` L474-478），不是 input。
      ⇒ 这边也用原生 change（React 的 `onChange` 映射到 input 事件，语义不同，不能拿来顶替）。 */
   useEffect(() => {
     const el = rootRef.current;
@@ -325,21 +325,21 @@ export default function Records({ open = false, onClose }) {
       if (!n) return;
       const v = String(n.value || '').trim();
       RecordsStore.setNote(n.getAttribute('data-note'), v);   /* A4②：动词走 store（原来 g('setNote')） */
-      /* 早期版本紧接着还有一句 `renderSdb()`；`setNote` → `saveCases` → `renderSdb`（已被重定向到 refresh）⇒ 不必再调。
-         ⚠ 但早期版本那次重渲染会把整行 innerHTML **重建** ⇒ 输入框的显示值也被归一成存档里的 trim 结果；
-           React 复用同一个节点、不会回写未受控输入的 live value ⇒ 这里照早期版本那样补一次回写。 */
+      /* 早前的版本紧接着还有一句 `renderSdb()`；`setNote` → `saveCases` → `renderSdb`（已被重定向到 refresh）⇒ 不必再调。
+         ⚠ 但早前的版本那次重渲染会把整行 innerHTML **重建** ⇒ 输入框的显示值也被归一成存档里的 trim 结果；
+           React 复用同一个节点、不会回写未受控输入的 live value ⇒ 这里照早前的版本那样补一次回写。 */
       if (n.value !== v) n.value = v;
     };
     el.addEventListener('change', onChange);
     return () => el.removeEventListener('change', onChange);
   }, []);
 
-  /* 详情态失效：早期版本 `renderCases` L297-305 —— 详情那条取自 `recById()`（= `loadCases()`，不含已删）
+  /* 详情态失效：早前的版本 `renderCases` L297-305 —— 详情那条取自 `recById()`（= `loadCases()`，不含已删）
      ⇒ 一旦它被删，就清空详情态、回列表。 */
   useEffect(() => { if (detailId && !cases.some((r) => r.id === detailId)) setDetailId(''); }, [detailId, cases]);
 
   /* ★ A4③ 复盘主流程（**会出网**）：跑在**渲染提交之后** ⇒ 那一刻 `#rv-<id>`（含 `.rv-b`/`.rv-s`）
-     已经由上面的 `<Rv>` 渲染出来，`reviewCase` 里的 `say()` 才有地方落笔（与早期版本「先重建 DOM 再复盘」同序）。
+     已经由上面的 `<Rv>` 渲染出来，`reviewCase` 里的 `say()` 才有地方落笔（与早前的版本「先重建 DOM 再复盘」同序）。
      ⚠ 只在这里跑一次；`reviewCase` 自己会判「没接模型就只提示」「已复盘过就不再跑」。 */
   useEffect(() => {
     if (!rvPending) return;
@@ -348,9 +348,9 @@ export default function Records({ open = false, onClose }) {
     ReviewCore.reviewCase(id);
   }, [rvPending]);
 
-  /* ── 早期版本 `sdbFootDel`（L231-243）：**捕获阶段**拦下 `.case-row` 里的 `[data-del]` ⇒
+  /* ── 早前的版本 `sdbFootDel`（L231-243）：**捕获阶段**拦下 `.case-row` 里的 `[data-del]` ⇒
      先播 260ms 退场动画、250ms 后才真删，并 `stopPropagation()` 让「立即删」那条收不到。
-     ⚠ 早期版本怪癖**照抄**：行已是 `going` 时它在最前面就 `return`（L240，在 preventDefault/stopPropagation **之前**）
+     ⚠ 早前的版本怪癖**照抄**：行已是 `going` 时它在最前面就 `return`（L240，在 preventDefault/stopPropagation **之前**）
      ⇒ 事件继续走到 `bindCaseBox` 的「立即删」（L471-473）⇒ **二次点击 = 立刻删**。 */
   const onDelCapture = (e) => {
     const t = e.target;
@@ -368,22 +368,22 @@ export default function Records({ open = false, onClose }) {
   };
 
   /* `[data-fb]`（L468-470 → `setFb` L84-95）。
-     ★ A4③（2026-10-13）：**复盘接上了**。早期版本「没应验」会顺手触发 `reviewCase()`（出网，20 L94 →
-     22-script L43 的复盘主流程）。这里照早期版本语义走，只把**时机**改成「等渲染提交之后再跑」：
-       ① 先在 setFb 里把复盘钩子**临时挂空** ⇒ 只做本地标记（等价于早期版本 setFb 里那一步 saveCases）；
-       ② 记下 `rvPending`，由上面的 effect 在 `#rv-<id>` 渲染出来之后跑 `reviewCase`（早期版本是先
+     ★ A4③（2026-10-13）：**复盘接上了**。早前的版本「没应验」会顺手触发 `reviewCase()`（出网，20 L94 →
+     22-script L43 的复盘主流程）。这里照早前的版本语义走，只把**时机**改成「等渲染提交之后再跑」：
+       ① 先在 setFb 里把复盘钩子**临时挂空** ⇒ 只做本地标记（等价于早前的版本 setFb 里那一步 saveCases）；
+       ② 记下 `rvPending`，由上面的 effect 在 `#rv-<id>` 渲染出来之后跑 `reviewCase`（早前的版本是先
           renderSdb 同步重建 DOM 再调 ⇒ 先后顺序一致）。
-     条件与早期版本逐字相同：`fb === '错'` 且这一条**还没复盘过**（`!rec.rv`）才跑。
+     条件与早前的版本逐字相同：`fb === '错'` 且这一条**还没复盘过**（`!rec.rv`）才跑。
      ★ 仍然**只有一份** setFb / reviewCase 实现（不复制数据逻辑）。 */
   const markFb = (id, fb) => {
     if (fb !== '错') { RecordsStore.setFb(id, fb); return; }        /* 「应验」不碰复盘（L94 条件不成立） */
     const prev = RecordsStore.setReviewHook(null);
     try { RecordsStore.setFb(id, fb); } finally { RecordsStore.setReviewHook(prev); }
     const rec = readCases().find((r) => r.id === id);
-    if (rec && !rec.rv) setRvPending(id);                          /* ⇔ 早期版本 L94 的条件 */
+    if (rec && !rec.rv) setRvPending(id);                          /* ⇔ 早前的版本 L94 的条件 */
   };
 
-  /* `[data-norule]`（L482-488 照抄：把该条的复盘清掉。早期版本这段是内联的，没有对应的全局函数）
+  /* `[data-norule]`（L482-488 照抄：把该条的复盘清掉。早前的版本这段是内联的，没有对应的全局函数）
      ⇒ **写一次就把回收站里那些已删记录永久写没**。本组件改为取 `loadCasesRaw()`（含已删），
      其余逐字照抄（`rv=''` / `rvWhy=''` 两处清空语义不变）。
      ⚠ 同族另 4 处在 legacy 段里（`setFb`/`setNote`/`updateCaseDuanci`/`markModelAnswered` + `addCase`），
@@ -394,15 +394,15 @@ export default function Records({ open = false, onClose }) {
     RecordsStore.saveCases(a);
   };
 
-  /* `[data-okrule]`（L479-481 → `confirmRule`）：早期版本末尾还会 `sdbTab('rules')`（L533）⇒ 这边同步切页 */
+  /* `[data-okrule]`（L479-481 → `confirmRule`）：早前的版本末尾还会 `sdbTab('rules')`（L533）⇒ 这边同步切页 */
   const confirmRuleById = (id) => {
     ReviewCore.confirmRule(id);   /* A4③：准则那条线走 React 侧切片（原来 g('confirmRule')） */
     setTab('rules');
   };
 
-  /* 冒泡阶段：早期版本三处监听器（`bindCaseBox` L452-489 / `renderRules` L447-449 / `sdbFootAct` L244-280）
-     合并成一处。**分支顺序与早期版本一致**：行内按钮在「行点击」之前；底栏六分支照 `sdbFootAct` 自己的顺序
-     （`[data-open]` 那行里还嵌着「还原/彻底删」⇒ 必须先判它们，与早期版本 `closest` 的先后完全一样）。 */
+  /* 冒泡阶段：早前的版本三处监听器（`bindCaseBox` L452-489 / `renderRules` L447-449 / `sdbFootAct` L244-280）
+     合并成一处。**分支顺序与早前的版本一致**：行内按钮在「行点击」之前；底栏六分支照 `sdbFootAct` 自己的顺序
+     （`[data-open]` 那行里还嵌着「还原/彻底删」⇒ 必须先判它们，与早前的版本 `closest` 的先后完全一样）。 */
   const onClick = (e) => {
     const t = e.target;
     if (!t || typeof t.closest !== 'function') return;
@@ -410,7 +410,7 @@ export default function Records({ open = false, onClose }) {
     /* ① 行内按钮（`bindCaseBox`） */
     if ((b = t.closest('[data-back]'))) {                                                                   /* L462-467 */
       setDetailId(''); setTrashId('');
-      /* 早期版本这句后面是 `renderSdb()` ⇒ 走的是**列表渲染** ⇒ 底栏被重建（展开的回收站跟着合上）。 */
+      /* 早前的版本这句后面是 `renderSdb()` ⇒ 走的是**列表渲染** ⇒ 底栏被重建（展开的回收站跟着合上）。 */
       setTrashOpen(false);
       return;
     }
@@ -496,16 +496,16 @@ export default function Records({ open = false, onClose }) {
   });
 
   /* 详情（`renderCases` L297-305 的入口 + `caseDetailHtml` L362-407）
-     · `trashId`（早期版本 `[data-open]`，L261-266）：从 `loadCasesRaw()` 里找 —— 回收站那条**本来就是已删的**
-     · `detailId`（早期版本 `window.__sdbDetail`）：从 `loadCases()` 里找（`recById`）
-     两者同时存在时 `trashId` 优先（早期版本 `[data-open]` 是**直接写 box**，覆盖掉先前详情），
-     而任何一次 `renderSdb` 都会把 `trashId` 抹掉（见上面的 `refresh()`）⇒ 优先级与早期版本一致。 */
+     · `trashId`（早前的版本 `[data-open]`，L261-266）：从 `loadCasesRaw()` 里找 —— 回收站那条**本来就是已删的**
+     · `detailId`（早前的版本 `window.__sdbDetail`）：从 `loadCases()` 里找（`recById`）
+     两者同时存在时 `trashId` 优先（早前的版本 `[data-open]` 是**直接写 box**，覆盖掉先前详情），
+     而任何一次 `renderSdb` 都会把 `trashId` 抹掉（见上面的 `refresh()`）⇒ 优先级与早前的版本一致。 */
   const all = cases.concat(dead);
   let detail = null;
   if (trashId) detail = all.find((r) => r.id === trashId) || null;
   else if (detailId) detail = cases.find((r) => r.id === detailId) || null;
   /* 底栏条数：照抄 legacy 三个调用点（L310 空态 0 / L324 无匹配 0 / L357 `rows.length`）。
-     ★★ **底栏始终在**：早期版本详情分支虽然自己
+     ★★ **底栏始终在**：早前的版本详情分支虽然自己
      **不渲染**底栏，但它**也不删**上一轮列表渲染留下的那个旧底栏节点（`sdbFootWire` 把它挂成
      `.sdb-b` 的兄弟，详情分支只重写 `#sdbCases`）⇒ 用户点开一条记录时，**底下照样看得见**
      「清空记录 / 回收站 / 设置」。⇒ React 这边必须同样**始终渲染**底栏；详情态取**上一轮列表渲染
@@ -538,9 +538,9 @@ export default function Records({ open = false, onClose }) {
               onInput={(e) => {
                 const v = String(e.target.value || '').trim();
                 window.__sdbQ = v; setQ(v);
-                /* 早期版本这里是 `renderCases()`（22-script L163-166）⇒ 也是一次**列表渲染** ⇒ 底栏重建
+                /* 早前的版本这里是 `renderCases()`（22-script L163-166）⇒ 也是一次**列表渲染** ⇒ 底栏重建
                    （展开的回收站跟着合上）。⚠ 两者只在 561~820px 那一带同时可见（≥821 搜索框 display:none、
-                   ≤560 回收站 display:none），但仍照早期版本做。 */
+                   ≤560 回收站 display:none），但仍照早前的版本做。 */
                 try { const td = rootRef.current && rootRef.current.querySelector('.trash'); if (td) td.open = false; } catch (eTd) { }
               }} />
           </span>
@@ -568,7 +568,7 @@ export default function Records({ open = false, onClose }) {
                 : <div className="mini" style={{ padding: '16px 18px' }}>还没有准则。<br />准则只从【你确认过的复盘】里来——不自动写、不偷偷学。</div>}
             </SafeZone>
           </div>
-          {/* ★ 底栏的位置：早期版本 `renderCases` 先把底栏写在 `#sdbCases` **里面**，随后 `sdbFootWire`
+          {/* ★ 底栏的位置：早前的版本 `renderCases` 先把底栏写在 `#sdbCases` **里面**，随后 `sdbFootWire`
               （20-script.txt L192–210）把它**搬出来**挂成 `.sdb-b` 的兄弟（避免内容从它底下穿过）。
               ⇒ 运行期终态 = `.sdb-b > [#sdbCases, #sdbRules, .sdb-foot]`，本组件**直接渲染终态**（不搬）。
               ★ 详情态**也照旧渲染**（值取自 `footView` 快照）—— 见上面「底栏始终在」的说明。 */}

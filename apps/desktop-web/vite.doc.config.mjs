@@ -6,7 +6,7 @@
  *     + <script type="module" src="/shell-dist/shell.js"></script>（外壳模块，与今天同一份产物）
  * 输出：apps/desktop-web/dist/新版-现代.html（单文件：脚本 / 样式全部内联）
  *
- * 分界线（变更记录）：**对早期产物的核对仍用组装器产的「上一版」**；本配置只负责"最终文档"这一半。
+ * 分界线（变更记录）：**对早期产物的核对仍用组装器产的「早前的版本」**；本配置只负责"最终文档"这一半。
  */
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';

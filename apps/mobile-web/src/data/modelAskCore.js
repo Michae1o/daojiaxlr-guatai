@@ -171,21 +171,21 @@ function recAskHtml(r) {
  *
  * 为什么补：报「接着问的视觉倒是没问题，但是点了按钮没用，而且也不支持回车提交」——
  *   实测本仓只有 `showCore.js` 里那段 HTML（`#askBox`/`#askQ`/`#btnAskMore` 都在），
- *   **没有任何人在听这两个事件**（早期版本靠 a10.html 末尾那两条 document 委托）。
+ *   **没有任何人在听这两个事件**（早前的版本靠 a10.html 末尾那两条 document 委托）。
  *
  * ★ 声明差异（3 处，逐条注明）：
  *   ① 委托里 `btnNew → newCast()` 那条**不搬** —— 本仓已由 `DivinationPane.jsx` 的 React `onClick` 接；
  *      再搬一份会让同一个动作跑两遍。
  *      锚点保留、用 `typeof … === 'function'` 守卫（未接时静默跳过，不抛错）。
  *   ③ `loadCases/saveCases` 从 `RecordsStore` 取（本模块已 import 它）；取不到时退化为空操作
- *      —— 早期版本读的是 legacy 全局，本仓没有那套全局。
+ *      —— 早前的版本读的是 legacy 全局，本仓没有那套全局。
  * ========================================================================== */
 
 /* L333–337 逐字 */
 function plainCore(c, B) {
   var oc = window.__ctx, ob = window.__blocks;
   window.__ctx = c; window.__blocks = B;
-  try { return plainAllOf(); } finally { window.__ctx = oc; window.__blocks = ob; }   /* ★ 声明差异 ④（2026-10-15 修）：早期版本这里是**零参** `plainAll()`（早期实现的全局版，从 window 读卦）；本仓 `plainAll` 是包内**三参纯函数** `plainAll(c,B,hooks)` —— 照旧搬会传进 undefined、它去读 `c.q` 就抛「Cannot read properties of undefined (reading 'q')」。⇒ 走本模块已有的三参适配器 `plainAllOf()`（它读 window.__ctx/__blocks，并在形状不对时现搭 buildBlocks）。 */
+  try { return plainAllOf(); } finally { window.__ctx = oc; window.__blocks = ob; }   /* ★ 声明差异 ④（2026-10-15 修）：早前的版本这里是**零参** `plainAll()`（早期实现的全局版，从 window 读卦）；本仓 `plainAll` 是包内**三参纯函数** `plainAll(c,B,hooks)` —— 照旧搬会传进 undefined、它去读 `c.q` 就抛「Cannot read properties of undefined (reading 'q')」。⇒ 走本模块已有的三参适配器 `plainAllOf()`（它读 window.__ctx/__blocks，并在形状不对时现搭 buildBlocks）。 */
 }
 
 /* L339–360 逐字 */
@@ -261,7 +261,7 @@ function threadMerge(x, y) {
   return out;
 }
 
-/* 声明差异 ③：早期版本读 legacy 全局 loadCases/saveCases；本仓取 RecordsStore 的导出，取不到则退化为空操作 */
+/* 声明差异 ③：早前的版本读 legacy 全局 loadCases/saveCases；本仓取 RecordsStore 的导出，取不到则退化为空操作 */
 var RC_loadCases = (RecordsStore && typeof RecordsStore.loadCases === 'function') ? RecordsStore.loadCases : function () { return []; };
 var RC_saveCases = (RecordsStore && typeof RecordsStore.saveCases === 'function') ? RecordsStore.saveCases : function () { };
 
@@ -279,7 +279,7 @@ function persistThread() {
 
 /*
    ① 按钮**不再写「问着…」文字**，改走 `asking` 类 ⇒ 按钮形变成开屏那款液态太极；
-   ② **提交即清空输入框**（早期版本只在成功后 `inp.value=''`；原文「提交之后，文本框里不要保留文字了」）；
+   ② **提交即清空输入框**（早前的版本只在成功后 `inp.value=''`；原文「提交之后，文本框里不要保留文字了」）；
    ③ 太极 markup 从 `askTaijiMarkup.js` import（★ 2026-10-16 起是**「接着问」专用那一份**；此前是复用开屏的 `splashMarkup.js`）。
    ⚠ 提交即清 ⇒ 失败时输入的字不在框里了；但那条问题已被写进问答项（`.ask-q`）、错误也显示在同一项里，
      */
@@ -339,7 +339,7 @@ document.addEventListener('click', function (ev) {
   while (t && t !== document) {
     if (t.id === 'btnAskMore') { askMore(); return; }
     if (t.id === 'btnXiang') { if (typeof askXiang === 'function') askXiang(); return; }
-    /* ① 早期版本这里还有一条 `if (t.id === 'btnNew') { newCast(); return; }` —— 本仓由 DivinationPane 的 React onClick 接，不重复 */
+    /* ① 早前的版本这里还有一条 `if (t.id === 'btnNew') { newCast(); return; }` —— 本仓由 DivinationPane 的 React onClick 接，不重复 */
     if (t.getAttribute) {
       var a1 = t.getAttribute('data-ask');
       if (a1) { if (typeof openRecAsk === 'function') openRecAsk(a1); return; }

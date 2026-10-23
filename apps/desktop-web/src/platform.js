@@ -6,7 +6,7 @@
  *
  * 值来自构建期替换（vite `define` 里的 `__XLR_PLATFORM__`）：
  *    手机端产物 = 'phone'（apps/mobile-web 那条线）· 桌面端产物 = 'desktop'（apps/desktop-web 那条线）。
- *    经组装器产出的「上一版」没有这次替换 ⇒ 落到 'desktop'（它本来就属于桌面线）。
+ *    经组装器产出的「早前的版本」没有这次替换 ⇒ 落到 'desktop'（它本来就属于桌面线）。
  */
 export const PLATFORM = (typeof __XLR_PLATFORM__ !== 'undefined' && __XLR_PLATFORM__) || 'desktop';
 export const IS_PHONE = PLATFORM === 'phone';

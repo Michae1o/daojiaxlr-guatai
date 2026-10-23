@@ -3,7 +3,7 @@
  *   · `renderRecap(c)`   L55–L67  → `.recap`（所问 / 背景（有才画）/ 卦·时 / 「结论」标题）
  *   · `renderLLMPane(c)` L70–L87  → `#llmPane`（头 + 复制按钮 + recap + `.llm-body`（`.llm-main > .doc#doc` / `.llm-side`））
  *      `.llm-body` 之后**（组装期把锚点 `#llmPane .bar` 改成 `#llmPane .llm-body`，见 变更记录）。
- *      ⇒ 本组件只摆结构；`#askBox` **故意不由 React 渲染**（由 legacy 照旧插入，位置/时序与早期版本一致）。
+ *      ⇒ 本组件只摆结构；`#askBox` **故意不由 React 渲染**（由 legacy 照旧插入，位置/时序与早前的版本一致）。
  *
  * 多段文本一律写成**单个模板字符串**（`{`${a} · ${b}`}`）⇒ 一个文本节点，与 legacy 的字符串拼接同形；
  * 拆成多个 JSX 子节点会变成多个文本节点，结构判据会（正确地）判为不同。
@@ -50,9 +50,9 @@ export default function DivinationPane({ c }) {
     } else ResultCore.fallback(t, done);
   };
   const onSolve = function () { try { askModel(); } catch (e) { } };   /* ★ 2026-10-15：直调模块（原先 typeof window.askModel 恒假） */
-  /* ★★ 2026-10-15（(会话)）现象：「新开一卦点了没用」：早期版本 `newCast()`（上游 chunks/a10.html L488–500）
+  /* ★★ 2026-10-15（(会话)）现象：「新开一卦点了没用」：早前的版本 `newCast()`（上游 chunks/a10.html L488–500）
      搬过来时**漏了接线** —— `#btnNew` 上根本没有 onClick。此处逐字搬回：清空 q/bg/n1–n3、点步进条回第 1 步、聚焦回输入框。
-     ⚠ 逐字 = 连那句 `.vstep button[data-k="q"]` 也照旧（早期版本同样带 `if (st)` 守卫）。 */
+     ⚠ 逐字 = 连那句 `.vstep button[data-k="q"]` 也照旧（早前的版本同样带 `if (st)` 守卫）。 */
   const onNew = function () {
     var q = document.getElementById('q'), bg = document.getElementById('bg');
     if (q) q.value = '';

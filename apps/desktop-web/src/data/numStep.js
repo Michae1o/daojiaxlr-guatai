@@ -69,7 +69,7 @@ function stepOnce(el, box) {
       wrap.insertBefore(bMinus, el);
       wrap.appendChild(bPlus);
       /* ★ 2026-10-10：窄屏每格只有 ~86px，减号+数字+加号之后留给文字的只有 24px ⇒
-         「第一数」这种占位会被裁成一个字（用户上一版截图里就是"只剩第"）。窄屏换成一道短横，
+         「第一数」这种占位会被裁成一个字（早前的版本截图里就是"只剩第"）。窄屏换成一道短横，
          该填第几个由上面那行标签（随口报三个数…）交代。 */
       try {
         if (i === 0 || i === 1 || i === 2) el.setAttribute('aria-label', '第' + (i + 1) + '数');

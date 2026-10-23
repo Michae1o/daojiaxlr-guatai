@@ -36,7 +36,7 @@
 @import "./styles/skin-backdrop.css";
 
 /*
-   早期版本把它归进「液态玻璃」按钮组：
+   早前的版本把它归进「液态玻璃」按钮组：
      `.sbtn,.btn,.castsw,…{background:var(--m-glass);backdrop-filter:var(--m-blur);box-shadow:inset 0 1px 0 …}`
      ＋ `.castsw:hover{background:var(--accent-bg)}` ＋ `.castsw[aria-expanded="true"]{background:var(--accent-bg)}`
    ⇒ 鼠标悬停 / 展开 / 某些皮肤下，它会被画成一块亮片（现象：的"方块背景"）。
@@ -103,7 +103,7 @@
 label.chk[for="optXiang"] { display: none !important; }
 
 /*
-   背景（实测）：那套 `.askbox/.ask-h/.ask-line/.ask-note` 样式**早期版本是靠 JS 注入**的
+   背景（实测）：那套 `.askbox/.ask-h/.ask-line/.ask-note` 样式**早前的版本是靠 JS 注入**的
    （上游 `现代版-预览.html` L2413–2441，`<style id="askStyle">`）， 砍「早期实现内联脚本」时
    它跟着没了 ⇒ 产物里 `.askbox` 一条规则都没有（`grep '\.askbox' 新版-现代.html` = 0 命中）。
    两个后果，都是用户看见的那个：

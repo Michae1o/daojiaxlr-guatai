@@ -7,14 +7,14 @@
  *       （`pvValid / guessProv / missing / load / loadSvcs / …` 一律调 `SettingsCore`）。
  *
  * 规矩：
- *   · **照抄早期版本**（结构/类名/id/文字一字不改）；CSS 不在这边写（桌面端样式唯一样源 = legacy.css）。
+ *   · **照抄早前的版本**（结构/类名/id/文字一字不改）；CSS 不在这边写（桌面端样式唯一样源 = legacy.css）。
  *   · 文字一律走 **JSX 文本节点**，不用 `esc()` —— 等价性已在 `开发笔记` 早期实现 给出机制证明
- *     （早期版本 `esc()` + innerHTML 的最终文本节点 == React 文本节点；本项目文案全部落在该等价范围内）。
+ *     （早前的版本 `esc()` + innerHTML 的最终文本节点 == React 文本节点；本项目文案全部落在该等价范围内）。
  *   · 每个状态驱动的属性/类名后面都标了**源行号**，便于逐条回溯。
  *
- * **交互（批 1 本轮实现的部分）** —— 逐条对应早期版本监听器：
- *   已实现：`#setBack`/Esc 关闭 · **`#setNav` 点击滚动（早期版本 L789-794；2026-10-13 补 —— 此前漏抄，
- *   见下方 ★ 注）** · 左栏随滚动高亮(L958-970，**照抄早期版本只算 s-llm/s-skin/s-data/s-about 四屏、
+ * **交互（批 1 本轮实现的部分）** —— 逐条对应早前的版本监听器：
+ *   已实现：`#setBack`/Esc 关闭 · **`#setNav` 点击滚动（早前的版本 L789-794；2026-10-13 补 —— 此前漏抄，
+ *   见下方 ★ 注）** · 左栏随滚动高亮(L958-970，**照抄早前的版本只算 s-llm/s-skin/s-data/s-about 四屏、
  *   不含 s-contact**）· `#stGuide`(L748-757) ·
  *   服务商卡片点击(L817-844) · `prov-del` 删除(L798-816) · `#stCustomGo`+Enter 起名(L728-744) ·
  *   `#stAgain`/`#stStart`(L500-514) · `#stEye`(L847-851) · 三个输入框(L853-868) ·
@@ -42,7 +42,7 @@ const VER = 'v1.0';   /* L16 `var VER = 'v1.0'` */
 /* `provCard()` L64–L68 的逐字对应（一张服务商卡片）+ `render()` 的高亮段 L526–L538：
    `aria-current` 是**每张卡都设**（`k2 === pv ? 'true' : 'false'`，L531）；
    `<em class="pst">已配置</em>` 只在「它就是当前在用的那家 **且** 配置完整」时**追加在卡片末尾**（L534–L537）。
-   ⚠ `data-p` / `data-del` 是**属性值**（早期版本经过 `esc()`），其等价性**不套用**文本节点那条，
+   ⚠ `data-p` / `data-del` 是**属性值**（早前的版本经过 `esc()`），其等价性**不套用**文本节点那条，
    另有单独证明（`开发笔记` 早期实现：属性值也逐字等价）。 */
 function ProvButton({ k, n, note, rec, del, pv, got }) {
   return (
@@ -67,23 +67,23 @@ export default function SettingsScreen({ open, onClose }) {
   });
 
   /* C1：当前皮肤 —— 读**共用**的 `SkinsCore` 状态（不另存一份）。
-     早期版本对应 `open()` 里的 `renderThemes()`（L573-578：用 `window.XLR_SKIN_CUR()` 给 `.theme` 标 aria-current）；
+     早前的版本对应 `open()` 里的 `renderThemes()`（L573-578：用 `window.XLR_SKIN_CUR()` 给 `.theme` 标 aria-current）；
      这边把它变成 state：点一下 → `applySkin()` → `setSkin()` ⇒ 重渲染即等价于 renderThemes()。 */
   const [skin, setSkin] = useState(() => currentSkin());
   /* `#stThemes` 点击（L910-915）：`window.XLR_SKIN_APPLY(data-k)` + `renderThemes()` */
   const onTheme = (k) => { applySkin(k); setSkin(k); };
 
-  /* ── 早期版本放在"模块级变量 / 活的 DOM"上的东西，React 里一律变成 state（对应关系见注释末尾） ──
-     每次「早期版本会调 render()」的地方 ⇒ 调 `renderLike()`：先按 L480 重新定 `pv`，再强制重画。
+  /* ── 早前的版本放在"模块级变量 / 活的 DOM"上的东西，React 里一律变成 state（对应关系见注释末尾） ──
+     每次「早前的版本会调 render()」的地方 ⇒ 调 `renderLike()`：先按 L480 重新定 `pv`，再强制重画。
      整屏派生值（状态卡三态 / 卡片 aria-current 与「已配置」/ stp3-5 的 off / 两句 hint /
      卦例本则数 / 导出清空的 disabled / 连接方式 pri / 中转行 display / 字段值）都在下面 return 里
-     从 `C.load()` **现读** ⇒ **重画 == 早期版本 render() 的效果**。
+     从 `C.load()` **现读** ⇒ **重画 == 早前的版本 render() 的效果**。
        `eyeOn` ⇐ `el.stKey.type` + `el.stEye.textContent`（L847-851）—— **唯一进 state 的**（React 要驱动 `type`）
-     ⚠ `#stMsg` 的 display/class/正文、`#stCustomRow` 的 display **不进 state**：早期版本是
+     ⚠ `#stMsg` 的 display/class/正文、`#stCustomRow` 的 display **不进 state**：早前的版本是
      `say()/quiet()`（L456-459）与 `showCustomRow()/hideCustomRow()`（L721-727）**直接改 DOM**
      ⇒ JSX 侧照做（ref/getElementById 直接赋属性），源文件里那两个静态 `style="display:none"`
      与静态 `class="stmsg"` **原样保留**。
-     `models`（早期版本 `var models = []`）本批不存在：**只有 pull()会填它**
+     `models`（早前的版本 `var models = []`）本批不存在：**只有 pull()会填它**
      ⇒ `#stModels` 保持静态 `none`。 */
   const [, setTick] = useState(0);
   const [eyeOn, setEyeOn] = useState(false);
@@ -99,18 +99,18 @@ export default function SettingsScreen({ open, onClose }) {
   const proxyRef = useRef(null);    /* `#stProxy` */
   const msgRef = useRef(null);      /* `#stMsg`（say()/quiet() 直接改它，L456-459） */
   /* ★ 2026-10-13 新增（出网两条接线）：前四个 ref 存的是 **DOM 节点**（在下面那支 effect 里用
-     第五个 `modelsRef` 存早期版本那个闭包数组 `models`（L581）的数据。 */
+     第五个 `modelsRef` 存早前的版本那个闭包数组 `models`（L581）的数据。 */
   const pullRef = useRef(null);       /* `#stPull`（节点） */
   const pullHintRef = useRef(null);   /* `#stPullHint`（节点） */
   const modelsBoxRef = useRef(null);  /* `#stModels`（节点） */
   const testRef = useRef(null);       /* `#stTest`（节点） */
-  const modelsRef = useRef([]);       /* 早期版本 `var models = []`（L581）的数据 */
-  /* render 之后要补的 DOM 副作用（早期版本直接改 DOM：滚动 / 聚焦 / 闪高亮）。
+  const modelsRef = useRef([]);       /* 早前的版本 `var models = []`（L581）的数据 */
+  /* render 之后要补的 DOM 副作用（早前的版本直接改 DOM：滚动 / 聚焦 / 闪高亮）。
      用法：先 `pending.current = () => {...}`，再触发重画 —— 效果在提交后执行。 */
   const pending = useRef(null);
 
-  /* L450-461 say()：先弹浮条（早期版本调全局 toast），再写 `#stMsg`（kind 进 class、正文进内容）。
-     ⚠ 早期版本这里是 innerHTML；**本批实现到的提示语里没有标签**（带 `<code>`/`<br>` 的都在
+  /* L450-461 say()：先弹浮条（早前的版本调全局 toast），再写 `#stMsg`（kind 进 class、正文进内容）。
+     ⚠ 早前的版本这里是 innerHTML；**本批实现到的提示语里没有标签**（带 `<code>`/`<br>` 的都在
      pull()/test() 两条出网路径上，按 早期实现① 留待）⇒ 文本节点等价。 */
   const say = (kind, txt) => {
     try {
@@ -122,8 +122,8 @@ export default function SettingsScreen({ open, onClose }) {
     m.style.display = '';
     m.className = 'stmsg ' + (kind || '');
     m.innerHTML = txt;
-    /* ⚠ 这里用 `innerHTML` 与早期版本一致（不是 textContent）。后果：提示语里嵌入的
-       **自定义家名字**（`cc.n` / `n`，用户自己输入）含 HTML 时会被解析 —— **早期版本行为如此，本轮照抄**；
+    /* ⚠ 这里用 `innerHTML` 与早前的版本一致（不是 textContent）。后果：提示语里嵌入的
+       **自定义家名字**（`cc.n` / `n`，用户自己输入）含 HTML 时会被解析 —— **早前的版本行为如此，本轮照抄**；
        带 `<code>`/`<br>` 的提示语都在出网路径（留待），与本批无关。 */
   };
   const quiet = () => { const m = msgRef.current; if (m) m.style.display = 'none'; };    /* L461 */
@@ -140,8 +140,8 @@ export default function SettingsScreen({ open, onClose }) {
 
   /* ---------- 出网两条：拉取可用模型 / 测试连接（★ 2026-10-13 接线，用户「第二条接」）----------
      逐条照抄 `36-script.txt`：`renderModels()` L583-605 · `pull()` L607-670 · `test()` L672-718 ·
-     ⚠ 早期版本用闭包 `models` 与缓存的 `el.stPull/…`；这里用上面那些 ref 持同一份东西，
-       并**照抄早期版本的 DOM 写法**（`innerHTML` / `style.display` / `disabled` / `textContent`）——
+     ⚠ 早前的版本用闭包 `models` 与缓存的 `el.stPull/…`；这里用上面那些 ref 持同一份东西，
+       并**照抄早前的版本的 DOM 写法**（`innerHTML` / `style.display` / `disabled` / `textContent`）——
        与 `say()`、左栏 `aria-current` 同一套做法：React 不接管这些属性的后续变化。
      ⚠ `apiURL/hdr/esc` 走 `SettingsCore`（提取器第三版新收，逐字切片，见 extract-settings-core.mjs）。 */
   const renderModels = (list, note) => {                              /* L583-605，逐字同构 */
@@ -296,8 +296,8 @@ export default function SettingsScreen({ open, onClose }) {
     if (s2.key || /localhost|127\.0\.0\.1/.test(s2.base || '')) pull();
   };
 
-  /* ★ 接线一律走**原生监听**（照早期版本 `el.stPull.addEventListener` 那一套），**不在 JSX 上加 `ref`/`onClick`**：
-     节点用 `getElementById` 取（同一份 DOM，id 与早期版本逐字相同），存进上面那几个 ref 供处理函数用。 */
+  /* ★ 接线一律走**原生监听**（照早前的版本 `el.stPull.addEventListener` 那一套），**不在 JSX 上加 `ref`/`onClick`**：
+     节点用 `getElementById` 取（同一份 DOM，id 与早前的版本逐字相同），存进上面那几个 ref 供处理函数用。 */
   useEffect(() => {
     pullRef.current = document.getElementById('stPull');          /* L882-883 */
     testRef.current = document.getElementById('stTest');
@@ -330,7 +330,7 @@ export default function SettingsScreen({ open, onClose }) {
        （`legacy.css` L1071），而设置页 `.setscreen` z-index = **600** ⇒ 从设置页里点开引导，
        引导**确实开出来了、但被设置页整个盖住**（实测：`#onbLayer` 已拿到 `.on`/`display:flex`/1280×900，
        但 `elementFromPoint` 在屏幕中心命中的仍是设置页）。
-       ⇒ 只在这一刻把引导层抬到设置页之上（**基础值 90 一字不动** = 首启观感照抄早期版本）；
+       ⇒ 只在这一刻把引导层抬到设置页之上（**基础值 90 一字不动** = 首启观感照抄早前的版本）；
        归还时机 = 设置页关闭时（见下面 `[open]` 那个 effect）。 */
     const ob = document.getElementById('onbLayer');
     if (ob) ob.style.zIndex = '640';                                  /* 高于设置页 600 */
@@ -492,7 +492,7 @@ export default function SettingsScreen({ open, onClose }) {
       localStorage.removeItem(C.KEYS.skin);
     } catch (e) { }
     /* C1（2026-10-12）：L952-953 原样落齐 ——
-       `XLR_SKIN_APPLY('xuan')`（重置后皮肤回到 xuan 宣纸，**早期版本就这么写死**）
+       `XLR_SKIN_APPLY('xuan')`（重置后皮肤回到 xuan 宣纸，**早前的版本就这么写死**）
        ＋ `renderThemes()`（把 `#stThemes` 的 aria-current 重标）⇒ 这边走**共用入口** `applySkin()`，
        `setSkin('xuan')` 就是 renderThemes() 的等价物。 */
     applySkin('xuan');
@@ -516,7 +516,7 @@ export default function SettingsScreen({ open, onClose }) {
       de.classList.add('set-lock');
       /* L983：`open()` 末尾是 `render(); renderThemes(); quiet();` —— 三条都要照抄：
          · `quiet()`：否则"关掉再打开"时上一次的 #stMsg 提示会留在页面上（交互比对抓到过）
-         · `renderThemes()`：**C1（2026-10-12）已落地** —— 早期版本每次打开都按 `XLR_SKIN_CUR()`
+         · `renderThemes()`：**C1（2026-10-12）已落地** —— 早前的版本每次打开都按 `XLR_SKIN_CUR()`
            重标 `.theme` 的 aria-current（皮肤也可能被面板改过）⇒ 这边等价物 = `setSkin(currentSkin())`，
            把 state 拉回"当前真实皮肤"，重渲染即重标（不能只在首帧取一次，否则面板改肤后此处会陈旧）。 */
       setSkin(currentSkin());
@@ -533,16 +533,16 @@ export default function SettingsScreen({ open, onClose }) {
     return () => { de.style.overflow = ''; de.classList.remove('set-lock'); };
   }, [open]);
 
-  /* L972-974：Esc 关闭（早期版本条件 = `el.setScreen.classList.contains('on')`，这里就是 `open`） */
+  /* L972-974：Esc 关闭（早前的版本条件 = `el.setScreen.classList.contains('on')`，这里就是 `open`） */
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape' && open) onClose(); };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  /* L517-519：`render()` 每次都把字段值从存档写回输入框（早期版本就这么做，含 trim 归一）
+  /* L517-519：`render()` 每次都把字段值从存档写回输入框（早前的版本就这么做，含 trim 归一）
      ＋ 提交后补 DOM 副作用（滚动 / 聚焦 / 闪高亮）。
-     ⚠ **故意无依赖数组 = 每次重画都跑**，与早期版本"render() 会重写 .value"逐字一致。 */
+     ⚠ **故意无依赖数组 = 每次重画都跑**，与早前的版本"render() 会重写 .value"逐字一致。 */
   useEffect(() => {
     const s2 = C.load();
     if (baseRef.current) baseRef.current.value = s2.base;
@@ -556,8 +556,8 @@ export default function SettingsScreen({ open, onClose }) {
     if (f) { pending.current = null; f(); }
   });
 
-  /* L958-970：滚动时同步左栏高亮。**照抄早期版本两处特征**：① 只算四个屏（**不含 `s-contact`**）
-     ② 就地改 `aria-current`（不重画）⇒ 这里用 DOM 原语而非 state（避免与早期版本初始 DOM 不一致）。 */
+  /* L958-970：滚动时同步左栏高亮。**照抄早前的版本两处特征**：① 只算四个屏（**不含 `s-contact`**）
+     ② 就地改 `aria-current`（不重画）⇒ 这里用 DOM 原语而非 state（避免与早前的版本初始 DOM 不一致）。 */
   useEffect(() => {
     const body = bodyRef.current;
     if (!body) return;
@@ -576,10 +576,10 @@ export default function SettingsScreen({ open, onClose }) {
         b.setAttribute('aria-current', b.getAttribute('data-to') === best ? 'true' : 'false');
       });
     };
-    /* ★ 2026-10-13 补：`#setNav` 点击 → 滚到对应段落 —— **早期版本 L789-794 逐字照抄**。
+    /* ★ 2026-10-13 补：`#setNav` 点击 → 滚到对应段落 —— **早前的版本 L789-794 逐字照抄**。
        此前只抄了下面的滚动高亮，漏了这一条 ⇒ 用户点「外观 / 数据」时页面纹丝不动
-       （三臂实测：早期版本点「外观」`.setbody` scrollTop 0→1402、高亮跟着走；新版恒 0）。
-       `block:'start'` + `behavior:'smooth'` 与早期版本一致；`closest('button[data-to]')` 同早期版本。 */
+       （三臂实测：早前的版本点「外观」`.setbody` scrollTop 0→1402、高亮跟着走；新版恒 0）。
+       `block:'start'` + `behavior:'smooth'` 与早前的版本一致；`closest('button[data-to]')` 同早前的版本。 */
     const nav = navRef.current;
     const onNav = (e) => {
       const b = e.target && e.target.closest ? e.target.closest('button[data-to]') : null;
@@ -627,7 +627,7 @@ export default function SettingsScreen({ open, onClose }) {
                 <span className="hint" style={{ margin: '0', alignSelf: 'center' }}>不知道去哪申请 Key？点这个，一步步来。</span>
               </div>
               {/* L484–L499：状态卡三态。**内容全部由 localStorage 决定**（运行期填充）⇒ 按 早期实现 的分工，
-                  它不在结构核对器管辖内，由比对 06-settings 负责；这里的文字/结构与早期版本逐字相同
+                  它不在结构核对器管辖内，由比对 06-settings 负责；这里的文字/结构与早前的版本逐字相同
                   （`esc()` 走的是 JSX 文本节点，等价性）。 */}
               <div className={'stcard' + (ok ? ' ok' : '')} id="stCard">
                 {ok && s.key ? (
@@ -717,10 +717,10 @@ export default function SettingsScreen({ open, onClose }) {
               <h3>外观</h3>
               <p className="lead">八套主题，点一下立刻生效，会记住。每套不只是换颜色——字体和边框语言也跟着换。</p>
               {/* L127-131：`#stThemes` 的 9 个 `.theme` 按钮 —— **C1 落地**，数据源 `SkinsCore`（A6 共用一份）。
-                  ⚠ 页面正文写「八套主题」是**早期版本文案，照抄不改**（表里实际 9 套：删了 4 个深色、补了 hei）。
+                  ⚠ 页面正文写「八套主题」是**早前的版本文案，照抄不改**（表里实际 9 套：删了 4 个深色、补了 hei）。
                   每个按钮 = 一个 `.theme` 按钮，内含一个 `.sw` 色块（inline 的 background / border-color）
                   加一个 `<b>` 名字 —— 逐字对应 36-script.txt L127-131 那段拼串（见该处原文）。
-                  ⚠ 早期版本 HTML 里**没有** aria-current —— 是 `open()` 时的 `renderThemes()`(L573-578) 补的
+                  ⚠ 早前的版本 HTML 里**没有** aria-current —— 是 `open()` 时的 `renderThemes()`(L573-578) 补的
                     （判据 `data-k === XLR_SKIN_CUR()`）；React 版由 `skin` state 直接渲染出同一结果 ⇒ 打开时一致。
                   点击(L910-915)：`XLR_SKIN_APPLY(data-k)` + `renderThemes()` ⇒ 这边 `onTheme()` 两条都做。 */}
               <div className="themes" id="stThemes">

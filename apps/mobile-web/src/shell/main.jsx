@@ -161,7 +161,7 @@ mountAura();
  *   而那一刻 `window.__xlrShell` **已经定义**（新仓两臂 true）⇒ 本模块顶层先建，早期实现那次必然看到 `.mfoot` 已在、直接 return。
  *   （看门狗那次调用（L2085）被它自己的 `!document.querySelector('.vstep')` 挡着，实测没轮到。）
  *   ⇒ 源里「把**最后一个** `.left > .pane` 搬进脚注」那段至今是**死代码**（`.mfoot` 里只有 `.mf-bar`）；
- *   这条是确定性的（同步任务里看门狗/定时器插不进来）。实测**早期版本摘掉后它不会自己回来**（三臂一致）⇒ 对照干净。
+ *   这条是确定性的（同步任务里看门狗/定时器插不进来）。实测**早前的版本摘掉后它不会自己回来**（三臂一致）⇒ 对照干净。
  */
 function mountFooter() {
   const before = document.querySelector('.mfoot');
@@ -486,7 +486,7 @@ mountSplash();
  *   （`36-script.txt` 里 `closest('#btnSet, #btnSet2')` + `preventDefault/stopPropagation` + `open()`）。
  *   就**先一步**拿到事件并 `stopPropagation()` ⇒ legacy 那条委托**永远收不到**。
  *   两条入口都盖住：① 顶栏按钮直接点 ② 底栏 tab 调用的 `#btnSet.click()`（程序化派发同样走捕获链路）。
- *   （三臂实测见 开发笔记 早期实现：A 早期版本上一版 / B 新版拦截开 / C 开关=0 一键回退。）
+ *   （三臂实测见 开发笔记 早期实现：A 早前的版本早前的版本 / B 新版拦截开 / C 开关=0 一键回退。）
  *
  * 挂载：
  *   · legacy 的 `build()` 在 DCL 就跑过、`#setScreen` 平时就躺在 body 里（`.setscreen{display:none}`、
@@ -585,14 +585,14 @@ function persistLlmSideEffects() {
 persistLlmSideEffects();
 
 /* ============ 2026-10-13：引导里「去配置」的**落点纠正** ============
- * 早期版本 `goConfig()`（`36-script.txt` L325–342）走完是：关引导 → 开设置页 → 滚到 **「大模型」段顶部**
+ * 早前的版本 `goConfig()`（`36-script.txt` L325–342）走完是：关引导 → 开设置页 → 滚到 **「大模型」段顶部**
  * → 未配置就先点智谱卡片 → 聚焦 Key（`preventScroll`）。
  * 实测（明文/加密壳双跑）：这一串在新栈里**照常跑通**（引导关掉、页面打开、`#stKey` 拿到焦点），
  * 但落点 = 段顶部 ⇒ **填 Key 的输入框仍在屏外**（窗口 900 高，Key 在 ~966px 处）——
  * 报「点了去配置，页面没滚到填 API Key 的地方」。
  * ⇒ 做法：**不拦这一击**（让 legacy 的 goConfig 照常跑完：关引导 / 开页 / 补选智谱 / 聚焦），
  *    只在它之后把落点纠正到 `#stp3`（填 Key 那一步）—— **不复制 goConfig 的任何逻辑**。
- * ⚠ 与早期版本的差异属**有意差异**（早期版本就停在段顶部），按的要求改。 */
+ * ⚠ 与早前的版本的差异属**有意差异**（早前的版本就停在段顶部），按的要求改。 */
 function fixGuideLanding() {
   const step = document.getElementById('stp3');
   if (!step) return;
@@ -742,7 +742,7 @@ function mountRecords() {
   /* ★ 变更记录：记住 legacy 抽屉在 body 里的**位置**（门户宿主稍后插回同一位置，不是 append 到末尾）
      ★★ （2026-10-14，用户放行第 3 条）：这个锚点**不再依赖早期实现节点** ——
      实测早期实现那个 `#sdb` 是 `22-script` 的 `mk()` 在**解析期** `document.body.appendChild(d)` 追加的
-     （骨架里根本没有它），砍段后它不存在 ⇒ 原写法会退回 `append`，`#sdb` 在 body 里的位置与早期版本不同
+     （骨架里根本没有它），砍段后它不存在 ⇒ 原写法会退回 `append`，`#sdb` 在 body 里的位置与早前的版本不同
      （实测旧 [#… #mask #sdb STYLE #onbLayer sl-orb] vs 新 [#… #mask STYLE #onbLayer #sdb sl-orb]）。
      等效常量锚点 = 骨架之后、body 里**最后一个没有 id 的 `<style>`** 之前（早期产物里那就是 `28-style`
      那一段，它排在早期实现所有内联脚本之后 ⇒ `#sdb` 恰好落在那个位置）。 */
@@ -758,7 +758,7 @@ function mountRecords() {
      */
   recordsPortalHost = document.createElement('div');
   recordsPortalHost.id = RECORDS_HOST_ID;
-  /* 插回 legacy 抽屉**原来的位置**（不是 append 到 body 末尾）：body 子节点顺序因此与早期版本逐位一致，
+  /* 插回 legacy 抽屉**原来的位置**（不是 append 到 body 末尾）：body 子节点顺序因此与早前的版本逐位一致，
      */
   try { document.body.insertBefore(recordsPortalHost, legacyNext); }
   catch (eH) { document.body.appendChild(recordsPortalHost); }
@@ -851,7 +851,7 @@ function mountRecords() {
   });
   /* ★ A4② 复盘接缝：`setFb` 标「没应验」时（源里调全局 `reviewCase`）⇒ 接到 React 侧的复盘实现
      （A4③ 的 `ReviewCore.reviewCase`）。⚠ 抽屉那条路径**不在 setFb 里当场跑**（React 的 setState 是异步的：
-     早期版本是 setFb → renderSdb 同步重建 DOM → reviewCase 找得到 `#rv-<id>`；React 里要等渲染提交）
+     早前的版本是 setFb → renderSdb 同步重建 DOM → reviewCase 找得到 `#rv-<id>`；React 里要等渲染提交）
      ⇒ 抽屉先把钩子挂空做本地标记，再由 Records.jsx 的 rvPending effect 在渲染后跑，见那里的注释。 */
   /*
      `confirmRule`（只有用户点「写入准则」才写库）。换掉之后 React 抽屉直接用这一份；
@@ -1256,7 +1256,7 @@ mountVariantC();
  * 源：上游手机段 `(upstream)` 的 `splitGreet()` / `adaptPh()`
  *   （逐字基准与两处有意偏离都写在 `src/data/phoneShims.js` 头注里，含源片段 sha16）。
  * 为什么现在补： 搬 React 时这两件没跟着搬（早期实现 `fitAll()` 那条链断了）⇒ 实测产物：
- *   · `#q` 占位是**桌面长版** 68 字（早期版本 18 字），16px 下溢出输入框（滚高 95 > 客户高 60）。
+ *   · `#q` 占位是**桌面长版** 68 字（早前的版本 18 字），16px 下溢出输入框（滚高 95 > 客户高 60）。
  * ⚠ 位置 = 紧接 `mountVariantC()` 之后：`.cbar` 已建 ⇒ `#q` 一定在文档里；`#greet` 来自静态骨架。
  *   本件是仓内自己新加的（同 tailwind.css 那批手机补丁的定位）。
  * ⚠ `watch()` 是必需的，不是保险丝：`#greet` 由 `askCore.renderGreet()` 写、`#q` 的 placeholder
