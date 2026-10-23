@@ -19,7 +19,7 @@ export default function App() {
   const [dateTouched, setDateTouched] = useState(false);
   /*
      「23:30 算今天的子时，00:30 就是次日的子时」⇒ 页面开着跨过午夜时日期框要自己翻篇；
-     用户手动改过之后就不再碰他选的。与上游时辰框那套同构。 */
+      */
   useEffect(() => {
     if (dateTouched) return undefined;
     const id = setInterval(() => {

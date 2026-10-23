@@ -1,9 +1,13 @@
 /* Tauri 版的网络适配层 + 启动自检。
    自检走「图片信标」上报到本机监听端口：不受跨域限制，也不依赖 Tauri 的任何权限。
-   正式分发时这段信标无害（没人监听就静默失败）。 */
+   ★ 信标只在「页面本身就从调试台 8798 打开」时才发（`PROBE_ON`）：
+     以前是无条件发，正式分发时虽然只是静默失败，但浏览器控制台每次多两条
+     ERR_CONNECTION_REFUSED —— 公开的网页版里看着像在偷偷连本机（2026-10-23 收口）。 */
 (function () {
   var PROBE = 'http://127.0.0.1:8798/';
+  var PROBE_ON = location.port === '8798';
   function beacon(stage) {
+    if (!PROBE_ON) { return; }
     try { new Image().src = PROBE + encodeURIComponent(stage); } catch (e) { }
   }
 

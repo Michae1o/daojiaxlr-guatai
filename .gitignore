@@ -44,3 +44,6 @@ local.properties
 Thumbs.db
 .idea/
 .vscode/
+
+# 构建脚本的临时目录
+.tmp/

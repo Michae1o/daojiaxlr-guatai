@@ -38,7 +38,6 @@
 /*
    本文件过去把 `quickReadRun` 绑成「惰性转发 window.quickReadRun」——那只在**早期实现全局还在**时成立。
     砍段后 `window.quickReadRun` 不存在 ⇒ 进「叁 断卦」那句 `typeof quickReadRun === 'function'`
-   永远为假 ⇒ **本机速断静默不跑**（页面只剩 `.llm .doc:empty` 虚线占位 = 用户看到的「没给卦辞」）。
    ⇒ 现在直接调本仓模块（`quickReadCore` 的正文是上游 L2585–2633 的**逐字**切片；
      落笔用的 `renderDoc` 与「补断辞进记录」都走本仓唯一一份实现），不再经 `window`。 */
 import { IS_PHONE } from '../platform.js';

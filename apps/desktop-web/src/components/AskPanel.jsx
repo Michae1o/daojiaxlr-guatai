@@ -37,7 +37,6 @@
  *   ＋ 本文 JSX 上**静态**盖封条 `data-gsel="1"`（三处 select）＋ 切片内两处改自用名
  *   （`data-xgs` / `__xgsWired`，理由见 glassSelect.js 头注：照抄会把自己挡住、或让弹层收不到键盘）。
  * ⚠ **不是新功能**：legacy 本来就在管（它的看门狗每 125ms 扫一次 select，扫到 React 的 `#cat` 就接管）
- *   ⇒ 这一步用户看不到任何变化，做的是**所有权收口**；「两道闸全关之后弹层还能用」本身就是归属证据。
  * ⚠ 补扫时机：切片保留了源里「`offsetWidth <= 0` 就跳过」⇒ `#h2` 初始隐藏，露出时要再扫一次
  *   （切方式 / 展开详情各补一次 = legacy 那个 125ms 轮询的**确定时机版**）。
  *
@@ -45,7 +44,6 @@
  *   `#dt` **静态**盖封条 `data-dp="1"`；切片内入口闸 `data-dp` → 自用 `data-dpx`（同 B1-1 的坑）。
  * ⚠ 与 B1-1 的两点不同（都是实测过的）：① **不需要补扫**（入口闸没有 `offsetWidth` 那条）；
  *   ② **不需要改一次性闸**（「点外面关」是 capture `click`、每次调用都装；legacy 那份绑在**已被摘掉的旧节点**上 ⇒ 空转）。
- * ⚠ **不是新功能**：legacy 本来就在管（看门狗每 125ms 扫一次，扫到 React 的 `#dt` 就接管）⇒ 用户看不到变化。
  *
  * 同 B1-1/B1-2 的配方：`38-script` L91–156（`stepOnce` ＋ `syncAuto` ＋ `buildNumStep`）**三块连续自包含**
  *   三个数字框**静态**盖封条 `data-nstep="1"`；切片内两处改自用名（`data-nsx` / `window.__autoObsX`）。
@@ -58,7 +56,6 @@
  *   ℹ `window.__autoObsX`（自用名）是**必须**的：legacy 的看门狗先跑过且已把 `window.__autoObs` 占住，
  *     沿用同名时这份会走进 `!window.__autoObs` 那一行就 return ⇒ **不建自己的活 observer**
  *     （实测：过 20 秒窗口后断开 `__autoObs` ⇒ `#castPanel.auto` 当场不跟；改后由 React 那份跟）。
- * ⚠ **不是新功能**：legacy 本来就在管（看门狗每 125ms 扫一次 `#castPanel` 里的数字框）⇒ 用户看不到变化。
  *
  * 源 = `38-script` L277–301 `wireKeys()`：`n1→n2→n3→提交` 三条链 ＋ `#q` 回车提交。
  * ⚠ 这一件**不能用 B1 的「盖封条」配方** —— `wireKeys` 一道闸都没有，它只是"初始化那一刻把监听

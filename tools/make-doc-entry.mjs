@@ -67,7 +67,6 @@ const TAG_PRE = '<script>\n' + prepSrc + '</script>\n';
 
 /* 预绘内联在 **`</head>` 之前**（一处）：
    ⚠ 它比 legacy 的 `32-script`（body 中段那句 apply(cur)）**早**，所以读到的 storage 是干净的
-     （用户上次选的那套）—— 这一点是「新皮肤开机不回落」的关键，由 `window.__xlrPrepaintGuard`
      （预绘脚本自带的 MutationObserver 守护）负责把 legacy 随后的覆盖改回来。
    */
 const HEAD_END = skeleton.indexOf('</head>');

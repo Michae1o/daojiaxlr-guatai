@@ -8,8 +8,14 @@
  *   2. 前两宫只解释"为什么走到这一步"，不当独立吉凶。
  *   4. 应期两种问法：问"什么时候"→定点（季节＋年份，要属相才能钉死）；问"还有多久"→拿本宫三数当时长。
  *
+ *
+ *   ① **体用整段摘掉** —— 不再算 `bodyUse`，也不再出现「用生体 / 体克用」这类话；
+ *      原来靠它判「有没有转机」「谁在推」的两支一并去掉，结论回到「吉就看吉、凶就看凶」；
+ *      应期那支当年拿体用判远近，现在只看落宫吉凶。
+ *   ② **结论更短** —— 理由**只留一句**（原来最多两句），三宫走向压成一行；
+ *      依据照旧在「断卦依据」里，速断这里不再铺。
  */
-import { G, GYY, SHENG, KE, GLOSS, bodyUse, ASKS } from '@xlr/shared-judgment';
+import { G, SHENG, KE, ASKS } from '@xlr/shared-judgment';
 
 /* ---------- 关系：原文义，不带吉凶、不自造词 ---------- */
 
@@ -31,7 +37,7 @@ function speak(s) { return String(s == null ? '' : s).replace(/——/g, '，').
    · 「天时又克地宫，说明财动，财空」；「天时克地宫原本为得，可却所得为空」｜011 L737 / L758｜A（克＝去取得，但可能落空／有阻碍）
    · 「天克地，不代表地对人没作用，无非有阻碍」｜031 L278｜A
    · 落宫凶照样断凶，前两宫生只作"怎么解决时可利用"｜029 L457｜A
-   */
+   注意：不把前两宫写成一个"会虚掉"的独立主体（材料无此说法）。 */
 function pairRel(a, b) {
   const wa = G[a].wx, wb = G[b].wx;
   if (wa === wb) return '比和';
@@ -67,9 +73,10 @@ function seasonOf(GG) {
   for (const [re, span, name] of SEASON) if (re.test(ji)) return { span, name };
   return { span: [3, 5], name: '这一季' };
 }
-function whenPoint(GG, bu, now) {
+function whenPoint(GG, now) {
   const { span, name } = seasonOf(GG);
-  const near = bu ? (bu.t === '用生体' || bu.t === '体克用') : /吉$/.test(String(GG.jx));
+  /* 2026-10-23：不再用体用判远近 —— 落宫是吉就按近的算，不吉就往后推一档。 */
+  const near = /吉$/.test(String(GG.jx));
   let off = near ? 0 : 1;
   const m = now.getMonth() + 1;
   if (span[0] <= span[1] ? m > span[1] : (m > span[1] && m < span[0])) off += 1;
@@ -92,7 +99,6 @@ const VD = [['会不会', '会'], ['能不能', '能'], ['可不可以', '可以
 export function quickRead(c) {
   if (!c || !c.g3 || !G[c.g3]) return '';
   const g1 = c.g1, g2 = c.g2, g3 = c.g3, GG = G[g3], q = String(c.q || '');
-  const bu = (() => { try { return c.zi ? bodyUse(g3, c.zi) : null; } catch (e) { return null; } })();
 
   /* ---- 问法 ---- */
   const isWhere = /哪|何处|什么地方|何方|位置|方位/.test(q);
@@ -111,7 +117,7 @@ export function quickRead(c) {
     head = '**往' + (dir || GG.fw) + '那边找**';
     if (it) why.push('方向看的是落宫克的那一宫：它在哪边，就往哪边找，以你现在住的地方为中心。');
   } else if (isPoint) {
-    head = '**' + whenPoint(GG, bu, new Date()) + '**';
+    head = '**' + whenPoint(GG, new Date()) + '**';
     why.push('时间按这一宫管的季节推，吉的近一点，不吉的远一点。想钉到哪一年，得先知道你的属相。');
   } else if (isDur) {
     const d = durationOf(GG);
@@ -126,7 +132,7 @@ export function quickRead(c) {
     /* 天气卦（015 大课 + 077 实例）：
        · 三宫＝气／地理气温／天气体现；天宫先、地宫次、落宫最后，一宫管一段时辰；
        · 问「会不会下雨」只判会不会＋理由，问「天气如何」才说天气；
-       */
+       · 温度、雪线要结合当地实际，不许拿宫数硬套。 */
     const map = (ASKS.weather && ASKS.weather.byPalace && ASKS.weather.byPalace[0]) || {};
     const d1 = String(map[g1] || ''), d2 = String(map[g2] || ''), d3 = String(map[g3] || '');
     const askRain = /会下雨|会下雪|下不下|下雨吗|下雪吗|会不会下|要下吗|下不下雨/.test(q);
@@ -156,27 +162,13 @@ export function quickRead(c) {
            问"能过吗/能好吗"→ 吉答"能"，凶答"不能"。 */
         const negQ = /严重|要紧|危险|厉害|更糟|恶化|有没有问题|有没有事|难吗/.test(q);
         const good = negQ ? !yes : yes;
-        const li = !!(bu && (bu.t === '用生体' || bu.t === '体克用'));
         const bian = /变数/.test(String(GG.xing || ''));
         if (bian) {
           /* ① 留连＝唯一带变数之宫 ⇒ 不给死答案 */
           head = '**还没定，眼下还拖着**';
-          why.push('这一宫是六宫里唯一带变数的：不是已经断了，也不是已经成了，说的是"还缠着、没落定"。');
-        } else if (li && !good) {
-          /* 往后走势：用生体＝有外力；体克用＝自己去争（两句话不能混） */
-          const wait = verb === '有' ? '没有' : '不' + verb;
-          if (bu.t === '用生体') {
-            head = '**眼下还' + wait + '，但有转机**';
-            why.push('落宫是' + g3 + '，' + GG.jx + '，' + tag(g3) + '；后面的走势是用生体，有人帮、有外力，不算死局。');
-          } else {
-            head = '**眼下还' + wait + '，但往后再主动争取，还有机会**';
-            why.push('落宫是' + g3 + '，' + GG.jx + '，' + tag(g3) + '；后面是体克用，要靠你自己去争，争了才可能转过来。');
-          }
-        } else if (li && good) {
-          head = bu.t === '用生体'
-            ? '**' + verb + '，而且有外人在推**'
-            : '**' + verb + '，但得你自己去争**';
+          why.push('落宫是留连：六宫里只有它自带变数 —— 不是成了，也不是没成，是还缠着。');
         } else {
+          /* 2026-10-23：体用那两支（"有转机"/"得自己去争"）随体用一并去掉，只按吉凶给答案。 */
           head = '**' + (good ? verb : (verb === '有' ? '没有' : '不' + verb)) + '**';
         }
       }
@@ -184,27 +176,23 @@ export function quickRead(c) {
   } else {
     /* 不问吉凶的泛问：答案在落宫特性里，吉凶只作括注 */
     head = '**' + tag(g3) + '**';
-    why.push('你没问吉凶，那先看这一宫是什么脾气（' + g3 + '，' + GG.jx + '）。');
+    /* 宫名与吉凶同名时别写两遍（小吉宫的 jx 也是「小吉」⇒ 原样输出会是「（小吉，小吉）」） */
+    why.push('你没问吉凶，那先看这一宫是什么脾气（'
+      + (String(GG.jx) === String(g3) ? g3 : g3 + '，' + GG.jx) + '）。');
   }
 
-  /* ---- ② 理由：落宫性质 + 前两宫怎么把它带过来（最多两句） ---- */
+  /* ---- ② 理由：只留**一句**（2026-10-23 你要「结论简单点」） ---- */
+  const isWeather = c.catKey === 'weather' && !!(ASKS.weather && ASKS.weather.byPalace);
+  if (!why.length && !isWeather) {
+    /* 普通吉凶问 / 泛问：就一句三宫走向（前因 → 经过 → 结果），不铺别的 */
+    const k12 = pairRel(g1, g2), k23 = pairRel(g2, g3);
+    why.push((g1 === g2)
+      ? '三宫 ' + g1 + '→' + g2 + '→' + g3 + '：起头和中间同气，' + D2R[k23] + '。'
+      : '三宫 ' + g1 + '→' + g2 + '→' + g3 + '：' + T2D[k12] + '；' + D2R[k23] + '。');
+  }
   if (!why.length) why.push('最后落在' + g3 + '，' + String(GG.xing || '').replace(/[。；\s]+$/, '') + '。');
 
-  const isWeather = c.catKey === 'weather' && !!(ASKS.weather && ASKS.weather.byPalace);
-  if (!isWeather && why.length < 2) {
-    /* 三宫走向：前因 → 经过 → 结果；前两宫只在落宫的框架里解释 */
-    const k12 = pairRel(g1, g2), k23 = pairRel(g2, g3);
-    const bad = /凶$/.test(String(GG.jx));
-    const frame = bad
-      ? '这些都是过程，落宫这一关已经先定了。'
-      : '这些过程是往成里走的。';
-    const step = (g1 === g2)
-      ? '起头和中间都是' + g1 + '（' + GLOSS[g1] + '），' + T2D[k12] + '；'
-      : '起头是' + g1 + '（' + GLOSS[g1] + '），走到中间是' + g2 + '（' + GLOSS[g2] + '），' + T2D[k12] + '；';
-    why.push(step + '最后落在' + g3 + '（' + GLOSS[g3] + '），' + D2R[k23] + '。' + frame);
-  }
-
-  return speak(head) + '\n\n' + why.slice(0, 2).map(speak).join('\n');
+  return speak(head) + '\n\n' + why.slice(0, 1).map(speak).join('\n');
 }
 
 function plainOf(it) {

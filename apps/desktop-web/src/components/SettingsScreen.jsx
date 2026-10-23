@@ -1,26 +1,27 @@
-/*
+/* SettingsScreen.jsx —— C2（设置页）S2 批 1
+ *   结构来源（逐字照抄）：`legacy/parts/36-script.txt`
  *     · 外壳/头部/身体   L133–L253（`build()` 里拼的那份 html，L249–253 挂到 body）
  *     · 五个 section     L149–L243 + 五步向导 L159–L194 + 进阶设置 L198–L210
  *     · **运行期填充/改写** L478–L571（`render()`）+ L127–L131（`#stThemes`）+ L978–L984（`open()`）
- *   数据与纯逻辑来源：`src/data/settingsCore.js`（工具机械提取、逐字、由工具生成，不要手改）
+ *   数据与纯逻辑来源：`src/data/settingsCore.js`（工具机械提取、逐字、勿手改）
  *     ⇒ 本文件**只负责把同样的 DOM 摆出来**，不重写任何计算逻辑
  *       （`pvValid / guessProv / missing / load / loadSvcs / …` 一律调 `SettingsCore`）。
  *
  * 规矩：
- *   · **照抄早前的版本**（结构/类名/id/文字一字不改）；CSS 不在这边写（桌面端样式唯一样源 = legacy.css）。
- *   · 文字一律走 **JSX 文本节点**，不用 `esc()` —— 等价性已在 `开发笔记` 早期实现 给出机制证明
- *     （早前的版本 `esc()` + innerHTML 的最终文本节点 == React 文本节点；本项目文案全部落在该等价范围内）。
+ *   · **照抄旧版**（结构/类名/id/文字一字不改）；CSS 不在这边写（桌面端样式唯一样源 = legacy.css）。
+ *   · 文字一律走 **JSX 文本节点**，不用 `esc()` —— 等价性已在 `docs/s2-log.md` §二十五 给出机制证明
+ *     （旧版 `esc()` + innerHTML 的最终文本节点 == React 文本节点；本项目文案全部落在该等价范围内）。
  *   · 每个状态驱动的属性/类名后面都标了**源行号**，便于逐条回溯。
  *
- * **交互（批 1 本轮实现的部分）** —— 逐条对应早前的版本监听器：
- *   已实现：`#setBack`/Esc 关闭 · **`#setNav` 点击滚动（早前的版本 L789-794；2026-10-13 补 —— 此前漏抄，
- *   见下方 ★ 注）** · 左栏随滚动高亮(L958-970，**照抄早前的版本只算 s-llm/s-skin/s-data/s-about 四屏、
+ * **交互（批 1 本轮实现的部分）** —— 逐条对应旧版监听器：
+ *   已实现：`#setBack`/Esc 关闭 · **`#setNav` 点击滚动（旧版 L789-794；2026-10-13 补 —— 此前漏抄，
+ *   见下方 ★ 注）** · 左栏随滚动高亮(L958-970，**照抄旧版只算 s-llm/s-skin/s-data/s-about 四屏、
  *   不含 s-contact**）· `#stGuide`(L748-757) ·
  *   服务商卡片点击(L817-844) · `prov-del` 删除(L798-816) · `#stCustomGo`+Enter 起名(L728-744) ·
  *   `#stAgain`/`#stStart`(L500-514) · `#stEye`(L847-851) · 三个输入框(L853-868) ·
  *   `#stWireD`/`#stWireP`(L869-874) · `#stSave`(L876-881) · `#stCaseExp`(L917-936) ·
  *   `#stCaseClr`(L938-943) · `#stReset`(L945-955)
- *   **已实现（2026-10-13 接线，用户「第二条接」）**：`#stPull`(拉模型 L883→pull) · `#stTest`(连通测试 L882→test) ·
+ *   `#stKey` 失焦自动拉(L904-908) · `#stModels` 清单点击(L890-901) —— 见下面「出网两条」那一段
  *   （逐字照抄 `renderModels()` L583-605 / `pull()` L607-670 / `test()` L672-718）。
  *   **C1 已落地（2026-10-12）**：`#stThemes` 点击(L910-915) + `renderThemes()`(L573-578)
  *   —— 走 `src/data/skinApply.js`（与 C1 换皮肤面板**共用一份**，A6 已解）
@@ -31,7 +32,7 @@ import { SettingsCore as C } from '../data/settingsCore.js';
    智谱官方地址在网页版与安卓上要换成本站中转；带 /anthropic 的地址要换请求形状。 */
 import { endpoint as epOf, headers as hdrsOf, payload as pyOf, textOf, errOf, resolveBase, isAnth, IS_TAURI } from '../data/llmEndpoint.js';
 import { fetchLLM } from '../llm/llmFetch.js';
-/* ★ 2026-10-22（要求）：「设置 → 常见问题」那一栏的条目，按平台过滤（本端专属 + 通用） */
+/* ★ 2026-10-22（你要求）：「设置 → 常见问题」那一栏的条目，按平台过滤（本端专属 + 通用） */
 import { faqList } from '../data/faq.js';
 import { SkinsCore } from '../data/skinsCore.js';
 import { applySkin, currentSkin } from '../data/skinApply.js';
@@ -40,16 +41,15 @@ const VER = 'v1.0';   /* L16 `var VER = 'v1.0'` */
 
 /* `provCard()` L64–L68 的逐字对应（一张服务商卡片）+ `render()` 的高亮段 L526–L538：
    `aria-current` 是**每张卡都设**（`k2 === pv ? 'true' : 'false'`，L531）；
-   `<em class="pst">已配置</em>` 只在「它就是当前在用的那家 **且** 配置完整」时**追加在卡片末尾**（L534–L537）。
-   ⚠ `data-p` / `data-del` 是**属性值**（早前的版本经过 `esc()`），其等价性**不套用**文本节点那条，
-   另有单独证明（`开发笔记` 早期实现：属性值也逐字等价）。 */
+   高亮仍走 `aria-current`；「配没配好」由下面那张状态卡说。
+   ⚠ `data-p` / `data-del` 是**属性值**（旧版经过 `esc()`），其等价性**不套用**文本节点那条，
+   另有单独证明（`docs/s2-log.md` §二十七：属性值也逐字等价）。 */
 function ProvButton({ k, n, note, rec, del, pv, got }) {
   return (
     <button type="button" className="prov" data-p={k} aria-current={k === pv ? 'true' : 'false'}>
       {rec ? <i>推荐</i> : null}
       {del ? <em className="prov-del" data-del={k} title="删掉这家">✕</em> : null}
       <b>{n}</b><span>{note}</span>
-      {got ? <em className="pst">已配置</em> : null}
     </button>
   );
 }
@@ -66,26 +66,30 @@ export default function SettingsScreen({ open, onClose }) {
   });
 
   /* C1：当前皮肤 —— 读**共用**的 `SkinsCore` 状态（不另存一份）。
-     早前的版本对应 `open()` 里的 `renderThemes()`（L573-578：用 `window.XLR_SKIN_CUR()` 给 `.theme` 标 aria-current）；
+     旧版对应 `open()` 里的 `renderThemes()`（L573-578：用 `window.XLR_SKIN_CUR()` 给 `.theme` 标 aria-current）；
      这边把它变成 state：点一下 → `applySkin()` → `setSkin()` ⇒ 重渲染即等价于 renderThemes()。 */
   const [skin, setSkin] = useState(() => currentSkin());
   /* `#stThemes` 点击（L910-915）：`window.XLR_SKIN_APPLY(data-k)` + `renderThemes()` */
   const onTheme = (k) => { applySkin(k); setSkin(k); };
 
-  /* ── 早前的版本放在"模块级变量 / 活的 DOM"上的东西，React 里一律变成 state（对应关系见注释末尾） ──
-     每次「早前的版本会调 render()」的地方 ⇒ 调 `renderLike()`：先按 L480 重新定 `pv`，再强制重画。
+  /* ── 旧版放在"模块级变量 / 活的 DOM"上的东西，React 里一律变成 state（对应关系见注释末尾） ──
+     每次「旧版会调 render()」的地方 ⇒ 调 `renderLike()`：先按 L480 重新定 `pv`，再强制重画。
      整屏派生值（状态卡三态 / 卡片 aria-current 与「已配置」/ stp3-5 的 off / 两句 hint /
      卦例本则数 / 导出清空的 disabled / 连接方式 pri / 中转行 display / 字段值）都在下面 return 里
-     从 `C.load()` **现读** ⇒ **重画 == 早前的版本 render() 的效果**。
+     从 `C.load()` **现读** ⇒ **重画 == 旧版 render() 的效果**。
        `eyeOn` ⇐ `el.stKey.type` + `el.stEye.textContent`（L847-851）—— **唯一进 state 的**（React 要驱动 `type`）
-     ⚠ `#stMsg` 的 display/class/正文、`#stCustomRow` 的 display **不进 state**：早前的版本是
+     ⚠ `#stMsg` 的 display/class/正文、`#stCustomRow` 的 display **不进 state**：旧版是
      `say()/quiet()`（L456-459）与 `showCustomRow()/hideCustomRow()`（L721-727）**直接改 DOM**
      ⇒ JSX 侧照做（ref/getElementById 直接赋属性），源文件里那两个静态 `style="display:none"`
      与静态 `class="stmsg"` **原样保留**。
-     `models`（早前的版本 `var models = []`）本批不存在：**只有 pull()会填它**
+     `models`（旧版 `var models = []`）本批不存在：**只有 pull()（出网，§十三① 留待）会填它**
      ⇒ `#stModels` 保持静态 `none`。 */
   const [, setTick] = useState(0);
   const [eyeOn, setEyeOn] = useState(false);
+  /* ★ 2026-10-23（你报「本地没部署 qwen，点 Ollama 却说我已配置」）：
+     null = 正在探 / 还没探；true = 那台「本机模型」真在跑；false = 连不上。
+     只对**本地地址**（localhost / 127.0.0.1）用；云端各家不探（白花请求、还容易被限流）。 */
+  const [localUp, setLocalUp] = useState(null);
 
   const bodyRef = useRef(null);     /* `.setbody`（滚动高亮挂它，L958） */
   const wizRef = useRef(null);      /* `#stWiz`（stAgain/stStart，L504-513） */
@@ -98,19 +102,20 @@ export default function SettingsScreen({ open, onClose }) {
   const proxyRef = useRef(null);    /* `#stProxy` */
   const msgRef = useRef(null);      /* `#stMsg`（say()/quiet() 直接改它，L456-459） */
   /* ★ 2026-10-13 新增（出网两条接线）：前四个 ref 存的是 **DOM 节点**（在下面那支 effect 里用
-     第五个 `modelsRef` 存早前的版本那个闭包数组 `models`（L581）的数据。 */
+     `getElementById` 取；**故意不在 JSX 上加 `ref`** —— 那要登记进结构核对器的声明表 = 改判据）；
+     第五个 `modelsRef` 存旧版那个闭包数组 `models`（L581）的数据。 */
   const pullRef = useRef(null);       /* `#stPull`（节点） */
   const pullHintRef = useRef(null);   /* `#stPullHint`（节点） */
   const modelsBoxRef = useRef(null);  /* `#stModels`（节点） */
   const testRef = useRef(null);       /* `#stTest`（节点） */
-  const modelsRef = useRef([]);       /* 早前的版本 `var models = []`（L581）的数据 */
-  /* render 之后要补的 DOM 副作用（早前的版本直接改 DOM：滚动 / 聚焦 / 闪高亮）。
+  const modelsRef = useRef([]);       /* 旧版 `var models = []`（L581）的数据 */
+  /* render 之后要补的 DOM 副作用（旧版直接改 DOM：滚动 / 聚焦 / 闪高亮）。
      用法：先 `pending.current = () => {...}`，再触发重画 —— 效果在提交后执行。 */
   const pending = useRef(null);
 
-  /* L450-461 say()：先弹浮条（早前的版本调全局 toast），再写 `#stMsg`（kind 进 class、正文进内容）。
-     ⚠ 早前的版本这里是 innerHTML；**本批实现到的提示语里没有标签**（带 `<code>`/`<br>` 的都在
-     pull()/test() 两条出网路径上，按 早期实现① 留待）⇒ 文本节点等价。 */
+  /* L450-461 say()：先弹浮条（旧版调全局 toast），再写 `#stMsg`（kind 进 class、正文进内容）。
+     ⚠ 旧版这里是 innerHTML；**本批实现到的提示语里没有标签**（带 `<code>`/`<br>` 的都在
+     pull()/test() 两条出网路径上，按 §十三① 留待）⇒ 文本节点等价（§二十五）。 */
   const say = (kind, txt) => {
     try {
       const plain = String(txt).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
@@ -121,8 +126,7 @@ export default function SettingsScreen({ open, onClose }) {
     m.style.display = '';
     m.className = 'stmsg ' + (kind || '');
     m.innerHTML = txt;
-    /* ⚠ 这里用 `innerHTML` 与早前的版本一致（不是 textContent）。后果：提示语里嵌入的
-       **自定义家名字**（`cc.n` / `n`，用户自己输入）含 HTML 时会被解析 —— **早前的版本行为如此，本轮照抄**；
+    /* ⚠ 这里用 `innerHTML` 与旧版一致（不是 textContent）。后果：提示语里嵌入的
        带 `<code>`/`<br>` 的提示语都在出网路径（留待），与本批无关。 */
   };
   const quiet = () => { const m = msgRef.current; if (m) m.style.display = 'none'; };    /* L461 */
@@ -137,10 +141,11 @@ export default function SettingsScreen({ open, onClose }) {
     setTick(t => t + 1);
   };
 
-  /* ---------- 出网两条：拉取可用模型 / 测试连接（★ 2026-10-13 接线，用户「第二条接」）----------
+  /* ---------- 出网两条：拉取可用模型 / 测试连接（★ 2026-10-13 接线，你「第二条接」）----------
      逐条照抄 `36-script.txt`：`renderModels()` L583-605 · `pull()` L607-670 · `test()` L672-718 ·
-     ⚠ 早前的版本用闭包 `models` 与缓存的 `el.stPull/…`；这里用上面那些 ref 持同一份东西，
-       并**照抄早前的版本的 DOM 写法**（`innerHTML` / `style.display` / `disabled` / `textContent`）——
+     清单点击 L890-901 · Key 失焦自动拉 L904-908 · 两颗按钮的禁用/文案（L615-616/667-668、L680-681/715-716）。
+     ⚠ 旧版用闭包 `models` 与缓存的 `el.stPull/…`；这里用上面那些 ref 持同一份东西，
+       并**照抄旧版的 DOM 写法**（`innerHTML` / `style.display` / `disabled` / `textContent`）——
        与 `say()`、左栏 `aria-current` 同一套做法：React 不接管这些属性的后续变化。
      ⚠ `apiURL/hdr/esc` 走 `SettingsCore`（提取器第三版新收，逐字切片，见 extract-settings-core.mjs）。 */
   const renderModels = (list, note) => {                              /* L583-605，逐字同构 */
@@ -168,6 +173,34 @@ export default function SettingsScreen({ open, onClose }) {
     });
   };
 
+  /* ★ 2026-10-23（你报「本地没部署 qwen，点 Ollama 却说我已配置…你这个本地接口作假了吧」）：
+     实测确认三处「假」——
+       ① 状态卡只判「地址 + 模型名填了没有」（`missing()`），**从不探本机** ⇒ 没装 Ollama 也写「已配置」；
+       ② 拉取失败时回退 `FALLBACK`（写死的 qwen2.5:7b 等）⇒ 看着像「拉到了」；
+       ③ 保存只写 localStorage、从不验证连通 ⇒ 永远报「已保存」。
+     ⇒ 补一次**真探**：GET `<base>/models`（Ollama 的 OpenAI 兼容口子也认这个），通了才算在跑。
+       只探本地地址；云端各家照旧不探（那会白花一次请求，也容易被限流）。 */
+  const isLocalBase = (base) => /localhost|127\.0\.0\.1/.test(String(base || ''));
+  /* 打开设置页 / 换服务商时探一次（只探本地地址） */
+  useEffect(() => {
+    if (!open) return;
+    const s2 = C.load();
+    if (isLocalBase(s2.base)) probeLocal(s2); else setLocalUp(null);
+  }, [open, pv]);
+  const probeLocal = (s2, cb) => {
+    const base = String((s2 && s2.base) || '').replace(/\/+$/, '');
+    if (!base) { setLocalUp(false); if (cb) cb(false); return; }
+    setLocalUp(null);
+    let done = false;
+    const fin = (up) => { if (done) return; done = true; setLocalUp(up); if (cb) cb(up); };
+    const t = setTimeout(() => fin(false), 6000);
+    try {
+      fetch(resolveBase(base) + '/models', { method: 'GET' })
+        .then((r) => { clearTimeout(t); fin(!!r.ok); })
+        .catch(() => { clearTimeout(t); fin(false); });
+    } catch (e) { clearTimeout(t); fin(false); }
+  };
+
   const pull = () => {                                                /* L607-670，逐字同构 */
     const s2 = C.load();
     const base = String(s2.base || '').replace(/\/+$/, '');
@@ -178,13 +211,13 @@ export default function SettingsScreen({ open, onClose }) {
     }
     if (pb) { pb.disabled = true; pb.textContent = '拉取中…'; }
     if (hint) hint.textContent = '正在连 ' + base + ' …';
-    /* */
+    /* ★ 先清空旧清单：换过服务商的话，留着上家的列表比没有更误导 */
     modelsRef.current = [];
     if (box) box.style.display = 'none';
 
     let p;
     if (s2.wire === 'proxy') {
-      /* */
+      /* 走本地中转：让它替我们 GET /models */
       p = fetch(String(s2.proxy || '').replace(/\/+$/, '') + '/proxy', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ base: base, key: s2.key, path: '/models', method: 'GET' })
@@ -215,8 +248,17 @@ export default function SettingsScreen({ open, onClose }) {
       return null;
     })
       .catch((e) => {
-        const fb = C.FALLBACK[C.guessProv(C.load())] || [];
         const why = C.esc(String(e.message || e).slice(0, 170));
+        /* ★ 2026-10-23：本地地址**不许**回退内置清单 —— 那份清单是写死的（qwen2.5:7b 等），
+           ⇒ 本地这条直接把「怎么把它跑起来」说清楚。 */
+        if (isLocalBase(base)) {
+          if (hint) hint.textContent = '连不上本机，先把它跑起来。';
+          say('bad', '连不上这个地址（' + why + '）。<br>' +
+            '① 服务起来了吗；② 地址写对了吗（一般以 <code>/v1</code> 结尾）；' +
+            '③ 再点一次「拉取可用模型」。');
+          return;
+        }
+        const fb = C.FALLBACK[C.guessProv(C.load())] || [];
         if (fb.length) {
           renderModels(fb, '这是<b>内置</b>的常用清单——没能拉到这家的实时列表。可以直接在下面手填模型名，或换个时间再拉。');
           if (hint) hint.textContent = '没拉成，先给你一份常用清单。';
@@ -260,19 +302,19 @@ export default function SettingsScreen({ open, onClose }) {
       })
       .catch((e) => {
         const m = C.esc(String(e.message || e));
-        /*
-           「无法连接。请检查网络设置，或更换供应商。如仍有问题，请到【联系】页面查看说明。」
-           网络层失败不把 Failed to fetch 甩给用户；HTTP 错误（Key 错/余额）留服务商原话。 */
+        /* ★ 2026-10-22（你定的说法）：不解释机制，只说下一步 ——
+           「无法连接。请检查网络设置，或更换供应商。如仍有问题，请到【关于】页面加作者微信。」
+           ★ 2026-10-23：设置里「联系」并入「关于」、那一栏已删 ⇒ 文案改指【关于】。 */
         const netFail = !ep.proxy && /Failed to fetch|NetworkError|Load failed|网络/i.test(String(e.message));
         say('bad', (netFail ? '✗ 无法连接。<br>' : '✗ 没通：' + m + '<br>') +
-          '请检查网络设置，或更换供应商。如仍有问题，请看【联系】页面的说明。');
+          '请检查网络设置，或更换供应商。如仍有问题，请到【关于】页面加作者微信。');
       })
       .then(() => {
         if (tb) { tb.disabled = false; tb.textContent = '测试连接'; }
       });
   };
 
-  /* */
+  /* L890-901：清单里点一个 ⇒ 选中它（就地改 aria-current，不重建清单） */
   const onModelsClick = (e) => {
     const b = e.target && e.target.closest ? e.target.closest('.mi') : null;
     if (!b) return;
@@ -295,8 +337,8 @@ export default function SettingsScreen({ open, onClose }) {
     if (s2.key || /localhost|127\.0\.0\.1/.test(s2.base || '')) pull();
   };
 
-  /* ★ 接线一律走**原生监听**（照早前的版本 `el.stPull.addEventListener` 那一套），**不在 JSX 上加 `ref`/`onClick`**：
-     节点用 `getElementById` 取（同一份 DOM，id 与早前的版本逐字相同），存进上面那几个 ref 供处理函数用。 */
+  /* ★ 接线一律走**原生监听**（照旧版 `el.stPull.addEventListener` 那一套），**不在 JSX 上加 `ref`/`onClick`**：
+     节点用 `getElementById` 取（同一份 DOM，id 与旧版逐字相同），存进上面那几个 ref 供处理函数用。 */
   useEffect(() => {
     pullRef.current = document.getElementById('stPull');          /* L882-883 */
     testRef.current = document.getElementById('stTest');
@@ -325,11 +367,11 @@ export default function SettingsScreen({ open, onClose }) {
   /* ---------- 事件（逐条照抄 36-script.txt） ---------- */
   const onGuide = () => {                                             /* L748-757 */
     try { localStorage.removeItem('xlr-onboarded-2'); } catch (e) { }
-    /* ★ 2026-10-13（现象：：「点了只有提醒，页面还是设置页」）：legacy 的引导层 `.onb` z-index = **90**
+    /* ★ 2026-10-13（你报：「点了只有提醒，页面还是设置页」）：legacy 的引导层 `.onb` z-index = **90**
        （`legacy.css` L1071），而设置页 `.setscreen` z-index = **600** ⇒ 从设置页里点开引导，
        引导**确实开出来了、但被设置页整个盖住**（实测：`#onbLayer` 已拿到 `.on`/`display:flex`/1280×900，
        但 `elementFromPoint` 在屏幕中心命中的仍是设置页）。
-       ⇒ 只在这一刻把引导层抬到设置页之上（**基础值 90 一字不动** = 首启观感照抄早前的版本）；
+       ⇒ 只在这一刻把引导层抬到设置页之上（**基础值 90 一字不动** = 首启观感照抄旧版）；
        归还时机 = 设置页关闭时（见下面 `[open]` 那个 effect）。 */
     const ob = document.getElementById('onbLayer');
     if (ob) ob.style.zIndex = '640';                                  /* 高于设置页 600 */
@@ -410,7 +452,7 @@ export default function SettingsScreen({ open, onClose }) {
     C.save(s2);
     quiet(); renderLike();
     /* L842-844：`models = []; el.stModels.style.display = 'none'; if (s.key || p.local) pull();`
-       */
+       ⇒ 清单清空已由 `models` 恒空体现；**`pull()` 出网，按 §十三① 留待（本批不调）**。 */
   };
   const onAgain = () => {                                            /* L500-509 */
     const w = wizRef.current; if (!w) return;
@@ -437,7 +479,7 @@ export default function SettingsScreen({ open, onClose }) {
   const onProxy = (e) => {                                           /* L866-868 */
     const s2 = C.load(); s2.proxy = e.target.value.trim(); C.save(s2); quiet();
   };
-  /* ★ 2026-10-22（要求）：智谱的地址一键切换 ——
+  /* ★ 2026-10-22（你要求）：智谱的地址一键切换 ——
      标准 API 走 `api/paas/v4`，token plan（编码套餐）走 `api/anthropic`（Claude 协议，软件自己认地址换形状）。
      点「这里」就换一次、记住；再点一次换回来。 */
   const onZipToggle = (e) => {
@@ -456,6 +498,18 @@ export default function SettingsScreen({ open, onClose }) {
   const onSave = () => {                                             /* L876-881 */
     const s2 = C.load();
     C.save(s2);
+    /* ★ 2026-10-23：本地地址保存后**当场探一次**再说「成功」——
+       原来只写 localStorage 就报「已保存」，你没装 Ollama 也会以为配好了（解卦时才报连不上）。 */
+    if (isLocalBase(s2.base)) {
+      say('', '已保存，正在检查本机模型…');
+      probeLocal(s2, (up) => {
+        say(up ? 'good' : 'bad', up
+          ? '✓ 已保存，本机的本地模型是在跑的。回到主界面点「让模型解卦」就能用。'
+          : '已保存，但本机这个地址（' + C.esc(s2.base) + '）连不上 —— 本地模型没装或没启动，现在还解不了卦。');
+      });
+      renderLike();
+      return;
+    }
     say('good', '✓ 已保存。回到主界面点「让模型解卦」就会用它。');
     renderLike();
   };
@@ -491,7 +545,7 @@ export default function SettingsScreen({ open, onClose }) {
       localStorage.removeItem(C.KEYS.skin);
     } catch (e) { }
     /* C1（2026-10-12）：L952-953 原样落齐 ——
-       `XLR_SKIN_APPLY('xuan')`（重置后皮肤回到 xuan 宣纸，**早前的版本就这么写死**）
+       `XLR_SKIN_APPLY('xuan')`（重置后皮肤回到 xuan 宣纸，**旧版就这么写死**）
        ＋ `renderThemes()`（把 `#stThemes` 的 aria-current 重标）⇒ 这边走**共用入口** `applySkin()`，
        `setSkin('xuan')` 就是 renderThemes() 的等价物。 */
     applySkin('xuan');
@@ -500,9 +554,30 @@ export default function SettingsScreen({ open, onClose }) {
     say('good', '✓ 已重置。');
   };
 
+  /* ★ 2026-10-23（你要「清空配置」）：一键把这页填过的东西全清掉。
+     ⚠ 输入框是**非受控**的（defaultValue + ref）⇒ 清完必须手工把 5 个框写回默认值，
+        否则屏幕上还留着旧字，看着像没清。 */
+  const onClearAll = () => {
+    if (!window.confirm('清空模型配置？服务商、接口地址、Key、模型名都会删掉，之后要重新填一遍。')) return;
+    C.clearAll();
+    const d = C.load();
+    if (baseRef.current) baseRef.current.value = d.base;
+    if (keyRef.current) keyRef.current.value = d.key;
+    if (modelRef.current) modelRef.current.value = d.model;
+    if (tempRef.current) tempRef.current.value = d.temp;
+    if (proxyRef.current) proxyRef.current.value = d.proxy;
+    modelsRef.current = [];
+    if (modelsBoxRef.current) { modelsBoxRef.current.innerHTML = ''; modelsBoxRef.current.style.display = 'none'; }
+    setPv(C.guessProv(d));
+    renderLike();
+    say('good', '✓ 模型配置已清空，可以重新配一家。');
+  };
+
   const s = C.load();                 /* L479 */
   const bad = C.missing(s);           /* L481 */
   const ok = !bad;                    /* L482 */
+  /* ★ 2026-10-23：本地预设（没 Key + 地址是本机）要**真探过**才敢说「已配置」 */
+  const localOnly = ok && !s.key && isLocalBase(s.base);
   const customs = C.loadCustoms();    /* gridHtml() 里那一支 */
   let caseN = 0;
   try { caseN = (JSON.parse(localStorage.getItem(C.KEYS.cases) || '[]') || []).length; } catch (e) { caseN = 0; }  /* L566-567 */
@@ -514,8 +589,7 @@ export default function SettingsScreen({ open, onClose }) {
       de.style.overflow = 'hidden';
       de.classList.add('set-lock');
       /* L983：`open()` 末尾是 `render(); renderThemes(); quiet();` —— 三条都要照抄：
-         · `quiet()`：否则"关掉再打开"时上一次的 #stMsg 提示会留在页面上（交互比对抓到过）
-         · `renderThemes()`：**C1（2026-10-12）已落地** —— 早前的版本每次打开都按 `XLR_SKIN_CUR()`
+         · `renderThemes()`：**C1（2026-10-12）已落地** —— 旧版每次打开都按 `XLR_SKIN_CUR()`
            重标 `.theme` 的 aria-current（皮肤也可能被面板改过）⇒ 这边等价物 = `setSkin(currentSkin())`，
            把 state 拉回"当前真实皮肤"，重渲染即重标（不能只在首帧取一次，否则面板改肤后此处会陈旧）。 */
       setSkin(currentSkin());
@@ -532,16 +606,16 @@ export default function SettingsScreen({ open, onClose }) {
     return () => { de.style.overflow = ''; de.classList.remove('set-lock'); };
   }, [open]);
 
-  /* L972-974：Esc 关闭（早前的版本条件 = `el.setScreen.classList.contains('on')`，这里就是 `open`） */
+  /* L972-974：Esc 关闭（旧版条件 = `el.setScreen.classList.contains('on')`，这里就是 `open`） */
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape' && open) onClose(); };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  /* L517-519：`render()` 每次都把字段值从存档写回输入框（早前的版本就这么做，含 trim 归一）
+  /* L517-519：`render()` 每次都把字段值从存档写回输入框（旧版就这么做，含 trim 归一）
      ＋ 提交后补 DOM 副作用（滚动 / 聚焦 / 闪高亮）。
-     ⚠ **故意无依赖数组 = 每次重画都跑**，与早前的版本"render() 会重写 .value"逐字一致。 */
+     ⚠ **故意无依赖数组 = 每次重画都跑**，与旧版"render() 会重写 .value"逐字一致。 */
   useEffect(() => {
     const s2 = C.load();
     if (baseRef.current) baseRef.current.value = s2.base;
@@ -555,8 +629,8 @@ export default function SettingsScreen({ open, onClose }) {
     if (f) { pending.current = null; f(); }
   });
 
-  /* L958-970：滚动时同步左栏高亮。**照抄早前的版本两处特征**：① 只算四个屏（**不含 `s-contact`**）
-     ② 就地改 `aria-current`（不重画）⇒ 这里用 DOM 原语而非 state（避免与早前的版本初始 DOM 不一致）。 */
+  /* L958-970：滚动时同步左栏高亮。**照抄旧版两处特征**：① 只算四个屏（**不含 `s-contact`**）
+     ② 就地改 `aria-current`（不重画）⇒ 这里用 DOM 原语而非 state（避免与旧版初始 DOM 不一致）。 */
   useEffect(() => {
     const body = bodyRef.current;
     if (!body) return;
@@ -575,10 +649,9 @@ export default function SettingsScreen({ open, onClose }) {
         b.setAttribute('aria-current', b.getAttribute('data-to') === best ? 'true' : 'false');
       });
     };
-    /* ★ 2026-10-13 补：`#setNav` 点击 → 滚到对应段落 —— **早前的版本 L789-794 逐字照抄**。
-       此前只抄了下面的滚动高亮，漏了这一条 ⇒ 用户点「外观 / 数据」时页面纹丝不动
-       （三臂实测：早前的版本点「外观」`.setbody` scrollTop 0→1402、高亮跟着走；新版恒 0）。
-       `block:'start'` + `behavior:'smooth'` 与早前的版本一致；`closest('button[data-to]')` 同早前的版本。 */
+    /* ★ 2026-10-13 补：`#setNav` 点击 → 滚到对应段落 —— **旧版 L789-794 逐字照抄**。
+       （三臂实测：旧版点「外观」`.setbody` scrollTop 0→1402、高亮跟着走；新版恒 0）。
+       `block:'start'` + `behavior:'smooth'` 与旧版一致；`closest('button[data-to]')` 同旧版。 */
     const nav = navRef.current;
     const onNav = (e) => {
       const b = e.target && e.target.closest ? e.target.closest('button[data-to]') : null;
@@ -614,25 +687,27 @@ export default function SettingsScreen({ open, onClose }) {
             <button type="button" data-to="s-skin">外观</button>
             <button type="button" data-to="s-data">数据</button>
             <button type="button" data-to="s-faq">常见问题</button>
-            <button type="button" data-to="s-contact">联系</button>
             <button type="button" data-to="s-about">关于</button>
           </nav>
           <div className="setmain">
             <section className="setsec" id="s-llm">
               <h3>大模型</h3>
-              <p className="lead">解卦台本身不联网：起卦、排盘、断卦依据都在本机算。不配模型也能起卦、看依据、自动出「本机速断」；配上模型，点「让模型解卦」直接出断辞。</p>
+              <p className="lead">解卦台本身不联网：起卦、排盘、断卦依据都在本机算。配上模型，点「让模型解卦」直接出断辞。</p>
               <div className="sbtnrow" style={{ margin: '14px 0 22px' }}>
                 <button className="sbtn" type="button" id="stGuide" onClick={onGuide}>重新看配置引导（图文）</button>
                 <span className="hint" style={{ margin: '0', alignSelf: 'center' }}>不知道去哪申请 Key？点这个，一步步来。</span>
               </div>
-              {/* L484–L499：状态卡三态。**内容全部由 localStorage 决定**（运行期填充）⇒ 按 早期实现 的分工，
-                  它不在结构核对器管辖内，由比对 06-settings 负责；这里的文字/结构与早前的版本逐字相同
-                  （`esc()` 走的是 JSX 文本节点，等价性）。 */}
-              <div className={'stcard' + (ok ? ' ok' : '')} id="stCard">
+              {/* L484–L499：状态卡三态。**内容全部由 localStorage 决定**（运行期填充）⇒ 按 §二十二 的分工，
+                  （`esc()` 走的是 JSX 文本节点，等价性见 §二十五）。 */}
+              <div className={'stcard' + (ok && (!localOnly || localUp === true) ? ' ok' : '')} id="stCard">
                 {ok && s.key ? (
                   <><span className="dot"></span><div className="m"><b>{'已配置 · ' + s.model}</b><p>{s.base + '　·　' + (s.wire === 'proxy' ? '本地中转' : '浏览器直连')}</p></div><button className="sbtn" type="button" id="stAgain" onClick={onAgain}>重新配置</button></>
+                ) : localOnly && localUp !== true ? (
+                  <><span className="dot"></span><div className="m"><b>{localUp === false ? '连不上这台本机服务' : '正在检查本机…'}</b>
+                    <p>{localUp === false ? (s.base + ' 连不上：服务没起来，或地址写错了。它起来之后再点「重新检查」。') : s.base}</p></div>
+                    <button className="sbtn" type="button" id="stRecheck" onClick={() => probeLocal(C.load())}>重新检查</button></>
                 ) : ok ? (
-                  <><span className="dot"></span><div className="m"><b>{'已配置 · ' + s.model + '（本地模型，不需要 Key）'}</b><p>{s.base}</p></div><button className="sbtn" type="button" id="stAgain" onClick={onAgain}>重新配置</button></>
+                  <><span className="dot"></span><div className="m"><b>{'已配置 · ' + s.model}</b><p>{s.base}</p></div><button className="sbtn" type="button" id="stAgain" onClick={onAgain}>重新配置</button></>
                 ) : (
                   <><span className="dot"></span><div className="m"><b>还没配模型</b><p>{bad + '跟着下面走，一分钟就能好。'}</p></div><button className="sbtn pri" type="button" id="stStart" onClick={onStart}>开始配置</button></>
                 )}
@@ -641,7 +716,7 @@ export default function SettingsScreen({ open, onClose }) {
                 <div className="step" id="stp1"><span className="no">1</span><span className="cn">选一个服务商</span>
                   <div className="bd"><div className="provs" id="stProvs" onClick={onProvsClick}>
                     {/* `gridHtml()` L69–L77 的**顺序**：内置各家（不含 custom）→ 自定义各家 → 「自定义」入口卡。
-                        内容属运行期填充⇒ 结构核对器已把这一段**切出去**，由比对 06-settings 负责。 */}
+                        内容属运行期填充（§二十二）⇒ 结构核对器已把这一段**切出去**，由比对 06-settings 负责。 */}
                     {provs.map(p => <ProvButton key={p.k} k={p.k} n={p.n} note={p.note} rec={!!p.rec} pv={pv} got={p.k === pv && ok} />)}
                     {customs.map(c => <ProvButton key={c.k} k={c.k} n={c.n} note="自定义" pv={pv} got={c.k === pv && ok} del />)}
                     <ProvButton k="custom" n="自定义" note="自己加一家（先起名）" pv={pv} got={'custom' === pv && ok} />
@@ -650,7 +725,7 @@ export default function SettingsScreen({ open, onClose }) {
                     <label htmlFor="stCustomName">给它起个名——比如 gemini（起完就出现在上面这一排里）</label>
                     <div className="strow"><input type="text" id="stCustomName" spellCheck="false" placeholder="比如 gemini" ref={nameRef} onKeyDown={onCustomNameKey} />
                     <button className="sbtn pri" type="button" id="stCustomGo" onClick={customCreate}>起名并添加</button></div></div>
-                  <div className="hint">选完会自动填好接口地址和模型名，你只要补一个 Key。只用本地模型的话选 Ollama，不需要 Key。</div></div></div>
+                  <div className="hint">选完会自动填好接口地址和模型名，你只要补一个 Key。</div></div></div>
                 <div className="step" id="stp2"><span className="no">2</span><span className="cn">核对接口地址</span>
                   <div className="bd">
                     <div className="stf"><label htmlFor="stBase">接口地址（Base URL）</label>
@@ -663,7 +738,7 @@ export default function SettingsScreen({ open, onClose }) {
                           ? <>{'已切到 token plan 的地址（'}<code>api/anthropic</code>
                             {'）；普通 API Key 请点击'}<a href="#" role="button" id="stZipToggle" onClick={onZipToggle}
                               style={{ textDecoration: 'underline', cursor: 'pointer', color: 'inherit' }}>这里</a>{'切回标准地址。'}</>
-                          : <>{'智谱因其特殊性，已通过本服务器中转；若您是 token plan 用户，请点击'}<a href="#" role="button"
+                          : <>{'智谱因其特殊性，已通过本服务器中转；若您用的是 token plan 套餐，请点击'}<a href="#" role="button"
                             id="stZipToggle" onClick={onZipToggle}
                             style={{ textDecoration: 'underline', cursor: 'pointer', color: 'inherit' }}>这里</a>{'切换。'}</>)
                         : '预设已自动填好，一般不用改；要换成别家的地址，直接改这里。'}</div></div></div>
@@ -673,9 +748,7 @@ export default function SettingsScreen({ open, onClose }) {
                       <div className="strow"><input type={eyeOn ? 'text' : 'password'} id="stKey" spellCheck="false" autoComplete="off" defaultValue={s.key} placeholder="sk-..." ref={keyRef} onChange={onField('key')} />
                       <button className="sbtn" type="button" id="stEye" onClick={onEye}>{eyeOn ? '隐藏' : '显示'}</button></div>
                       {/* L547-558：三支（本地模型 / 有拿 Key 的地址 / 兜底）。`p` 只看 PROVS（见上面 `cur`）。 */}
-                      <div className="hint" id="stKeyHint">{cur && cur.local
-                        ? <>{'本地模型不需要 Key，留空即可。还没装？去 '}<a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a>{' 装好，再拉一个模型（如 '}<code>ollama pull qwen2.5:7b</code>{'）。'}</>
-                        : cur && cur.url
+                      <div className="hint" id="stKeyHint">{cur && cur.url
                           ? <>{'去哪里拿：'}<a href={cur.url} target="_blank" rel="noopener">{cur.url.replace(/^https?:\/\//, '')}</a></>
                           : '填服务商给你的 API Key，一般以 sk- 开头。'}</div>
                     </div></div></div>
@@ -691,7 +764,8 @@ export default function SettingsScreen({ open, onClose }) {
                 <div className={'step' + (ok ? '' : ' off')} id="stp5"><span className="no">5</span><span className="cn">点一下，看通不通</span>
                   <div className="bd"><div className="sbtnrow" style={{ marginTop: '0' }}>
                     <button className="sbtn pri" type="button" id="stTest">测试连接</button>
-                    <button className="sbtn" type="button" id="stSave" onClick={onSave}>保存</button></div>
+                    <button className="sbtn" type="button" id="stSave" onClick={onSave}>保存</button>
+                    <button className="sbtn" type="button" id="stClearAll" onClick={onClearAll}>清空配置</button></div>
                     <div id="stMsg" className="stmsg" style={{ display: 'none' }} ref={msgRef}></div>
                   </div></div>
               </div>
@@ -716,10 +790,10 @@ export default function SettingsScreen({ open, onClose }) {
               <h3>外观</h3>
               <p className="lead">八套主题，点一下立刻生效，会记住。每套不只是换颜色——字体和边框语言也跟着换。</p>
               {/* L127-131：`#stThemes` 的 9 个 `.theme` 按钮 —— **C1 落地**，数据源 `SkinsCore`（A6 共用一份）。
-                  ⚠ 页面正文写「八套主题」是**早前的版本文案，照抄不改**（表里实际 9 套：删了 4 个深色、补了 hei）。
+                  ⚠ 页面正文写「八套主题」是**旧版文案，照抄不改**（表里实际 9 套：删了 4 个深色、补了 hei）。
                   每个按钮 = 一个 `.theme` 按钮，内含一个 `.sw` 色块（inline 的 background / border-color）
                   加一个 `<b>` 名字 —— 逐字对应 36-script.txt L127-131 那段拼串（见该处原文）。
-                  ⚠ 早前的版本 HTML 里**没有** aria-current —— 是 `open()` 时的 `renderThemes()`(L573-578) 补的
+                  ⚠ 旧版 HTML 里**没有** aria-current —— 是 `open()` 时的 `renderThemes()`(L573-578) 补的
                     （判据 `data-k === XLR_SKIN_CUR()`）；React 版由 `skin` state 直接渲染出同一结果 ⇒ 打开时一致。
                   点击(L910-915)：`XLR_SKIN_APPLY(data-k)` + `renderThemes()` ⇒ 这边 `onTheme()` 两条都做。 */}
               <div className="themes" id="stThemes">
@@ -747,7 +821,7 @@ export default function SettingsScreen({ open, onClose }) {
                 <button className="sbtn" type="button" id="stReset" onClick={onReset}>重置</button></div>
             </section>
 
-            {/* ★ 2026-10-22（要求）：常见问题 —— 只显示问题，点一下才出解法；
+            {/* 常见问题 —— 只显示问题，点一下才出解法；
                 条目按平台过滤（Win 端只出 Win + 通用、安卓只出安卓 + 通用、网页版不出安卓），
                 样式不写死颜色：用 --ink / --line / --dim2 这些皮肤变量，九套皮肤与昼夜自动跟着变。 */}
             <section className="setsec" id="s-faq">
@@ -763,17 +837,32 @@ export default function SettingsScreen({ open, onClose }) {
               </div>
             </section>
 
-            <section className="setsec contact" id="s-contact">
-              <h3>联系</h3>
-              <p>反馈与建议：请到项目的 Issues 页留言（问题描述 + 你那一卦的三宫与所问即可）。</p>
-              <p>二次分发或改版：请保留「关于」里的出处与授权说明。</p>
-            </section>
-
+            {/* 「关于」里的内容、免责条款与联系方式，
+                都移动到关于吧，再把联系栏删了。」⇒ 原 `#s-contact` 整节删除，两处微信并进本页；
+                免责声明按「它是什么 → 不能拿它干什么 → 数据与模型 → 责任 → 用法」分层写。 */}
             <section className="setsec about" id="s-about">
               <h3>关于</h3>
               <p><b>道家小六壬 · 卦台</b>　v1.0</p>
               <p>本软件以邵一尘先生的小六壬神通·卜法卷为基础，部分功能及生成内容由人工智能技术辅助完成，结果仅供参考。所有内容仅供交流、学习使用，不用于商业用途；如涉及版权争议，请权利人联系删除，造成不便敬请谅解。</p>
               <p>三条前提：<b>无事不卦、心动即卦、一事不二卦</b>。</p>
+
+              <h4 className="ab-h">免责声明</h4>
+              <ul className="ab-list">
+                <li>本软件是传统术数文化的<b>学习与自用工具</b>。起卦、排盘、本机速断与模型断辞都只是按这套体系的推演，<b>不构成预测、承诺或任何专业意见</b>；请当作参考，不必据此替自己做重大决定。</li>
+                <li>医疗、诉讼、投资、婚育、就业这类专业事项，请找有资质的专业人士；本软件的输出不能替代他们的判断，也不该被用来拖延就诊或决策。</li>
+                <li>模型断辞由<b>你自己配置的</b>第三方模型服务生成，作者无法预知、也无法控制它写了什么；其中若有错漏、偏差或不当表述，作者不承担责任。</li>
+                <li>请勿在「所问」「背景」里填身份证号、银行卡号、病历等敏感个人信息 —— 你填的内容会随请求发送给<b>你自己配置的那家服务商</b>。</li>
+                <li>本软件按「现状」提供，不承诺无缺陷、不承诺永久可用。因使用本软件（含模型输出有误、服务中断、记录丢失）造成的任何直接或间接损失，由使用者自行承担。</li>
+                <li>请在所在地法律与公序良俗的范围内使用；不得用它行骗、敛财，或做其他违法的事。</li>
+              </ul>
+
+              <h4 className="ab-h">联系作者</h4>
+              <p>软件使用反馈：微信 <b>Trick_Mage</b></p>
+              <p>小六壬交流：微信 <b>gny950107</b></p>
+              <p>添加请注明来意。</p>
+
+              <h4 className="ab-h">开源仓库</h4>
+              <p><a href="https://github.com/Michae1o/daojiaxlr-guatai" target="_blank" rel="noopener">github.com/Michae1o/daojiaxlr-guatai</a></p>
             </section>
           </div>
         </div>

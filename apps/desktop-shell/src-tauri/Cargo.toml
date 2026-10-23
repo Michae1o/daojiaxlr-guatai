@@ -1,6 +1,6 @@
 [package]
 name = "xiaoliuren"
-version = "1.261023.1"
+version = "1.261023.3"
 edition = "2021"
 description = "小六壬 · 起卦解卦台"
 

@@ -19,7 +19,6 @@ export default function App() {
   const [dateTouched, setDateTouched] = useState(false);
   /*
      反馈「23:30 算今天的子时，00:30 就是次日的子时」⇒ 日子必须跟着钟走。
-     页面开着跨过午夜时，日期框要自己翻篇；用户手动改过之后就不再碰他选的
      —— 与上游时辰框 __ziTouch 那套完全同构。 */
   useEffect(() => {
     if (dateTouched) return undefined;

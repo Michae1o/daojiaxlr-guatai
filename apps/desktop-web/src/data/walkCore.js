@@ -212,7 +212,7 @@ function calmWalk() {
    ⚠ __xlrWalkLegacy：安装那一刻 window.playWalk 是什么就存什么（明文臂 = 16-script 的原始 playWalk；
       若 legacy 那侧已先跑过，存到的就是它那层包装）—— **运行时不再调用**，只作对照。
    ⚠ autoTimer：wireWalk 里那句 clearTimeout(autoTimer) **照抄不了**（闭包变量），实测它**永远是 null**
-     （38-script 里只被清、从未被赋值 ⇒ 自动跳转那套早被用户取消）⇒ 省掉不影响行为。 */
+      */
 export function installWalk(opts) {
   const hooks = opts || {};
   if (window.__xlrWalkInstalled) return false;

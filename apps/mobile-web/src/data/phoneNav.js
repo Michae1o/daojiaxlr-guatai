@@ -294,7 +294,7 @@
       var dx = st.dx, dy = st.dy;
       var dist = Math.sqrt(dx * dx + dy * dy);
       if (!st.moved && dist > 6) {
-        /* ★ 十一版（用户真机·iPhone）：「轻点被当拖拽、滑块闪一下」——
+        /*
            进入跟手态先不形变：位移>26px，或拖动持续 90ms 以上且还有新移动事件，
            才「确认拖动」。轻点整个生命周期内都不会触发变形/点亮/彩边。 */
         st.moved = true;
@@ -308,7 +308,7 @@
       var barW = nav.clientWidth - 10;
       var pL = pill ? parseFloat(pill.style.left || '0') || 0 : 0;
       var pW = pill ? parseFloat(pill.style.width || '0') || 0 : 0;
-      var tx = dx * 0.95, ty = 0;   /* ★ 六版（口径： 2026-10-08）：拖拽只许左右动，垂直一律 0 */
+      var tx = dx * 0.95, ty = 0;   /* 拖拽只允许左右，垂直恒为 0 */
       if (pill) {
         var lo = -pL, hi = barW - pW - pL;
         if (lo > hi) { lo = hi = 0; }
@@ -339,7 +339,7 @@
       var rH = st.fh, rB = st.btop;   /* ★ 九版：快照留给 growBack（st 马上就置空） */
       st = null;
       try { nav.releasePointerCapture(id); } catch (err) { }
-      /* ★ 十版（用户真机·iPhone 2026-10-08）：「记录点不到」的根子——
+      /*
          手指微抖 >6px 会进拖拽态，松手时合成 click 被吞。位移 <18px 一律按轻点：
          复位放行，click 正常触发。 */
       if (!wasMoved || Math.abs(tx) < 18) { reset(); return; }
@@ -415,14 +415,14 @@
     var vv = window.visualViewport;
     function kbCheck() {
       try {
-        /* ★ 十二版（用户真机·安卓 APK 2026-10-08）：「进页面不显示导航栏」——
+        /*
            起因是「进页面就检测键盘」的开机检查，在 APP 里把启动瞬间的视口抖动
            误判成键盘态（底栏被淡出）。改成双条件：有输入框正在编辑 且 可视区
            明显变矮（>100px）才算键盘；只有聚焦、高度没变，一律不算。 */
         var ae = document.activeElement;
         var editable = !!(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA'));
         var open = !!(vv && editable && (window.innerHeight - vv.height) > 100);
-        /* ★ 十版（用户真机·iPhone）：iOS Safari 的底部工具条会盖住悬浮底栏，
+        /*
            第一次碰屏幕（工具条收起）才露出来 ⇒ 按「可视区底部」锚定：
            布局视口比可视区多出来的带子（最多按 56px）垫在底栏下面。
            键盘弹起时不垫（走淡出）。 */

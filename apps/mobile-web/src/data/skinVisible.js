@@ -6,7 +6,6 @@
  *   ② 铜古素材包在手机端**本批未 fork**（变更记录：src/tailwind.css 里 `@import "./skins/tonggu/tonggu.css";`
  *      那行被注释掉，素材 56 个二进制件 ≈1.5 MB）⇒ 手机端就算列出来也选不出效果；
  *   ③ 早前的版本手机端本来就是 9 项（无铜古）—— 去掉后与早前的版本面板 9 行一致（07 屏那 31px 差随之归零）。
- *   skinApply.js 原样保留：用户若在桌面端选过铜古，手机端开机仍认这个键（html[data-skin] 照写），
  *   不会回落 bw；只是列表里不再呈现这个选项。
  */
 import { SkinsCore } from './skinsCore.js';

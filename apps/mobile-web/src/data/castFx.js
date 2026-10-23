@@ -65,7 +65,7 @@ export function installCastFx(opts) {
     /*
        先问一句「这一击到底能不能起卦」——不能就**不播动画**（提示已经由那一问自己写好了），
        也不补发那一次点击（这一击到这就结束了）。判定由调用方注入；没注入或它自己抛了
-       ⇒ **fail-open**（按老样子播 + 补发）：宁可多播一次动效，也绝不吞掉用户的点击。 */
+        */
     if (hooks.canCast) {
       let ok = true;
       try { ok = hooks.canCast() !== false; } catch (eG) { ok = true; }

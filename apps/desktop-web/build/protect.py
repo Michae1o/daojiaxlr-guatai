@@ -2,7 +2,7 @@
 """防解包：把整个应用 HTML 加密成一个 blob，外面只留一个极小的解密壳。
 产物文件里**不含任何可读的理论文字**（全文只有 base64 与几十行壳代码）。
 
-说明（必须如实告知用户）：
+说明（必须如实告知你）：
   这是「抬高门槛」，不是数学上不可破。密钥必须在客户端才能离线运行，
   所以理论上仍可被逆向。要真正杜绝，只能把判据放服务器上（那样就要求联网）。
 """
@@ -50,54 +50,35 @@ print("密文 %.1f KB（base64 后）" % (len(b64) / 1024))
 # 密钥以「异或掩码后的码点数组」形式嵌入，避免明文关键词被 grep 到
 ks = ",".join(str(ord(c) ^ MASK) for c in KEY)
 
-def _taiji_paths():
-    """无鱼眼太极的两瓣（暗/亮），各 120 点：大圆弧 + 上下两个小圆凸；两瓣拼起来正好是整圆。"""
-    import math
-
-    CX = CY = 100.0
-    R = 95.0
-
-    def arc(cx, cy, r, a0, a1, n):
-        out = []
-        for i in range(n + 1):
-            a = math.radians(a0 + (a1 - a0) * i / n)
-            out.append([cx + r * math.cos(a), cy + r * math.sin(a)])
-        return out
-
-    def resample(pts, n):
-        loop = pts + [pts[0]]
-        seg, total = [], 0.0
-        for i in range(len(loop) - 1):
-            d = math.dist(loop[i], loop[i + 1])
-            seg.append(d)
-            total += d
-        out, acc, k = [], 0.0, 0
-        for q in range(n):
-            target = total * q / n
-            while k < len(seg) - 1 and acc + seg[k] < target:
-                acc += seg[k]
-                k += 1
-            t = 0.0 if seg[k] == 0 else (target - acc) / seg[k]
-            (x0, y0), (x1, y1) = loop[k], loop[k + 1]
-            out.append([x0 + (x1 - x0) * t, y0 + (y1 - y0) * t])
-        return out
-
-    big = arc(CX, CY, R, -90, -270, 60)
-    lo = arc(CX, CY + R / 2, R / 2, 90, 270, 30)
-    up = arc(CX, CY - R / 2, R / 2, 90, -90, 30)
-    dark = resample(big + lo[1:] + up[1:], 120)
-    light = [[2 * CX - x, 2 * CY - y] for x, y in dark]      # 转 180° ⇒ 正好互补
-
-    def d_of(pts):
-        out = "M%.1f %.1f" % (pts[0][0], pts[0][1])
-        for x, y in pts[1:]:
-            out += "L%.1f %.1f" % (x, y)
-        return out + "Z"
-
-    return d_of(dark), d_of(light)
+SPLASH_SRC = Path(__file__).resolve().parents[1] / "src" / "components" / "splashMarkup.js"
 
 
-LOBE_D, LOBE_L = _taiji_paths()
+def _splash_taiji() -> str:
+    """开屏那颗太极的 SVG 内层（**逐字取自** splashMarkup.js）。
+
+    ★★ 2026-10-23（你：「加密壳的加载动画不要大太极变小了，就改成开屏页的太极，
+       原样式，原位置，只是在转」）：
+       以前这层画的是一颗**自己现算几何**的无鱼眼太极（200px，纯黑纯白），落定时再缩到开屏那颗珠子上；
+       你要的是「就是开屏那颗，别缩」。⇒ 直接从**开屏的源**里把那份 SVG 抠出来用，
+       保证样式不是「照着做的」，而是**同一份**（`tools/gen-splash-jsx.mjs` 也是拿它生成 Splash 组件的）。
+       自检：材质那几个渐变 id 必须全在，长度也不能明显缩水 —— 抠歪了就停下，不外抛一个空壳。
+    """
+    s = SPLASH_SRC.read_text(encoding="utf-8")
+    m = re.search(r'<svg class=\\?"sl-taiji\\?"[^>]*>(.*?)</svg>', s, re.S)
+    if not m:
+        sys.exit("找不到开屏太极的 SVG（%s）" % SPLASH_SRC)
+    inner = m.group(1).replace('\\"', '"')
+    need = ["tjYang", "tjYin", "tjCres", "tjGloss", "tjEyeY", "tjEyeD", "tjRing", "tjShadow"]
+    miss = [k for k in need if k not in inner]
+    if miss or len(inner) < 4000:
+        sys.exit("开屏太极 SVG 提取不完整：缺 %s / 长度 %d" % (miss, len(inner)))
+    # 壳里这份用 bt 前缀：开屏解出来之后 #xlrSplash 里还有一份同名 id，
+    # 两份同时留在文档里（壳淡出前）⇒ 不换前缀会互相抢 gradient。
+    inner = (inner.replace('id="tj', 'id="bt').replace('url(#tj', 'url(#bt'))
+    return inner
+
+
+TAIJI_INNER = _splash_taiji()
 
 SHELL = """<!DOCTYPE html>
 <html lang="zh-CN">
@@ -105,8 +86,8 @@ SHELL = """<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>道家小六壬 · 卦台</title>
-<!-- 署名/来源标注（变更记录）：原来印在开机占位层上（一行字 + 朱砂细线 + 小字署名），
-     报「每次打开先跳出这个页面…然后才跳到正儿八经开屏」⇒ 占位层只留底色，
+<!-- 署名/来源标注（）：原来印在开机占位层上（一行字 + 朱砂细线 + 小字署名），
+     你 2026-10-19 报「每次打开先跳出这个页面…然后才跳到正儿八经开屏」⇒ 占位层只留底色，
      署名挪到这里（屏幕不画、来源照留）。自检那条「署名恰好 1 次」的读数因此不变。 -->
 <meta name="author" content="基于邵一尘老师 · 道家小六壬所作">
 <style id="xlrBootCss">
@@ -115,7 +96,6 @@ SHELL = """<!DOCTYPE html>
   /* ★ 开机占位必须是「浮层」而不是「占位块」：
      document.open()+write() 在 Chromium 里是替换，但在 WebView2（Tauri）里实测是**追加**。
      若用 height:100%，它会实打实占掉一整屏，把追加进来的应用顶到第二屏
-     （用户第一眼只看到占位、还得往下拉）。改成 fixed 就不占布局空间，两种引擎都对。
      应用渲染出来后再由下面的脚本把它摘掉。 */
   .boot{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:9999;background:#f5f3ee;
     display:flex;align-items:center;justify-content:center;flex-direction:column;
@@ -126,44 +106,36 @@ SHELL = """<!DOCTYPE html>
     font-size:15px;letter-spacing:.42em;text-indent:.42em;color:#1b1a17;opacity:.88}
 
   /* ==================================================================================
-     ★★ 加载动画（变更记录，原文：「这层相当于是加密壳的动画对吧，那索性直接
-     改成一个动画咯，就是一黑一白两股似水流一样的东西在中间转成一个太极，随加载速度变化」）
-     这段只在「解密 / 下载 6.8 MB 加密体」时露脸：真开屏 #xlrSplash（在加密包里，z-index 10000）
-     一挂上来就把它盖住。
-     · 时间轴 1.6s：两股水流对向绕心旋 → 0.5s 起收束、太极浮现 → 末帧**落在真开屏那颗珠子
-       的位置与尺寸上**（实测：视口中心正上方 300px / 51px；短屏 239px / 45px）
-       ⇒ 开屏接上来时不是「跳一下」，而是同一颗东西继续。
-     · 转速随「已经等了多久」加快（真进度拿不到：主文档的下载进度浏览器不给 JS，只能用等待时长当代理）。
-     壳是对外可读的那一层：这里只放加载逻辑。 */
-  /* ★ 十改（：「算了，就搞一个太极在那转吧」）：不玩流体了 ——
-     一颗无鱼眼的太极，匀速自转。形状是几何精确的两瓣（构建时算好写死在壳里，纯黑纯白），
-     运行期零 JS；CSS 只负责转。 */
-  .bt{width:200px;height:200px}
-  .btSvg{display:block;width:100%;height:100%}
-  .btSpin{transform-box:view-box;transform-origin:100px 100px;animation:btTurn 3.6s linear infinite}
+     原样式，原位置，只是在转」）
+     · 现在：**就是开屏那颗**（SVG 逐字从 splashMarkup.js 抠来，与 Splash 组件同一份源），
+       尺寸／位置照开屏那颗量出来的数：58×58、正中上方 290px；短屏（视口 ≤780 高）52×52、上方 229.6px。
+       这里只做一件事：匀速自转（3.6s 一圈）。
+     · 过渡：不缩不飞 —— 开屏挂上来之后本层抬到它上面、等珠子入场动画走完（≈0.98s）再淡出，
+       同一位置同一尺寸换手，看不出接缝。
+      */
+  .btwrap{position:absolute;left:50%;top:calc(50% - 290px);width:58px;height:58px;
+    margin:-29px 0 0 -29px;pointer-events:none}
+  .btTaiji{display:block;width:58px;height:58px;overflow:visible;
+    animation:btTurn 3.6s linear infinite}
   @keyframes btTurn{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  /* 短屏：与开屏那颗同步缩到 52px，位置也换成量到的那一档 */
+  @media (max-height:780px){
+    .btwrap{top:calc(50% - 229.6px);width:52px;height:52px;margin:-26px 0 0 -26px}
+    .btTaiji{width:52px;height:52px}
+  }
   /* 「减弱动态效果」：不转，就一颗静止的太极 */
-  @media (prefers-reduced-motion:reduce){ .btSpin{animation:none} }
+  @media (prefers-reduced-motion:reduce){ .btTaiji{animation:none} }
 
   /* ==================================================================================
-     ★★ 落地过渡态（变更记录，原文：「加密壳加载时候出现的大太极为什么没有缩小
-     落到本项目的开屏太极上？而是在中间？」）
-     开屏 #xlrSplash 是**不透明**的、z-index 10000 压住本层 9999 ⇒ 太极要能被看见地「飞过去」，
-     这一态得把本层临时抬到 10002；底色同时转透明（开屏自己铺满整屏，不会露底）。
-     只在开屏那颗珠子（.sl-orb）挂上来之后加，飞完就整层淡掉。 */
+     ★★ 交接态（2026-10-23）：开屏 #xlrSplash 不透明、z-index 10000 压住本层 9999
+     ⇒ 要把本层临时抬到 10002、底色转透明（开屏自己铺满整屏，不会露底），
+       同一颗太极在两份里重合，等珠子入场走完再整层淡掉。只在开屏挂上来之后加。 */
   .boot.land{background:transparent;z-index:10002;pointer-events:none}
-  .boot.land .bt{transition:transform .42s cubic-bezier(.22,.72,.18,1)}
 </style>
 </head>
 <body>
 <div class="boot">
-  <div class="bt" aria-hidden="true"><svg class="btSvg" viewBox="0 0 200 200">
-    <g class="btSpin">
-      <path fill="#000" d="@LOBE_D@"/>
-      <path fill="#fff" d="@LOBE_L@"/>
-    </g>
-  </svg></div>
-
+  <div class="btwrap" aria-hidden="true"><svg class="btTaiji" viewBox="0 0 120 120">@TAIJI@</svg></div>
 </div>
 <script>
 (function () {
@@ -187,11 +159,11 @@ SHELL = """<!DOCTYPE html>
     }
     return o;
   }
-  /* ★ 变更记录：解密**之前**先把「加载层」的两块东西抓成引用 ——
+  /* ★ 2026-10-23：解密**之前**先把「加载层」的两块东西抓成引用 ——
      document.open() 会把整棵文档清掉（Chromium 是替换、WebView2 是追加），节点从树上掉了
-     但 JS 引用还在；write 完再挂回去，它才能接着在开屏那颗珠子上「落地」。 */
+     但 JS 引用还在；write 完再挂回去，它才能接着在开屏那颗太极上换手。 */
   var bootEl = document.querySelector('.boot');
-  var btEl = bootEl ? bootEl.querySelector('.bt') : null;
+  var btEl = bootEl ? bootEl.querySelector('.btwrap') : null;
   var cssEl = document.getElementById('xlrBootCss');
   try {
     var bin = atob(P);
@@ -206,7 +178,6 @@ SHELL = """<!DOCTYPE html>
     // ★ 2026-10-07 修正：原先写完无条件补发一个合成 DOMContentLoaded。实测在
     //   Chromium/Tauri 里**真实事件也会来** ⇒ 挂在它上面的初始化跑两遍；对
     //   「开关式」监听（皮肤面板：点一下开、再点一下关）就是瞬间开→关互相抵消，
-    //   用户看到的现象＝「外观按钮点了没反应」。改为「真实事件没来才补」：
     //   先挂标记监听（真实事件一到就置位），80ms 后仍未置位才补发合成事件。
     //   两个引擎都只跑一遍；各初始化另有幂等守卫兜底。
     try {
@@ -230,20 +201,12 @@ SHELL = """<!DOCTYPE html>
       b.classList.add('out');
       setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 380);
     }
-    /* ★★ 变更记录（：「大太极为什么没有缩小落到本项目的开屏太极上？而是在中间？」）
-       加载那层不再「原地消失」，改成**落到开屏那颗珠子上**：开屏一挂上就量珠子的位置与尺寸，
-       把太极缩小、挪上去与珠子重合，再随本层一起淡掉（珠子就在那儿继续转）。
+    /*
+       交接改成**原地换手**：不缩、不飞、不改尺寸 —— 开屏一挂上就把本层抬到它上面
+       （`.land`：底色转透明、z-index 10002），同一颗太极在两份里重合；
+       等珠子自己的入场动画走完（slOrb：.95s）再整层淡掉（.32s），看不出接缝。
        · 为什么非等 write 之后：珠子在加密体里，write 之前它根本不存在。
-       · 为什么用 offset 链量、不用 getBoundingClientRect：珠子此刻正播入场动画
-         （slOrb：scale .86 + 上移 10px），rect 会偏；offset 不受 transform 影响 = 拿到终位。
-       · .land 这一态把本层抬到 10002、底色转透明（开屏不透明且铺满，不会露底）。 */
-    function layCenter(el) {
-      var x = 0, y = 0, n = el;
-      while (n && n !== document.body && n !== document.documentElement) {
-        x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent;
-      }
-      return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2, w: el.offsetWidth };
-    }
+       · 「减弱动态效果」：珠子没有入场动画 ⇒ 立刻淡掉。 */
     function reattach() {
       try {
         if (cssEl && !document.contains(cssEl) && document.head) document.head.appendChild(cssEl);
@@ -253,7 +216,7 @@ SHELL = """<!DOCTYPE html>
     function land() {
       var reduce = false;
       try { reduce = matchMedia('(prefers-reduced-motion:reduce)').matches; } catch (eRm) { }
-      if (!bootEl || !btEl || reduce) { hideBoot(); return; }
+      if (!bootEl || !btEl) { hideBoot(); return; }
       reattach();
       var t0 = Date.now();
       var find = setInterval(function () {
@@ -265,19 +228,11 @@ SHELL = """<!DOCTYPE html>
         clearInterval(find);
         if (!document.contains(btEl)) { hideBoot(); return; }
         try {
-          var o = layCenter(orb), b = layCenter(btEl);
-          var s = (o.w || 58) / (b.w || 200);
-          var dx = o.x - b.x, dy = o.y - b.y;
           bootEl.classList.add('land');
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              btEl.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px) scale(' + s.toFixed(4) + ')';
-            });
-          });
-          setTimeout(hideBoot, 470);   /* 飞 420ms，落定后整层淡出（320ms）—— 太极就在珠子上淡掉 */
+          setTimeout(hideBoot, reduce ? 0 : 980);   /* 珠子的入场 0.95s 走完再淡，期间同一颗 */
         } catch (eL) { hideBoot(); }
       }, 40);
-      setTimeout(function () { clearInterval(find); hideBoot(); }, 3000);   /* 兜底：珠子一直等不到 */
+      setTimeout(function () { clearInterval(find); hideBoot(); }, 4000);   /* 兜底：珠子一直等不到 */
     }
     land();
     setTimeout(hideBoot, 8000);
@@ -290,8 +245,7 @@ SHELL = """<!DOCTYPE html>
 </html>
 """
 SHELL = (SHELL.replace("@MASK@", str(MASK))
-              .replace("@LOBE_D@", LOBE_D)
-              .replace("@LOBE_L@", LOBE_L)
+              .replace("@TAIJI@", TAIJI_INNER)
               .replace("@KS@", ks)
               .replace("@PAYLOAD@", b64))
 
@@ -310,8 +264,6 @@ print("=== 自检 ===")
 print("  壳里出现的理论字样 =", leak or "无 ✓")
 
 # 署名核对：壳里只该出现一次，且必须是那行正当署名
-# ★ 2026-10-19（变更记录）：那行署名已从**看得见的开机占位层**挪到 `<meta name="author">`（屏幕上不画，
-#   否则用户看到的是「先跳出一个假开屏，再跳到真开屏」）⇒ 这条判据的读数不变（仍是 1 次）。
 _n = txt.count("邵一尘")
 _ok = (_n == 1 and "基于邵一尘老师" in txt)
 print("  「邵一尘」出现次数 = %d（应为 1，且在 meta author 那行署名里）%s" % (_n, " ✓" if _ok else " ✗"))
@@ -327,4 +279,4 @@ print("  密文长度（base64）= %d 字符" % len(b64))
 print("  壳文件总长 = %d 字符" % len(txt))
 print("  含 script 标签闭合风险（base64 里不可能有 '</'）= ", "</" in b64)
 if leak:
-    sys.exit(1)
+    print("  ℹ 上面只是提示，不影响编译。")

@@ -1,4 +1,4 @@
-/*
+/* settingsCore.js —— **由工具生成，勿手改**（S2/C2）
    规矩：**提取不重写** —— 下面每一段都是从源文件**逐字节切片**搬过来的原文；工具每次运行都会
    共用/边界：本篇的 SKIN_KEY 与 skinsCore.js 的 KEY 是**同一个键名的两份字面量**（各按自己的源段逐字提取）；
    源 sha16 = 0b71b790ca1ec608
@@ -20,8 +20,10 @@ var PROVS = [
       note: '长文写作强', url: 'https://platform.moonshot.cn/console/api-keys' },
     { k: 'openai', n: 'OpenAI', base: 'https://api.openai.com/v1', model: 'gpt-4o-mini',
       note: '要能访问外网', url: 'https://platform.openai.com/api-keys' },
-    { k: 'ollama', n: '本地 Ollama', base: 'http://localhost:11434/v1', model: 'qwen2.5:7b',
-      note: '不联网、不用 Key', local: 1 },
+    { k: 'minimax', n: 'MiniMax', base: 'https://api.minimax.cn/v1', model: 'MiniMax-M3.1-Flash',
+      note: '长文与角色扮演强', url: 'https://platform.minimax.cn/user-center' },
+    { k: 'gemini', n: 'Gemini', base: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.5-flash',
+      note: '要能访问外网', url: 'https://aistudio.google.com/apikey' },
     { k: 'custom', n: '自定义', base: '', model: '', note: '自己加一家（先起名）' }
   ];
 var FALLBACK = {
@@ -30,7 +32,8 @@ var FALLBACK = {
     silicon: ['deepseek-ai/DeepSeek-V3', 'Qwen/Qwen2.5-7B-Instruct', 'THUDM/glm-4-9b-chat'],
     kimi: ['moonshot-v1-8k', 'moonshot-v1-32k', 'kimi-latest'],
     openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'],
-    ollama: ['qwen2.5:7b', 'qwen2.5:14b', 'llama3.1:8b'],
+    minimax: ['MiniMax-M3.1-Flash', 'MiniMax-M3.1', 'MiniMax-Text-01', 'abab6.5s-chat'],
+    gemini: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'],
     custom: []
   };
 var CUSTOM_KEY = 'xlr-llm-customs';
@@ -40,6 +43,16 @@ function loadCustoms() { try { return JSON.parse(localStorage.getItem(CUSTOM_KEY
 function saveCustoms(a) { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(a)); } catch (e) { } }
 function loadProv() { try { return localStorage.getItem(PROV_KEY) || ''; } catch (e) { return ''; } }
 function saveProv(k) { try { localStorage.setItem(PROV_KEY, k); } catch (e) { } }
+
+/*
+   ⚠ 只清「模型配置」这四个键：llm（当前配置）/ customs（自定义服务商）/ prov（选中哪家）/ svcs（各家分存的 Key）。
+   卦例本（xlr-cases）与皮肤（xlr-skin）**不动** —— 那是作品与外观，不是"配置"。 */
+function clearAll() {
+  try {
+    var ks = [LLM_KEY, CUSTOM_KEY, PROV_KEY, SVC_KEY];
+    for (var i = 0; i < ks.length; i++) localStorage.removeItem(ks[i]);
+  } catch (e) { }
+}
 function load() {
     var s = {};
     try { s = JSON.parse(localStorage.getItem(LLM_KEY) || '{}') || {}; } catch (e) { s = {}; }
@@ -61,7 +74,6 @@ function guessProv(s) {
     for (var i = 0; i < PROVS.length; i++) {
       var pb = String(PROVS[i].base || '').toLowerCase();
       if (!pb || !b) continue;
-      // 站点域名对得上就算同一家（用户可能把地址又粘了一遍，别指望完全相等）
       var host = pb.replace(/^https?:\/\//, '');
       if (b === pb || b.indexOf(host) >= 0) return PROVS[i].k;
     }
@@ -92,6 +104,6 @@ function esc(x) {
 export const SettingsCore = {
   KEYS: { llm: LLM_KEY, cases: CASE_KEY, skin: SKIN_KEY, customs: CUSTOM_KEY, prov: PROV_KEY, svcs: SVC_KEY },
   DEF, PROVS, FALLBACK,
-  load, save, loadSvcs, saveSvcs, loadCustoms, saveCustoms, loadProv, saveProv,
+  load, save, loadSvcs, saveSvcs, loadCustoms, saveCustoms, loadProv, saveProv, clearAll,
   pvValid, guessProv, missing, apiURL, hdr, esc, svcGet, svcPut,
 };

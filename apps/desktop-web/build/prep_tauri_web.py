@@ -11,7 +11,7 @@ WEB = WEB_SHELL
 TAURI = WEB_SHELL.parent
 WEB.mkdir(parents=True, exist_ok=True)
 
-# 源：默认判据版的加密壳；可传 --src <html> 指定（精简版用它）
+# 源：默认用当前判据产的加密壳；可传 --src <html> 指定别的
 _args = [a for a in sys.argv[1:] if not a.startswith("--")]
 PLAIN = DIST / "新版-现代.html"
 SHELL = Path(_args[0]) if _args else (DIST / "新版-现代-加密.html")
@@ -55,7 +55,6 @@ print("       ", WEB / "shim.js")
 t = (WEB / "index.html").read_text(encoding="utf-8")
 # 「邵一尘」不在泄露词表里——署名是要求印的，属正当标注
 # ★ 2026-10-19（变更记录）：那行署名从可见的开机占位层挪到了 `<meta name="author">`
-#   （占位层只剩底色，不然用户会看到「假开屏」再跳到真开屏）⇒ 本行判据读数不变（仍是 1 次）。
 leak = [w for w in ["大安", "留连", "速喜", "赤口", "小吉", "空亡", "落宫", "判据"] if w in t]
 sc = (WEB / "shim.js").read_text(encoding="utf-8")
 print()

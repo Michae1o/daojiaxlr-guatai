@@ -147,7 +147,7 @@ function setMode(m) {
      （时间取数是自动取数 ⇒ 默认收起；报数 / 月日时必须填 ⇒ 默认展开）。 */
   if (m !== 'clock') window.__numManual = false;
   /* ★ 2026-10-10：「起卦方式点到月日时，不用自动跳出来详情，到报数才用」。
-     ⇒ 只在切到「报数」时自动展开；切到时间取数 / 月日时**不动**（用户展开着就保持展开，收起着就保持收起）。 */
+      */
   if (m === 'num') setCastOpen(true);
   var cfM = document.getElementById('castFields');
   if (cfM) cfM.classList.toggle('auto', m === 'clock' && !window.__numManual);

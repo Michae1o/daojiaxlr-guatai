@@ -431,7 +431,7 @@ function initEdgeSwipe() {
     if (!e.touches || e.touches.length !== 1) return;
     var t = e.touches[0];
     x0 = t.clientX; y0 = t.clientY;
-    /* ★★ 2026-10-17 回归（用户逐字：「我说的是在壹页右滑时，**要能**打开记录页」）：
+    /*
        ① 抽屉开着 ⇒ 哪儿起手都能划回去收起；
        ② 关着 ⇒ **贴左边缘 30px 起手向右划**打开记录页。
        （`initStepSwipe` 里 `if (x <= 30) return;` 本来就把左边缘排除在切页手势外
@@ -500,7 +500,6 @@ function animateIn() {
    ⚠ 为什么必须有：本仓 `Guide.maybeWelcome()` 只在 DCL+260ms 跑一次，那一刻开屏在场 ⇒
      守卫（`window.__xlrSplashOn || document.getElementById('xlrSplash')`）当场早退；
      **这条 300ms 轮询才是早期产物真正把引导弹出来的那条路**。不搬的后果（2026-10-15 实测）：
-     用户点「进入」→ 开屏文字淡出 → 底下那层浅白引导面板（`#onbLayer.onb.guide.on`，bg
      rgb(244,244,245)）永不出现 ⇒ 就是「开屏页的文字和壹页的背景之间都没过渡」。
    逐字差异：无（变量名、300ms、tries>60 兜底都照旧）。 */
 function installGuideRetry() {
@@ -510,11 +509,9 @@ function installGuideRetry() {
   /* ★ 加固（2026-10-15 **非早前的版本原样，已标注**）——早前的版本这条闸只认「此刻有没有 #xlrSplash」，
      慢机上会踩空窗：实测（CPU 节流 6×）新载荷 t=797ms 时开屏**尚未建出**（页面上只有加密壳的
      `.boot.out`），t=1329ms 才建出 ⇒ 撞进 797–1329ms 这一拍就判定「开屏已退场」⇒ 抢先把引导层
-     弹出来盖住开屏（用户真机报「开屏被自动跳过」）。
      加固①：**必须见过开屏**（出现过一次再等它消失）才允许弹引导。
      加固②（2026-10-17 更正）：**取消**。原来这里对
              「系统开了减弱动效 ⇒ legacy 不建开屏」的机器例外放行，结果是引导 300ms 后直接
-             盖上来 —— 用户逐字报「开屏动画不见了 + 还tm给我自动跳过开屏」。
              现在 `splashCore.buildSplash()` 在 reduce 下**照建开屏**（只是不播动画），
              所以「必须见过开屏」这条对 reduce 机器同样成立，不再需要例外。 */
   var seen = false;
@@ -652,7 +649,7 @@ export const PhoneAnim = {
       window.__xlrAlignStepBar = alignStepBar;
       /* ★ 2026-10-15：`animateIn` 也挂回**同名全局** —— 开屏收掉那一下的既有调用
          （splash 内联脚本里的 `try{ animateIn() }catch{ }`）读的就是这个名字；
-         不挂回 ⇒ 它静默失败 ⇒ 主界面不播 `vIn` 进场（用户看到的「动画不一致」）。 */
+          */
       window.animateIn = animateIn;
       ev.hooks = ['__xlrSetStep', '__xlrPhoneStepSettle', '__xlrSyncPhone', '__xlrAlignStepBar', 'animateIn'];
     } catch (e10) { }

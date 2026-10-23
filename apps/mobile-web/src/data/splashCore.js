@@ -29,7 +29,7 @@ var OUT = null, KILL = null;
     if (document.getElementById('xlrSplash')) return;
     var reduce = false;
     try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e2) { }
-    /* ★★ 2026-10-17 声明差异②（用户逐字：「我的手机版开屏动画呢？怎么不见了？而且还tm给我自动跳过开屏」）
+    /*
        源里这行是 `if (reduce) return;` —— 系统一开「减弱动态效果」（安卓的无障碍/开发者选项「移除动画」、
        iOS 的「减弱动态效果」）就**整屏不建**；再叠上 `phoneAnim.installGuideRetry()` 的「reduce 例外放行」
        （那条是给"压根没有开屏"的机器兜底的）⇒ 引导 300ms 后直接盖上来 ＝「开屏被自动跳过」。
@@ -49,7 +49,7 @@ var OUT = null, KILL = null;
     d.id = 'xlrSplash';
     /* 开屏层在场期间挂上 sl-on：用来压住底下的首次配置引导（开屏背景半透明，不压会透出来） */
     try { document.documentElement.classList.add('sl-on'); } catch (eS0) { }
-    /* ★ 2026-10-09 用户给了风格稿（玻璃阴阳珠 + 发丝线 + 极简留白）：按稿重排开屏，
+    /*
        并且**用动画把开屏和主页面接起来** —— 那颗珠子飞向该在的位置、缩成第一步「壹」的圆。 */
     d.innerHTML =
       '<span class="sl-axis sl-axis-t" aria-hidden="true"></span>' +
@@ -57,7 +57,7 @@ var OUT = null, KILL = null;
         '<div class="sl-orbwrap">' +
           '<span class="sl-line"></span><span class="sl-dot"></span>' +
           '<span class="sl-orb">' +
-            /* ★★ 2026-10-10 二改（用户甩参照图：「其实我想要的是这种液态的太极」）：
+            /*
                参照图＝**3D 渲染的液态太极**，不是早前的版本的「扁平玻璃」——
                ① 浅瓣＝清水/胶质（乳白、半透，边缘略沉做出厚度）；
                ② 深瓣＝液态金属/墨（中心最沉、往边缘提亮，右下外缘一道**月牙棱光**）；
@@ -199,13 +199,13 @@ var OUT = null, KILL = null;
     document.body.appendChild(d);
     var t0 = Date.now(), gone = false;
     var goBtn = d.querySelector('.sl-go');
-    /* ★★ 2026-10-17 平台判定（用户逐字：「手机就是手机，电脑就是电脑，关屏幕大小什么事」）
+    /*
        —— 宽度不是平台，两条线各自由构建期常量标明：手机端 `__XLR_PLATFORM__='phone'`、
        matchMedia 回退：模拟器 WebView 实测 innerWidth=760（viewport 写的是 390 也没吃到），
        一靠宽度就会把手机端判成"宽屏"⇒ 3 秒自动退场 + 珠子飞向「壹」，手机版下落弹跳动效等于没发生。 */
     function narrowW() { return IS_PHONE; }
 
-    /* ★★ 2026-10-09 手机版开屏转场（照用户给的六阶段规格逐条落地）：
+    /*
        A 0-180ms   蓄力：先轻微下压(scale 1.07/.93) → 迅速向上弹起，带缩放，有明确加速度（不匀速）
        B 180-380ms 上升：到最高点速度渐慢 → 开始下落，轨迹平滑；背景开始极轻微变亮（tinted 淡入）
        C 380-600ms 自由下落：向**视口底部**加速；带极轻微纵向形变（不能变明显椭圆）
@@ -392,7 +392,6 @@ var OUT = null, KILL = null;
         var mx = Math.round(dotAbs.left - bx);            /* 向右移动的距离 */
         var my = Math.round(dotAbs.top - by);
         /* ⚠ 位移与透明度**分开两条动画**：位移要用"极慢起手"的阻尼曲线，
-           但透明度若也走这条曲线，方框形成的瞬间小球还是全透明的（用户："小球并没有淡入"）。
            所以透明度单走一条、前 18% 就显到 0.10 ⇒ 一出现就能看见。 */
         seed.animate([
           { transform: 'translate(0,0)' },
@@ -480,7 +479,7 @@ var OUT = null, KILL = null;
         var sc = Math.max(.08, to.width / Math.max(1, from.width));
         orb.style.transformOrigin = '50% 50%';
         /* ★ 太极自己转：**匀速**（linear），和珠子的位移/缩放分两条动画走。
-           同一条 transform 里既写缓动又写旋转 ⇒ 转速被缓动拽得忽快忽慢（用户点了「不够丝滑」）。 */
+            */
         var tj = orb.querySelector('.sl-taiji');
         if (tj && tj.animate) {
           try { tj.getAnimations().forEach(function (aT) { aT.cancel(); }); } catch (eT2) { }

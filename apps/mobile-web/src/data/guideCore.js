@@ -8,15 +8,15 @@
    —— 自由变量绑定（源里是 36-script 那个大 IIFE 的**私有**函数，搬过来必须给）——
    · load / missing ⇒ 绑到 settingsCore.js 里那两份**同源**实现（同一提取器族从同一段正文切出来的，不另抄一份）
    · open          ⇒ 外壳注入（mountGuide() 传进来）。源里它是「打开设置页」；本仓的设置页由外壳
-                      openSettings() 提供（React 那份，与早期实现那份逐条同形）⇒ 注入时用 flushSync 包一层，
+                      openSettings() 提供（React 那份，与旧层那份逐条同形）⇒ 注入时用 flushSync 包一层，
                       让它**同步**提交 —— 源里 open() 之后那几行紧接着就要取 #s-llm / #stProvs / #stKey
    —— 声明差异（2 处）——
-   ① 「show()」开头加一行「已经弹着就直接 return」：早期实现 init() 里那条 setTimeout(maybeWelcome, 260) 是**无条件**的、
+   ① 「show()」开头加一行「已经弹着就直接 return」：旧层 init() 里那条 setTimeout(maybeWelcome, 260) 是**无条件**的、
    #gB 的 innerHTML 重渲一遍（图重解码）。正常情况下 maybeWelcome 第一条「开屏在场时不弹」已经把两条路都挡住
-   （实测见 （生成过程）），这行是给**没有开屏**那种情况（reduced-motion 等）兜底。
+   （实测见 _legacy-ref/_diag-guide-config），这行是给**没有开屏**那种情况（reduced-motion 等）兜底。
    点一下就能打开网页」）⇒ 点它由 C-①b 那条统一出口打开（桌面＝系统浏览器）。
    —— 接管手法（装配，手写）——
-   · 本模块**在 DCL 之前**（外壳模块顶层）建层 ⇒ 早期实现 buildWelcome() 里那条共用 id 闸
+   · 本模块**在 DCL 之前**（外壳模块顶层）建层 ⇒ 旧层 buildWelcome() 里那条共用 id 闸
      共用 id 判定 ⇒ **不需要改名**）。
      ⇒ 外壳在 DCL 调 placeGuide() 把它**归位**到 #setScreen 的下一位（否则结构签名会变）。
    · 一键回退：VITE_BISECT=noreact ⇒ 不装（回到 legacy 全权）。
@@ -25,7 +25,7 @@
 /* eslint-disable */
 import { SettingsCore } from './settingsCore.js';
 
-/* 自由变量 open：源里 = 早期实现那个「打开设置页」；本仓由外壳注入 */
+/* 自由变量 open：源里 = 旧层那个「打开设置页」；本仓由外壳注入 */
 let __opener = null;
 function open() { if (typeof __opener === 'function') return __opener(); }
 
@@ -49,7 +49,6 @@ function buildWelcome() {
           '<button class="sbtn" type="button" id="gPrev">上一步</button>' +
           '<button class="sbtn pri" type="button" id="gNext">下一步</button>' +
         '</div>' +
-        '<p class="tip">配模型不是必修课：不配也能起卦、排盘、看本机速断。</p>' +
       '</div>';
     document.body.appendChild(d);
 
@@ -91,8 +90,8 @@ function buildWelcome() {
       document.documentElement.style.overflow = 'hidden';
       render();
     }
-    /* 直接跳去真实向导：只把光标送过去，不替用户改配置。
-       */
+    /*
+       已经配好了别动他的服务商（免得把人家正在用的那家换掉）。 */
     function goConfig() {
       close('done');
       open();
@@ -157,9 +156,7 @@ function guideImg(k) {
 var GUIDE_STEPS = [
     {
       t: '先配一个模型',
-      h: '解卦台<b>本身不联网</b>——起卦、排盘、本机速断都在你电脑上算完。配上模型，点「让模型解卦」，它才会按这套体系把这一卦解出来。',
-      list: ['<b>配了</b> —— 完整断辞，解完还能「接着问」。',
-        '<b>不配</b> —— 进「解卦」那一步，自动给一段本机速断。']
+      h: '解卦台<b>本身不联网</b>——起卦、排盘、本机速断都在你电脑上算完。配上模型，点「让模型解卦」，它才会按这套体系把这一卦解出来。'
     },
     {
       t: '先去注册智谱',
@@ -200,14 +197,13 @@ var GUIDE_STEPS = [
 
 /* ===== ④ maybeWelcome：切片正文（零差异） ===== */
 function maybeWelcome() {
-    /* ★ 2026-10-10 现象：「一切到位之后，框内还是会像刷新了一样」：
+    /*
        引导层（整屏半透明底）踩着开屏的尾巴出场 ⇒ 看着像页面被刷了一遍。
        开屏在场时不自动弹引导（要再看：设置 → 大模型 →「重新看配置引导」）。 */
     if (window.__xlrSplashOn || document.getElementById('xlrSplash')) return;
     var seen = null, s = load();
     try { seen = localStorage.getItem('xlr-onboarded-2'); } catch (e) { }
     if (seen) return;
-    // ★ 2026-10-09：原来这里有一条「已经配好了就不用再引导」的短路 —— 要求「教程先复原一次」，
     // 但有这条短路时，只要模型配好了就永远不弹（换键也不弹）。所以本条只「记标记」不再短路。
     if (!missing(s)) { try { localStorage.setItem('xlr-onboarded-2', 'done'); } catch (e) { return; } }
     var d = document.getElementById('onbLayer');
@@ -221,7 +217,7 @@ export function mount(opts) {
   __opener = (opts && opts.open) || null;
   if (window.__xlrGuideMounted) return false;
   window.__xlrGuideMounted = 1;
-  buildWelcome();              /* 共用 id 闸（见文件头）：早期实现那份因此跳过 */
+  buildWelcome();              /* 共用 id 闸（见文件头）：旧层那份因此跳过 */
   return true;
 }
 

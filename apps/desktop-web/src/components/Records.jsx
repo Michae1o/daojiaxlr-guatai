@@ -44,7 +44,6 @@ const g = (k) => (typeof window !== 'undefined' ? window[k] : undefined);
 /* ★ 2026-10-15：`bold` / `renderDoc` 这两个 legacy 全局**在新产物里根本不在 window 上**
    （实测 `typeof window.bold === 'undefined'`；同批的 `esc` 早有守卫兜底，只剩这两个是裸调用）
    ⇒ 记录里只要有一条**带断辞**（`duanci` 非空），`CaseRow` 一渲染就抛 `TypeError: Xr(...) is not a function`
-   ⇒ 整棵 React 树连带 `#sdb` 一起崩掉，而 `html.sdb-lock` 已经加上 ⇒ 用户看到的就是「点『记录』没反应 / 打不开」。
    （干净 profile 里 `xlr-cases` 是空的 ⇒ 走不到这句 ⇒ 之前的复现全是假阴性。）
    兜底正文**逐字取自上游** `(upstream)` L2302–2317（bold / renderDoc 两份）。
    */
@@ -507,7 +506,6 @@ export default function Records({ open = false, onClose }) {
   /* 底栏条数：照抄 legacy 三个调用点（L310 空态 0 / L324 无匹配 0 / L357 `rows.length`）。
      ★★ **底栏始终在**：早前的版本详情分支虽然自己
      **不渲染**底栏，但它**也不删**上一轮列表渲染留下的那个旧底栏节点（`sdbFootWire` 把它挂成
-     `.sdb-b` 的兄弟，详情分支只重写 `#sdbCases`）⇒ 用户点开一条记录时，**底下照样看得见**
      「清空记录 / 回收站 / 设置」。⇒ React 这边必须同样**始终渲染**底栏；详情态取**上一轮列表渲染
      的快照**（`footSnap`）——条数与回收站列表都停在上一次列表渲染的时刻，与那个"旧节点"一致。 */
   const listFootN = cases.length ? (rows.length ? rows.length : 0) : 0;

@@ -28,7 +28,7 @@ export default function Splash() {
      `out()` 自带幂等（38-script.txt L2144 `if (gone) return;`）⇒ 点过之后再被倒计时叫到不会重复退场。 */
   const exit = (e) => {
     const btn = e && e.target && typeof e.target.closest === 'function' ? e.target.closest('.sl-go') : null;
-    const narrow = IS_PHONE;   /* ★ 与 legacy narrowW() 同口径，但读的是产物平台常量（不看屏幕宽度） */
+    const narrow = IS_PHONE;   /* 平台常量判定，不看屏幕宽度 */
     if (narrow && !btn) return;                                      /* legacy L2212：窄屏只认按钮 */
     if (btn && e && typeof e.stopPropagation === 'function') e.stopPropagation();  /* legacy L2209 */
     try { if (typeof window.__xlrSplashOut === 'function') window.__xlrSplashOut(); } catch (errExit) { }

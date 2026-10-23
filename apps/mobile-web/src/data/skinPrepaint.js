@@ -54,7 +54,7 @@ function apply(k) {
       这里用 MutationObserver 盯着 data-skin，被改走就按本仓那份合法值改回来。
       ⚠ 为什么用 Observer 而不是「在 body 末尾再内联一段脚本」：后者会**往 DOM 里加节点**，
       ⚠ 自身 setAttribute 也会触发一次回调 —— 那时值已经是对的，比一下就不动（不会循环）。
-      ⚠ **DCL 时断开**：用户切肤都发生在 DCL 之后，不能被这个守护改回去；装配侧（mountSkins）再断一次，双保险。 */
+       */
 var want = null;
 try { want = localStorage.getItem(KEY); } catch (eW) { }
 for (var q = 0; q < SKINS.length; q++) if (SKINS[q].k === want) { cur = want; }

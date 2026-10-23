@@ -45,7 +45,6 @@ const g = (k) => (typeof window !== 'undefined' ? window[k] : undefined);
 /* ★ 2026-10-15：`bold` / `renderDoc` 这两个 legacy 全局**在新产物里根本不在 window 上**
    （实测 `typeof window.bold === 'undefined'`；同批的 `esc` 早有守卫兜底，只剩这两个是裸调用）
    ⇒ 记录里只要有一条**带断辞**（`duanci` 非空），`CaseRow` 一渲染就抛 `TypeError: Xr(...) is not a function`
-   ⇒ 整棵 React 树连带 `#sdb` 一起崩掉，而 `html.sdb-lock` 已经加上 ⇒ 用户看到的就是「点『记录』没反应 / 打不开」。
    （干净 profile 里 `xlr-cases` 是空的 ⇒ 走不到这句 ⇒ 之前的复现全是假阴性。）
    兜底正文**逐字取自上游** `(upstream)` L2302–2317（bold / renderDoc 两份）。
    */
@@ -74,8 +73,8 @@ const renderDoc = (t) => {
 const readCases = () => { try { return RecordsStore.loadCases() || []; } catch (e) { return []; } };
 const readCasesRaw = () => { try { return RecordsStore.loadCasesRaw() || []; } catch (e) { return []; } };
 
-/* ★ 2026-10-23（用户看图四）：浮出菜单的图标（16 单位线稿，只描边、跟随文字颜色）。
-   字符串是**静态常量**，没有用户内容 ⇒ 直接塞进 <svg> 的 dangerouslySetInnerHTML。 */
+/*
+    */
 const MICONS = {
   open: '<path d="M1.8 8S4.3 3.7 8 3.7 14.2 8 14.2 8 11.7 12.3 8 12.3 1.8 8 1.8 8Z"/><circle cx="8" cy="8" r="1.9"/>',
   ok: '<path d="M3 8.5 6.2 11.8 13 4.7"/>',
@@ -173,7 +172,7 @@ function CaseRow({ r, first, going }) {
         {r.fb === '错' ? <Rv r={r} /> : null}
         {du ? <div className="cr-d" dangerouslySetInnerHTML={{ __html: du }} /> : null}
       </div>
-      {/* ★ 2026-10-23（用户看图）：竖三点挪到 `.cr-sw` **外面**，直接挂在行上。
+      {/* ★ 2026-10-23：竖三点挪到 `.cr-sw` **外面**，直接挂在行上。
          原因：`.cr-sw` 为了做位移带了 `will-change:transform` ⇒ 它成了绝对定位的包含块，
          `right:4px` 是相对那条窄窄的头部算的（实测三点落在 x=55 而不是行尾）。 */}
       <button type="button" className="cr-more" data-more={r.id} aria-label="更多操作" aria-haspopup="menu">⋮</button>
@@ -511,7 +510,7 @@ export default function Records({ open = false, onClose }) {
       if (axis === 'x') {
         suppressClick.current = Date.now();
         ev.stopPropagation();       /* 同上：这一次抬起不交给抽屉自己的收起逻辑 */
-        /* ★ 2026-10-23（用户：「不丝滑、不 Q 弹」）：松手不再用 CSS 过渡，改**弹簧**跑完最后一段。
+        /*
            原因：拖到 84 上限时 start==end，CSS 过渡等于没有动画（实测 translateX 从 40ms 起就恒为 -84）；
            弹簧则按「当前位移 + 松手速度」收敛，满拖也有一次轻微过冲回收 ⇒ 手感是弹的。 */
         const target = dx < -34 ? -84 : 0;
@@ -586,7 +585,7 @@ export default function Records({ open = false, onClose }) {
     } catch (e) { }
   };
 
-  /* ★ 2026-10-23（用户抓到的 bug）：菜单开着时退回主页 / 关掉抽屉，菜单得跟着散掉，
+  /*
      不能下次打开还杵在那儿。抽屉开合是**命令式**的（`#sdb` 的 class 由外部代码加减，
      React 这边收不到），所以盯一眼 class：一旦 'on' 没了就把菜单收起来。 */
   useEffect(() => {
@@ -701,7 +700,6 @@ export default function Records({ open = false, onClose }) {
   /* 底栏条数：照抄 legacy 三个调用点（L310 空态 0 / L324 无匹配 0 / L357 `rows.length`）。
      ★★ **底栏始终在**：早前的版本详情分支虽然自己
      **不渲染**底栏，但它**也不删**上一轮列表渲染留下的那个旧底栏节点（`sdbFootWire` 把它挂成
-     `.sdb-b` 的兄弟，详情分支只重写 `#sdbCases`）⇒ 用户点开一条记录时，**底下照样看得见**
      「清空记录 / 回收站 / 设置」。⇒ React 这边必须同样**始终渲染**底栏；详情态取**上一轮列表渲染
      的快照**（`footSnap`）——条数与回收站列表都停在上一次列表渲染的时刻，与那个"旧节点"一致。 */
   const listFootN = cases.length ? (rows.length ? rows.length : 0) : 0;
@@ -717,7 +715,7 @@ export default function Records({ open = false, onClose }) {
     { k: 'copy', t: '复制断辞' },
     { k: 'del', t: '删除', danger: true },
   ] : [];
-  /* ★ 2026-10-23（用户看图四）：不要底部升起的面板，要**贴着这一行浮出的小菜单**。
+  /*
      ⇒ 开的时候量一下行在哪，菜单落在行下方（下面放不下就翻到上方），左右夹在视口里。 */
   const openMenu = (id, rowEl) => {
     const r = rowEl && rowEl.getBoundingClientRect ? rowEl.getBoundingClientRect() : null;
@@ -805,7 +803,7 @@ export default function Records({ open = false, onClose }) {
               ★ 详情态**也照旧渲染**（值取自 `footView` 快照）—— 见上面「底栏始终在」的说明。 */}
           <Foot n={footView.n} dead={footView.dead} armed={armed} trashOpen={trashOpen} onTrashToggle={setTrashOpen} />
         </div>
-        {/* ★ 2026-10-23（用户看图四）：贴着这一行浮出的小菜单（不是底部面板）。
+        {/* ★ 2026-10-23：贴着这一行浮出的小菜单（不是底部面板）。
             portal 到 body 是为了层级（`#sdb` 是 z-index 420，菜单必须 900 才压得住），
             同时避开抽屉那层的 transform 对定位的影响。 */}
         {sheetRec ? createPortal((
