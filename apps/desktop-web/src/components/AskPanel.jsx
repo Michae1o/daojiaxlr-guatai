@@ -99,7 +99,7 @@ function useAskCore() {
   useEffect(() => {
     const $ = (id) => document.getElementById(id);
     /* */
-    const mark = (k) => { try { const a = window.__xlrShell; if (a && a.s3bOwn) a.s3bOwn(k); } catch (e) { } };
+    const mark = (k) => { try { const a = window.__xlrShell; if (a && a.fxOwn) a.fxOwn(k); } catch (e) { } };
 
     /* ① 把 AskCore 需要的那 5 个节点注入（源里它们是 18-script 的全局 var） */
     AskCore.bind({ h1: $('h1'), h2: $('h2'), mNum: $('mNum'), mTime: $('mTime'), mClock: $('mClock') });
@@ -197,7 +197,7 @@ function useAskCore() {
       return reachedRender;
     };
     CastFx.installCastFx({
-      onPlay: function () { const a = window.__xlrShell; if (a && a.s3bFxPlay) a.s3bFxPlay(); },
+      onPlay: function () { const a = window.__xlrShell; if (a && a.fxPlay) a.fxPlay(); },
       canCast: canCast
     });
     mark('castFx');

@@ -18,13 +18,10 @@
 
 <script>
 /* skinPrepaint.js —— **由工具生成，由工具生成，不要手改**（首屏预绘 = 皮肤 + 明暗）
-   来源：apps/desktop-web/src/legacy/parts/32-script.txt（换皮肤模块 IIFE 里解析期那几块）
-   生成：node tools/extract-skin-prepaint.mjs
    规矩：**提取不重写** —— 下面每一段都是从源文件**逐字节切片**搬来的原文；工具每次运行都做四条核对。
         改行为要改 legacy 源再重跑本工具（本文件升为真源）。
    ⚠ 本文件是**经典脚本**（不是 ES module）⇒ 由产出链（tools/make-doc-entry.mjs）内联进 HTML。
      不能改成模块：皮肤/明暗必须在**画第一帧之前**定到 html 上，defer 模块赶不上第一帧。
-   ⚠ 工具加的外包装（不是 legacy 正文）：外层 IIFE、末尾 apply(cur)、以及只读登记 window.__xlrPrepaint。
    ⚠ 源里「挂 window.XLR_SKINS / XLR_SKIN_APPLY / XLR_SKIN_CUR」那三行**不在这里** ——
      由本仓模块在模块期指向本仓实现（src/shell/main.jsx 的 mountSkins；模块期晚于解析期 ⇒ 本仓赢）。
    源 sha16 = 306931ad3e1f1bca
@@ -72,9 +69,7 @@ function apply(k) {
     }
   }
 /* ★ 本仓外包装（**不属于** legacy 正文；见文件头）：
-   ① 若 storage 里那个值**在我们表里**就用它 —— 源的回落判定只认它自己那份 9 套表，而本仓表更全（含追加皮肤）；
       真不在表里的非法值不受影响（保持源的回落 bw）。
-   ② 只读登记 window.__xlrPrepaint（判据据此证「这段确实在解析期跑过」）＋ 暴露 apply 备用。
    ③ **守护**：legacy 的 32-script（body 中段）也在解析期跑，它那份 9 套表不认新皮肤 ⇒ 会把 html 上的
       data-skin 覆盖成它的回落值、并把回落值写回 storage（实测：开机第一眼永远是默认皮肤）。
       这里用 MutationObserver 盯着 data-skin，被改走就按本仓那份合法值改回来。

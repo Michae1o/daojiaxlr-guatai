@@ -60,7 +60,7 @@ export default function EvidencePane({ B }) {
   /* 新一卦 ⇒ 回到收起态（React 官方「渲染期按 props 重置 state」写法；提交前发生，不闪一帧） */
   if (seenB !== B) { setSeenB(B); setOpenAll(false); setOpenSet({}); }
   useEffect(function () {
-    try { const a = window.__xlrShell; if (a && a.s3bOwn) a.s3bOwn('eviFold'); } catch (e) { }
+    try { const a = window.__xlrShell; if (a && a.fxOwn) a.fxOwn('eviFold'); } catch (e) { }
   }, []);
   const onToggleBlk = (i) => setOpenSet((s) => { const nx = Object.assign({}, s); nx[i] = !nx[i]; return nx; });
   return (

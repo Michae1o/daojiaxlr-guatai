@@ -31,7 +31,7 @@ export default function DivinationPane({ c }) {
   if (seenC !== c) { setSeenC(c); setCopyState(''); }
 
   useEffect(function () {
-    const mark = (k) => { try { const a = window.__xlrShell; if (a && a.s3bOwn) a.s3bOwn(k); } catch (e) { } };
+    const mark = (k) => { try { const a = window.__xlrShell; if (a && a.fxOwn) a.fxOwn(k); } catch (e) { } };
     mark('resultBind');
     mark('copyClean');
     return function () { if (tRef.current) clearTimeout(tRef.current); };

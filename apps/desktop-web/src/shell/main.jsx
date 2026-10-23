@@ -53,7 +53,7 @@ import { ShowCore } from '../data/showCore.js';
 import { VariantC } from '../data/variantC.js';
 import { SplashCore } from '../data/splashCore.js';
 
-const VERSION = '0.1.0-phase2';
+const VERSION = '0.1.0';
 
 /*
  *   —— 那是判「**旧**界面就绪」。删段（）之后那两个全局会消失 ⇒ 判据必须先换基准，
@@ -126,7 +126,7 @@ Object.defineProperty(window, '__xlrShell', { value: api, writable: false, confi
 /*
    */
 api.owned = [];
-api.s3bOwn = function (k) { if (k && api.owned.indexOf(k) < 0) api.owned.push(k); };
+api.fxOwn = function (k) { if (k && api.owned.indexOf(k) < 0) api.owned.push(k); };
 
 /* ===== （历史）bisect 臂：`VITE_BISECT=noreact` =====
  *   import/初始化本身」（含 变更记录 那两条 react-dom 装的被动监听），用来分离致因。
@@ -148,7 +148,7 @@ function mountAura() {
     /** 供判据做「删掉重建」实验：调它 = 再跑一遍源里那份 buildAura（幂等） */
     build: function () { Aura.buildAura(); },
   };
-  if (built) api.s3bOwn('aura');
+  if (built) api.fxOwn('aura');
 }
 mountAura();
 
@@ -170,7 +170,7 @@ function mountFooter() {
     /** 供判据做「删掉重建」实验：调它 = 再跑一遍源里那份 buildFooter（幂等） */
     build: function () { Footer.buildFooter(); },
   };
-  if (built) api.s3bOwn('footer');
+  if (built) api.fxOwn('footer');
 }
 mountFooter();
 
@@ -201,7 +201,7 @@ function mountGlobals() {
     /* */
     toast: Globals.toast,
   };
-  api.s3bOwn('globals');
+  api.fxOwn('globals');
 }
 mountGlobals();
 
@@ -223,7 +223,7 @@ function mountSetDot() {
     globalsOurs: window.updateSetDot === SetDot.updateSetDot
       && window.loadSet === SetDot.loadSet && window.refreshLLMWho === SetDot.refreshLLMWho,
   };
-  if (api.setDot.globalsOurs) api.s3bOwn('setDot');
+  if (api.setDot.globalsOurs) api.fxOwn('setDot');
 }
 mountSetDot();
 
@@ -264,7 +264,7 @@ function mountSkins() {
   try {
     if (window.__xlrPrepaintGuard) { window.__xlrPrepaintGuard.disconnect(); api.skins.guardOff = true; }
   } catch (ePG) { }
-  api.s3bOwn('skins');
+  api.fxOwn('skins');
 }
 mountSkins();
 
@@ -288,7 +288,7 @@ function mountOpenOut() {
     isOurs: window.openOut === OpenOut.openOut,           /* 全局已指到本仓这份 ⇒ 早期实现任何直接调用者也走我们 */
     seen: OpenOut.seen, handled: OpenOut.handled,         /* 判据读它证「这一次是我们处理的」（挂 s2ask，不进三臂比对） */
   };
-  api.s3bOwn('openOut');
+  api.fxOwn('openOut');
 }
 mountOpenOut();
 
@@ -341,7 +341,7 @@ function mountGuide() {
     /** 设置页那颗「重看引导」走的同一条入口 */
     show: Guide.show,
   };
-  if (built) api.s3bOwn('guide');
+  if (built) api.fxOwn('guide');
   /* 归位 ＋ 自动弹的调度：**必须等 DCL**（早期实现是在 DCL 的 init() 里才建 #setScreen、顺带定位置）。
      ⚠ 实测踩过：`<script type="module">` 是在 `readyState === 'interactive'`（解析完、DCL 还没发）时执行的
      当场报 -1 抓到的）。所以判据是「不是 complete ⇒ 等 DCL」。 */
@@ -435,7 +435,7 @@ function mountStepper() {
     legacyHooked: null,      /* 重指之前，那个口子是不是被早期实现 ready() 拿走了 */
     isOurs: null,            /* 重指之后 `window.__xlrSetStep === StepCore.setStep` */
   };
-  if (built) api.s3bOwn('stepper');
+  if (built) api.fxOwn('stepper');
   /* ★ 见上面 ②：必须晚于早期实现 ready() 的赋值 ⇒ 挂在 load 上 */
   const tookOver = () => {
     api.stepper.legacyHooked = (typeof window.__xlrSetStep === 'function') && window.__xlrSetStep !== StepCore.setStep;
@@ -1079,7 +1079,7 @@ function mountMain() {
     if (window.__md) { try { ResultCore.revealNewBtn(); } catch (eR) { } }
     try { if (typeof window.renderSdb === 'function') window.renderSdb(); } catch (eB) { }
   };
-  api.s3bOwn('bindResult');
+  api.fxOwn('bindResult');
 
   /*
      `WalkCore.installWalk()`（切片在 `src/data/walkCore.js`）把 `window.playWalk` 换成
@@ -1095,7 +1095,7 @@ function mountMain() {
         try { if (typeof window.__xlrVnext === 'function') window.__xlrVnext(true); } catch (eV) { }
       }
     });
-    if (st.walkInstalled) api.s3bOwn('walkCore');
+    if (st.walkInstalled) api.fxOwn('walkCore');
   } catch (eW) { st.walkError = String((eW && eW.message) || eW); }
 }
 mountMain();
@@ -1140,7 +1140,7 @@ function mountAsk() {
   /*
      */
   /* 四拍由 React 播时，每播一次报一次（判据读 `fxPlays`） */
-  api.s3bFxPlay = function () { st.fxPlays += 1; };
+  api.fxPlay = function () { st.fxPlays += 1; };
   /*
      整体空转，四拍只由 React 的 `CastFx.installCastFx` 播 ⇒ 不会两套并存播两遍。 */
   try { window.__xlrCasting = 1; } catch (eC) { }
@@ -1160,7 +1160,7 @@ function mountAsk() {
   const anchor = legacy.nextSibling;
   legacy.remove();
   st.legacyNodeRemoved = true;
-  api.s3bOwn('legacyPaneRemoved');
+  api.fxOwn('legacyPaneRemoved');
   const askHost = document.createElement('div');   /* React 根容器：故意不挂进文档（DOM 由 portal 提供） */
   const askRoot = createRoot(askHost);
   flushSync(() => askRoot.render(createPortal(<AskPanel />, left)));
@@ -1201,7 +1201,7 @@ function mountAsk() {
      · 为什么必须中和：18-script 有一条每 2 秒的 timer（L164）调全局 `refreshClock()`，它按 **id** 写
        `#castMini` / 九数值 ⇒ 与 React 侧的新写者**抢同一个态**（两个写者 = 抖动/半活状态）。
      · 中和后：`#castMini` 与九数**只有 React 一个写者**（`AskCore.refreshClock`），行为不变。 */
-  try { window.refreshClock = function () { }; api.s3bOwn('legacyClockNeutralized'); } catch (eN) { }
+  try { window.refreshClock = function () { }; api.fxOwn('legacyClockNeutralized'); } catch (eN) { }
 
   /* ⑥ 分段控件那颗滑动药丸（`.spill`）的**位置/宽度**：React 只建了元素（见 AskPanel 注释），
      摆位由这里按 `38-script.txt` **L515–526 `placeSpill()` 的 4 行几何逐字照抄**（不是重写：同左邻右舍的判定、
@@ -1279,7 +1279,7 @@ function mountVariantC() {
          */
     build: function () { VariantC.mount(); },
   };
-  if (built) api.s3bOwn('variantC');
+  if (built) api.fxOwn('variantC');
 }
 mountVariantC();
 

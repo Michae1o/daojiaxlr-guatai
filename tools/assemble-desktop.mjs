@@ -124,7 +124,7 @@ const STYLE_CHUNK = '<style id="xlr-fix-20261012">\n' +
 if (APPEND) {
   const js = lf(fs.readFileSync(APPEND, 'utf8'));
   if (js.includes('</script')) die('外壳模块里含 </script 字面量，内联会截断脚本：' + APPEND);
-  const appendChunk = '<script type="module">\n/* 外壳：React 启动/路由/加载（Phase 2） */\n' + js + '\n</script>\n';
+  const appendChunk = '<script type="module">\n/* 外壳：React 启动/路由/加载 */\n' + js + '\n</script>\n';
   const at = finalDoc.lastIndexOf('</body>');
   if (at < 0) die('找不到 </body>，无法追加外壳模块');
   finalDoc = finalDoc.slice(0, at) + appendChunk + finalDoc.slice(at);

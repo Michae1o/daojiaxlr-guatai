@@ -1729,7 +1729,6 @@ html[data-step] .wrap{max-width:clamp(880px,78vw,1320px);padding:24px 44px 56px}
 html[data-step] .top-in{max-width:clamp(880px,78vw,1320px)}
 html[data-step] .left{margin-bottom:0}
 /*
-   页面上别的一概不出现。★ 注意：7vh 那种「只有这一页才有的上边距」不能加在 .wrap 上，
    否则步进条（.wrap 的第一个孩子）会跟着往下跳——切页时看的人难受。
    所以：.wrap 的内距各页一致，qa 页的呼吸感加在 .left 上。 */
 html[data-step="q"] .wrap{max-width:1000px;padding:24px 44px 56px;display:block}

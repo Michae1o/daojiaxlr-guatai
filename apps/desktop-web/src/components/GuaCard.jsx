@@ -31,7 +31,7 @@ export default function GuaCard({ c }) {
   if (seenC !== c) { setSeenC(c); setVnext(false); }
   useEffect(function () {
     /* */
-    try { const a = window.__xlrShell; if (a && a.s3bOwn) { a.s3bOwn('walkSettle'); a.s3bOwn('vnextButton'); } } catch (e) { }
+    try { const a = window.__xlrShell; if (a && a.fxOwn) { a.fxOwn('walkSettle'); a.fxOwn('vnextButton'); } } catch (e) { }
     /* 外壳那条 `onSettle`（落定后 350ms）就调这里（`__xlrRecordsRefresh` 同族：未注册即静默） */
     window.__xlrVnext = function (on) { setVnext(!!on); };
     return function () { try { window.__xlrVnext = null; } catch (eC) { } };
