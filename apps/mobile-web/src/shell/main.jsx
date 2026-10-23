@@ -54,6 +54,7 @@ import { SplashCore } from '../data/splashCore.js';
 import { PhoneShims } from '../data/phoneShims.js';
 import { PhoneAnim } from '../data/phoneAnim.js';
 import { PhoneNav } from '../data/phoneNav.js';
+import { NativeShell } from '../native/nativeShell.js';
 
 const VERSION = '0.1.0-phase2';
 
@@ -266,7 +267,7 @@ function mountSkins() {
   }
   api.skins = {
     owner: 'react', assigned: assigned,
-    legacyApplyWasFn: typeof legacyApply === 'function',   /* 旧层确实挂过一个（取证：证「覆盖」不是白覆） */
+    legacyApplyWasFn: typeof legacyApply === 'function',   /* 旧层确实挂过一个（实测：证「覆盖」不是白覆） */
     globalsOurs: window.XLR_SKIN_APPLY === SkinsCore.apply
       && window.XLR_SKINS === SkinsCore.SKINS
       && window.XLR_SKIN_CUR === SkinsCore.cur,
@@ -800,7 +801,7 @@ function mountRecords() {
   };
   api.s2records = st;
 
-  /* ★★ 2026-10-12 你定（真坑一 + 真坑二，都在 C3 靶区）：把「点抽屉外面关抽屉」的**所有权**
+  /* ★★ 2026-10-12 实测（真坑一 + 真坑二，都在 C3 靶区）：把「点抽屉外面关抽屉」的**所有权**
        ① legacy 那条**不再生效**；
        ② 外壳**自己**实现「点抽屉真正外面才关」，判据 = 抽屉的实际 DOM 边界（`#sdb` 整棵，
           含页签栏 / 底部按钮 / 回收站块），**不是** `#sdbCases` 那一块矩形；
@@ -1045,7 +1046,7 @@ function mountMain() {
     st.lastC = String((c && c.g1) || '') + ' · ' + String((c && c.g2) || '') + ' · ' + String((c && c.g3) || '');
     renderMain(c, B);                    /* DOM 归 React（**同步**提交，链上紧接着要按 id/class 找节点） */
     const r = ShowCore.show(c, B);       /* ★ 态写者（__ctx/__blocks/__md）＋ 接着问区 ＋ addCase：本仓这条链 */
-    /* ★ 2026-10-23（你报「新开一卦之后，接着问还带着上一卦的问题」）：`__thread` 每卦都清，
+    /* ★ 2026-10-23（实测「新开一卦之后，接着问还带着上一卦的问题」）：`__thread` 每卦都清，
        但 `#askBox` 里那些 `.ask-item` 是 DOM 残留、没人清。⇒ 在这里收口：**任何入口起卦**都走这条
        `show`，所以清在这里才等于「有新起卦就刷新」；顺带补上「在本卦的基础上接着问」那行小字。 */
     try { resetAskBox(); } catch (eAB) { }
@@ -1147,7 +1148,7 @@ function mountAsk() {
   /* ★ A3①：「已接管项」的登记函数已提到文件头附近（定义在 `api` 上）—— 见那里的注释。
      （原先在这里定义 ⇒ S2/MAIN 块调不到，A3 的 `bindResult` 就登记不进去。） */
   /* 四拍由 React 播时，每播一次报一次（判据读 `fxPlays`） */
-  api.s3bFxPlay = function () { st.fxPlays += 1; };
+  api.fxPlay = function () { st.fxPlays += 1; };
   /* ★  批 A2②：**常置** `window.__xlrCasting = 1` ⇒ 38-script 那个 legacy 拦截器（它只认这一个旗）
      整体空转，四拍只由 React 的 `CastFx.installCastFx` 播 ⇒ 不会两套并存播两遍。 */
   try { window.__xlrCasting = 1; } catch (eC) { }
@@ -1364,12 +1365,37 @@ function mountPhoneNav() {
     owner: 'react',
     ran: !!ev,
     installed: !!(ev && ev.enabled),
-    reason: '手机版不要底栏（用户 2026-10-16）：不建节点、不接线；代码留在 data/phoneNav.js 备用',
+    reason: '手机版不要底栏（你 2026-10-16）：不建节点、不接线；代码留在 data/phoneNav.js 备用',
     error: ev && ev.error ? String(ev.error) : null,
     state: function () { return PhoneNav.state(); },
   };
 }
 mountPhoneNav();
+
+/* ============ App 那一层（★ 2026-10-23，实测「做成 app 之后用起来和网页一样」）============
+ * 源：本仓新写 `src/native/nativeShell.js`（不是从旧仓搬的 —— 旧仓根本没有这一层）。
+ * 干什么：状态栏跟随皮肤明暗 · 去掉 iOS 键盘上方那条工具栏 · 起卦/换页轻震 ·
+ *   安卓返回键按层级退（弹窗 → 抽屉 → 详情 → 上一步 → 退出）· 原生启动图等 HTML 开屏画出来再撤。
+ *   逐条的「为什么」写在那个文件头注里。
+ * ⚠ 位置 = 最后一块：返回键要读 `data-step` / `#mask` / `#sdb` / `#castPanel` 这些**已经建好**的东西。
+ * ⚠ 网页与桌面端 `isNativePlatform()` 为假 ⇒ 整个函数立刻 return，连监听都不挂（零副作用）。
+ * ⚠ 归属登记走 `api.nativeShell`，不进 `READY_MOUNTS`（同 phoneShims / phoneAnim / phoneNav）。
+ */
+function mountNativeShell() {
+  let ev = null;
+  try { ev = NativeShell.installNativeShell(); } catch (eNS) { ev = { error: String((eNS && eNS.message) || eNS) }; }
+  api.nativeShell = {
+    owner: 'react',
+    isNative: !!(ev && ev.isNative),
+    platform: (ev && ev.platform) || 'web',
+    plugins: (ev && ev.plugins) || {},
+    wired: (ev && ev.wired) || [],
+    error: (ev && ev.error) || null,
+    /** 供判据：手动退一步（返回键那条链在安卓上走原生事件，这里给同一份实现做等价验证） */
+    backOnce: function () { return NativeShell.backOnce(); },
+  };
+}
+mountNativeShell();
 
 
 

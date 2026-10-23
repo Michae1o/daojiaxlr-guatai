@@ -1,8 +1,27 @@
 {
-  "appId": "cn.xiaoliuren.guatai",
+  "appId": "cn.luoshen.xiaoliuren",
   "appName": "道家小六壬 · 卦台",
   "webDir": "www",
   "android": {
     "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 500,
+      "backgroundColor": "#F4F4F5",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "iosSpinnerStyle": "none"
+    },
+    "Keyboard": {
+      "resize": "native",
+      "resizeOnFullScreen": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#F4F4F5",
+      "overlaysWebView": false
+    }
   }
 }

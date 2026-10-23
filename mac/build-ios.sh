@@ -48,7 +48,7 @@ node -e 'require.resolve("@capacitor/ios",{paths:[require("path").resolve("apps/
 echo "  @capacitor/ios 已就位"
 
 echo ""
-echo "== 2. 前端壳在场 + 核对（手机端加密壳，与安卓同一份）=="
+echo "== 2. 前端壳在场 + 自证（手机端加密壳，与安卓同一份）=="
 [ -f "$APP/www/index.html" ] || { echo "✗ 缺 $APP/www/index.html"; exit 1; }
 echo "  www/index.html  $(wc -c <"$APP/www/index.html" | tr -d ' ') B"
 node -e '
@@ -71,6 +71,25 @@ fi
 ( cd "$APP" && npx cap sync ios )
 
 echo ""
+echo "== 3b. Info.plist：状态栏交给原生插件 =="
+# ★ 2026-10-23（用户报「做成 app 之后用起来和网页一样」）：
+#   @capacitor/status-bar 在 iOS 上靠 UIApplication.statusBarStyle 改样式，
+#   而 Info.plist 里默认是 `UIViewControllerBasedStatusBarAppearance = YES`
+#   ⇒ view controller 说了算 ⇒ 插件调 setStyle 无效（症状：深色皮肤下状态栏黑字压深底看不见）。
+#   这两条是那个插件在 iOS 上能工作的前提，`cap sync` 不会替你写。
+PLIST="$APP/ios/App/App/Info.plist"
+if [ -f "$PLIST" ]; then
+  /usr/libexec/PlistBuddy -c 'Delete :UIViewControllerBasedStatusBarAppearance' "$PLIST" 2>/dev/null || true
+  /usr/libexec/PlistBuddy -c 'Add :UIViewControllerBasedStatusBarAppearance bool false' "$PLIST" || exit 1
+  /usr/libexec/PlistBuddy -c 'Delete :UIStatusBarStyle' "$PLIST" 2>/dev/null || true
+  /usr/libexec/PlistBuddy -c 'Add :UIStatusBarStyle string UIStatusBarStyleDarkContent' "$PLIST" || exit 1
+  echo "  UIViewControllerBasedStatusBarAppearance = false"
+  echo "  UIStatusBarStyle = UIStatusBarStyleDarkContent"
+else
+  echo "  ⚠ 没找到 $PLIST（cap add ios 没成功？）"
+fi
+
+echo ""
 echo "== 4. 编模拟器版（不需要签名证书）=="
 DERIVED="$APP/ios/build"
 cd "$APP/ios/App"
@@ -87,7 +106,7 @@ cd - >/dev/null
 SIM_APP="$APP/ios/build/Build/Products/Debug-iphonesimulator/App.app"
 [ -d "$SIM_APP" ] || { echo "✗ 没找到模拟器产物：$SIM_APP"; exit 1; }
 echo ""
-echo "== 5. 产物核对 =="
+echo "== 5. 产物自证 =="
 file "$SIM_APP/App" 2>/dev/null || file "$SIM_APP/$(ls "$SIM_APP" | grep -v '\.' | head -1)"
 /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$SIM_APP/Info.plist" 2>/dev/null | sed 's/^/  CFBundleIdentifier = /'
 /usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$SIM_APP/Info.plist" 2>/dev/null | sed 's/^/  CFBundleDisplayName = /'
@@ -101,7 +120,7 @@ echo "   跑模拟器："
 echo "     open -a Simulator"
 echo "     xcrun simctl boot 'iPhone 15' 2>/dev/null || true"
 echo "     xcrun simctl install booted \"$SIM_APP\""
-echo "     xcrun simctl launch booted cn.xiaoliuren.guatai"
+echo "     xcrun simctl launch booted cn.luoshen.xiaoliuren"
 echo ""
 echo "   真机 / 用 Xcode 打开："
 echo "     open \"$APP/ios/App/App.xcworkspace\""

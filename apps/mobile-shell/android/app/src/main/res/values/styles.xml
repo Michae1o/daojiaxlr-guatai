@@ -9,14 +9,38 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- ★ 2026-10-23（实测「做成 app 之后用起来和网页一样」）：
+         状态栏/导航栏这四行是**开机那一帧**的底 —— 默认皮肤「黑白」的 bg = #F4F4F5，
+         深色图标（浅底上的黑字）。运行时由 @capacitor/status-bar 按皮肤改，
+         真源是 apps/mobile-web/src/native/nativeShell.js 的 syncStatusBar()。
+         注意：别删这四行：删了以后冷启动会先闪一条系统默认的黑/白状态栏。
+         ⚠ windowLightStatusBar 是 API 23+、windowLightNavigationBar 是 API 27+；
+           放在 values/ 里由低版本系统自行忽略（本工程 minSdk 22），aapt 只会给提示不报错。 -->
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <item name="android:statusBarColor">#F4F4F5</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">#F4F4F5</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
 
+    <!-- 启动画面主题（Activity 上那条）：底图已换成纯色（tools/_gen-android-splash.py），
+         状态栏同色 ⇒ 从原生启动图到 HTML 开屏中间不出现第二条色带。
+         ★ Android 12+ 的启动画面**由系统接管**（androidx core-splashscreen），
+           那边用的是窗口背景色 + windowSplashScreenAnimatedIcon，不看 android:background
+           ⇒ 后面三行必须写，否则 12+ 上是一张系统默认白底 + 图标，跟下面 #F4F4F5 对不上。
+           postSplashScreenTheme 缺了会让启动主题不切走（残留 splah 层）。 -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+        <item name="android:statusBarColor">#F4F4F5</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">#F4F4F5</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="windowSplashScreenBackground">#F4F4F5</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>

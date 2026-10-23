@@ -281,3 +281,75 @@ html[data-skin="xuan"] #q:focus {
   background-color: transparent !important;
   border-color: transparent !important;
 }
+
+
+
+
+:root { --xlr-sab: env(safe-area-inset-bottom, 0px); }
+#sdb .sdb-foot .sdb-set { padding-bottom: calc(14px + var(--xlr-sab)); } /* 抽屉底部「设置」 */
+.mask .dlg-f { padding-bottom: calc(14px + var(--xlr-sab)); }            /* 设置弹窗底栏 */
+
+/* ② 输入框 ≥16px（iOS 低于 16px 聚焦必放大）。十六是硬线，不是审美选择 */
+html[data-step] #q,
+html[data-step] .cmain textarea,
+html[data-step] .stf input,
+html[data-step] .stf select,
+html[data-step] .cr-note input,
+html[data-step] #sdb .sdb-search input { font-size: 16px; }
+
+
+html[data-step] .tbtn,
+html[data-step] .ibt,
+html[data-step] .seg button,
+html[data-step] .vstep button,
+html[data-step] .sdb-set,
+html[data-step] #btnGo,
+html[data-step] .chips .tag,
+html[data-step] .sl-go,
+html[data-step] .skinmenu button {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* ④ 到顶/到底不要橡皮筋露白（那一下最像网页） */
+html, body { overscroll-behavior-y: none; }
+
+/* ⑤ 键盘弹起时按**可视高度**算，别用 100vh —— iOS 的 vh 不随键盘缩，输入框会被压到键盘后面 */
+@supports (height: 100dvh) {
+  html[data-step] .left { min-height: calc(100dvh - 90px); }
+}
+
+
+#sdb .sdb-foot .trash { display: block !important; }
+#sdb .sdb-foot .trash .btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;   /* 触摸目标：低于 34 手指容易点歪 */
+  padding: 0 12px;
+}
+#sdb .sdb-foot .trash .tr-row { padding: 10px 0; }
+#sdb .sdb-foot .trash .tr-q { font-size: 13px; }
+
+
+html.xlr-android:is([data-skin="hei"], [data-skin="dh"], [data-skin="mg"], [data-skin="tonggu"]) #xlrAura i {
+  /* ⚠ 必须 !important：legacy.css L4328 有一条
+     `#xlrAura i{border-radius:50% !important;filter:none !important;opacity:1 !important}`
+     —— 不带 !important 的话这条会被它整条压掉（实测：background 生效、opacity/filter 全是原值）。 */
+  opacity: .30 !important;
+  filter: blur(18px) !important;
+}
+html.xlr-android:is([data-skin="hei"], [data-skin="dh"], [data-skin="mg"], [data-skin="tonggu"]) #xlrAura i:nth-child(1) {
+  background: radial-gradient(closest-side, var(--a1, #6898ff), transparent 84%) !important;
+}
+html.xlr-android:is([data-skin="hei"], [data-skin="dh"], [data-skin="mg"], [data-skin="tonggu"]) #xlrAura i:nth-child(2) {
+  background: radial-gradient(closest-side, var(--a2, #7aa8ff), transparent 84%) !important;
+}
+html.xlr-android:is([data-skin="hei"], [data-skin="dh"], [data-skin="mg"], [data-skin="tonggu"]) #xlrAura i:nth-child(3) {
+  background: radial-gradient(closest-side, var(--a3, #b48cff), transparent 84%) !important;
+}
+html.xlr-android:is([data-skin="hei"], [data-skin="dh"], [data-skin="mg"], [data-skin="tonggu"]) #xlrAura i:nth-child(4) {
+  background: radial-gradient(closest-side, var(--a1, #78dccd), transparent 84%) !important;
+}
