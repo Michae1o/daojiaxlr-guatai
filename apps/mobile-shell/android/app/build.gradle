@@ -1,19 +1,19 @@
 apply plugin: 'com.android.application'
 
-/* ★ 2026-10-16（实测「你打的包在手机上不能覆盖安装，旧仓的包都可以」）——
-   真因：本仓此前一直用 **Android 自带 debug 钥匙**签名（`CN=Android Debug`），而你旧仓的包用的是
-   他那把**正式钥匙**（`CN=LuoShen, OU=IndieEcho, O=Independent, L=Suzhou, ST=Jiangsu, C=CN`，
+/* ★ （现象：打的包在手机上不能覆盖安装，而上游的包可以）——
+   真因：本仓此前一直用 **Android 自带 debug 钥匙**签名（`CN=Android Debug`），而上游的包用的是
+   那把**正式钥匙**（`CN=LuoShen, OU=IndieEcho, O=Independent, L=Suzhou, ST=Jiangsu, C=CN`，
    cert SHA-256 `a88bd077…324c55`）⇒ 安卓认定「不是同一个应用」⇒ 拒绝覆盖安装
    （同签名才能覆盖，才能保住记录 / profile）。
-   修法：**两个 buildType（含 `npm run apk` 走的 debug）都改用他那把正式钥匙**。
-   注意：钥匙库与口令**留在你自己的位置**（`E:\Develop\xiaoliuren-android\`，见其《密钥库位置.txt》），
+   修法：**两个 buildType（含 `npm run apk` 走的 debug）都改用那把正式钥匙**。
+   注意：钥匙库与口令**留在你自己的位置**（你自己指定的位置），
       本仓只**引用**不复制、不进 git；分发物里绝不带私钥。
    注意：找不到签名配置**不静默降级**：直接报错停下 —— 免得又打出一份装不上的包。
    可用环境变量 `XLR_KEYSTORE_PROPS` 覆盖 properties 路径。 */
-def xlrKsPropsFile = file(System.getenv('XLR_KEYSTORE_PROPS') ?: 'E:/Develop/xiaoliuren-android/android/keystore.properties')
+def xlrKsPropsFile = file(System.getenv('XLR_KEYSTORE_PROPS') ?: '../keystore.properties')   /* 自己的 keystore.properties 放仓库根（已在 .gitignore）；没有就走下面自带 debug 钥匙 */
 def xlrKsProps = new Properties()
 if (xlrKsPropsFile.exists()) {
-    /* ⚠ 必须显式 UTF-8：Java 的 Properties.load(InputStream) 按 ISO-8859-1 读（旧仓 move_keystore.py 记过这个坑） */
+    /* ⚠ 必须显式 UTF-8：Java 的 Properties.load(InputStream) 按 ISO-8859-1 读（上游 move_keystore.py 记过这个坑） */
     xlrKsPropsFile.withInputStream { xlrKsProps.load(new InputStreamReader(it, 'UTF-8')) }
 }
 
@@ -33,24 +33,33 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    /* 默认就能编：没填正式钥匙 ⇒ 直接用 Android 自带 debug 钥匙（能装能看）。
+       想强制要求正式签名（正式发版）再设 XLR_REQUIRE_REAL_KEY=1。 */
+    def xlrUseRealKey = xlrKsPropsFile.exists()
+    if (!xlrUseRealKey) {
+        if (System.getenv('XLR_REQUIRE_REAL_KEY') == '1') {
+            throw new GradleException('你设了 XLR_REQUIRE_REAL_KEY=1，但没找到签名配置：' + xlrKsPropsFile
+                + ' —— 见 README「出安卓 APK」')
+        }
+        println '没填正式签名 ⇒ 本次用 Android 自带 debug 钥匙（能装能看；正式发版请填 keystore.properties）'
+    }
     signingConfigs {
-        release {
-            if (!xlrKsPropsFile.exists()) {
-                throw new GradleException('缺少签名配置（会打出装不上的包）：' + xlrKsPropsFile + '  —— 见其《密钥库位置.txt》')
+        if (xlrUseRealKey) {
+            release {
+                storeFile file(xlrKsProps.storeFile)
+                storePassword xlrKsProps.storePassword
+                keyAlias xlrKsProps.keyAlias
+                keyPassword xlrKsProps.keyPassword
             }
-            storeFile file(xlrKsProps.storeFile)
-            storePassword xlrKsProps.storePassword
-            keyAlias xlrKsProps.keyAlias
-            keyPassword xlrKsProps.keyPassword
         }
     }
     buildTypes {
         debug {
-            /* 让 `npm run apk`（assembleDebug）也带正式签名 ⇒ 能覆盖安装、保数据 */
-            signingConfig signingConfigs.release
+            /* 有正式钥匙 ⇒ 带它（能覆盖安装、保数据）；无钥匙 ⇒ Android 自带 debug 钥匙 */
+            signingConfig xlrUseRealKey ? signingConfigs.release : signingConfigs.debug
         }
         release {
-            signingConfig signingConfigs.release
+            signingConfig xlrUseRealKey ? signingConfigs.release : signingConfigs.debug
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

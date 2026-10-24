@@ -87,7 +87,7 @@ fn save_export(name: String, text: String) -> Result<String, String> {
         .filter(|c| c.is_alphanumeric() || "._-（）·（）".contains(*c) || (*c as u32) > 127)
         .collect();
     let safe = if safe.is_empty() { "导出.json".to_string() } else { safe };
-    // ★ 2026-10-18（mac 编译包）：Windows 用 USERPROFILE，macOS / Linux 只有 HOME。
+    // ★ （mac 编译包）：Windows 用 USERPROFILE，macOS / Linux 只有 HOME。
     let home = std::env::var("USERPROFILE")
         .or_else(|_| std::env::var("HOME"))
         .map_err(|e| e.to_string())?;

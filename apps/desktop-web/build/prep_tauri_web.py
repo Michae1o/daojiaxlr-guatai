@@ -54,7 +54,7 @@ print("       ", WEB / "shim.js")
 # 自检
 t = (WEB / "index.html").read_text(encoding="utf-8")
 # 「邵一尘」不在泄露词表里——署名是要求印的，属正当标注
-# ★ 2026-10-19（变更记录）：那行署名从可见的开机占位层挪到了 `<meta name="author">`
+# ★ （变更记录）：那行署名从可见的开机占位层挪到了 `<meta name="author">`
 leak = [w for w in ["大安", "留连", "速喜", "赤口", "小吉", "空亡", "落宫", "判据"] if w in t]
 sc = (WEB / "shim.js").read_text(encoding="utf-8")
 print()
@@ -62,6 +62,6 @@ print("OK  含适配层 =", 'shim.js' in t)
 print("OK  仍是加密壳 =", "TextDecoder" in t)
 print("OK  署名正当（出现 1 次）=", t.count("邵一尘") == 1)
 print("OK  无理论明文 =", "无 ✓" if not leak else leak)
-# ★ 2026-10-07 雷：适配层曾在运行时 setTitle() 覆写窗口标题，改名后 UI 看不出
+# ★ 雷：适配层曾在运行时 setTitle() 覆写窗口标题，改名后 UI 看不出
 print("OK  适配层无覆写标题 =", ("setTitle" not in sc and "起卦解卦台" not in sc))
 sys.exit(1 if (leak or t.count("邵一尘") != 1 or "setTitle" in sc or "起卦解卦台" in sc) else 0)

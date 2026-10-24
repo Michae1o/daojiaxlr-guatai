@@ -143,10 +143,10 @@ function setMode(m) {
     refreshClock();
   }
   document.getElementById('modeHint').textContent = m === 'num' ? '报数' : (m === 'time' ? '月日时' : '时间取数');
-  /* ★ 2026-10-08：离开「时间取数」就清掉手改标记；九数默认撑开状态跟着方式走
+  /* ★ 离开「时间取数」就清掉手改标记；九数默认撑开状态跟着方式走
      （时间取数是自动取数 ⇒ 默认收起；报数 / 月日时必须填 ⇒ 默认展开）。 */
   if (m !== 'clock') window.__numManual = false;
-  /* ★ 2026-10-10：「起卦方式点到月日时，不用自动跳出来详情，到报数才用」。
+  /* ★ 「起卦方式点到月日时，不用自动跳出来详情，到报数才用」。
       */
   if (m === 'num') setCastOpen(true);
   var cfM = document.getElementById('castFields');

@@ -15,7 +15,7 @@ export var ASK_TIP = '在本卦的基础上接着问';
 export function resetAskBox() {
   var box = document.getElementById('askBox');
   var seq = (window.__askSeq = (window.__askSeq | 0) + 1);
-  if (!box) return seq;                       /* 首卦：还没插（旧层没跑）⇒ 没东西可清 */
+  if (!box) return seq;                       /* 首卦：还没插（早期实现没跑）⇒ 没东西可清 */
   var list = document.getElementById('askList');
   if (list) list.innerHTML = '';
   var note = document.getElementById('askNote');

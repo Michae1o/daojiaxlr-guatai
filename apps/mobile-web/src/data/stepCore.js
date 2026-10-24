@@ -87,7 +87,7 @@ function buildStepper() {
       h += '<button type="button" data-k="' + STEPS[i][0] + '" aria-label="' + STEPS[i][2] + ' · ' + STEPS[i][1] + '">' +
         '<i>' + STEPS[i][2] + '</i><span class="vsl">' + STEPS[i][1] + '</span></button>';
     }
-    /* ★ 2026-10-09 液滴三件套：颈（.vneck，连接两团的那根丝）、源（.vsrc，留在旧圆上的那团）、
+    /* ★ 液滴三件套：颈（.vneck，连接两团的那根丝）、源（.vsrc，留在旧圆上的那团）、
        头（.vpill，落到新圆上的那滴）。DOM 顺序＝绘制顺序，头写在最后＝压在最上面。 */
     h += '<span class="vneck" aria-hidden="true"></span><span class="vsrc" aria-hidden="true"></span>';
     h += '<span class="vpill" aria-hidden="true"></span>';
@@ -224,7 +224,7 @@ function syncStep() {
     var bar = document.querySelector('.vstep');
     var prevOn = bar ? bar.querySelector('button[data-st="on"]') : null;   /* 换步前的当前步 */
     var bs = document.querySelectorAll('.vstep button');
-    /* ★ 2026-10-09：多一个圆 ⇒ 整行会重新居中（瞬时位移）⇒ 视觉上「啪」地跳一下。
+    /* ★ 多一个圆 ⇒ 整行会重新居中（瞬时位移）⇒ 视觉上「啪」地跳一下。
        先记下整行最左那个圆的位置，露完之后用反向 transform 抵掉、再放掉 ⇒ 丝滑滑过去。 */
     var anchor = null;
     for (var a0 = 0; a0 < bs.length; a0++) if (bs[a0].offsetWidth > 0) { anchor = bs[a0]; break; }
@@ -257,7 +257,7 @@ function syncStep() {
       pillSplit(bar, prevOn, nowOn);
       return;
     }
-    /* ★★ 2026-10-09 治「点一步会跳一下」：换页面时 .wrap 的内距不同（问卦页比其他页窄 14px），
+    /* ★★ 治「点一步会跳一下」：换页面时 .wrap 的内距不同（问卦页比其他页窄 14px），
        工具条的坐标系会整体平移几像素 —— 按钮因为居中看不出来，但药丸的 left 是相对工具条的绝对值，
        不补偿就会先"跳"那几像素再开始滑。做法＝FLIP：先按**上一个当前步**在新坐标系里的位置
        静默放一次（此时屏幕位置不变 ⇒ 看不出任何动静），再交给 placePill 过渡到新目标。 */

@@ -35,14 +35,14 @@ import { createPortal } from 'react-dom';
 import { RecordsStore } from '../data/recordsStore.js';
 import SafeZone from './SafeZone.jsx';
 import { ReviewCore } from '../review/reviewCore.js';
-import { recAskHtml } from '../data/modelAskCore.js';   /* ★ 2026-10-15：记录行「接着问」区（原先只读 window.recAskHtml ⇒ 渲染成空） */
-import { htmlEsc as esc } from '../data/docRender.js';   /* ★ 2026-10-15：收敛到唯一一份转义实现（原先降级成不转义的 String()） */
+import { recAskHtml } from '../data/modelAskCore.js';   /* ★ 记录行「接着问」区（原先只读 window.recAskHtml ⇒ 渲染成空） */
+import { htmlEsc as esc } from '../data/docRender.js';   /* ★ 收敛到唯一一份转义实现（原先降级成不转义的 String()） */
 
 /* legacy 全局取值（装载顺序：classic 脚本段在前、外壳 module 在后 ⇒ 渲染期一定已在） */
 const g = (k) => (typeof window !== 'undefined' ? window[k] : undefined);
-/* ★ 2026-10-15：`esc` 不再本地降级——已改为上面从 docRender.js 导入的唯一一份 `htmlEsc`。 */
+/* ★ `esc` 不再本地降级——已改为上面从 docRender.js 导入的唯一一份 `htmlEsc`。 */
 
-/* ★ 2026-10-15：`bold` / `renderDoc` 这两个 legacy 全局**在新产物里根本不在 window 上**
+/* ★ `bold` / `renderDoc` 这两个 legacy 全局**在新产物里根本不在 window 上**
    （实测 `typeof window.bold === 'undefined'`；同批的 `esc` 早有守卫兜底，只剩这两个是裸调用）
    ⇒ 记录里只要有一条**带断辞**（`duanci` 非空），`CaseRow` 一渲染就抛 `TypeError: Xr(...) is not a function`
    （干净 profile 里 `xlr-cases` 是空的 ⇒ 走不到这句 ⇒ 之前的复现全是假阴性。）
@@ -148,7 +148,7 @@ function CaseRow({ r, first, going }) {
   const du = r.duanci ? bold(esc(String(r.duanci).replace(/<b>(.*?)<\/b>/g, '**$1**').replace(/<[^>]*>/g, '').slice(0, 140))) : '';
   return (
     <div className={'case-row' + (r.fb === '错' ? ' bad' : '') + (first ? ' on' : '') + (going ? ' going' : '')} data-row={r.id} title="点开看这一卦">
-      {/* ★ 2026-10-22（要求）：手机端这一行 —— 长按出选项面板、尾部竖三点也是同一个面板、左滑露出红底删除。
+      {/* ★ （要求）：手机端这一行 —— 长按出选项面板、尾部竖三点也是同一个面板、左滑露出红底删除。
           .cr-sw 是「会被推走的那一层」，.cr-del 是贴着右边、平时透明不可点的删除按钮。 */}
       <div className="cr-sw">
         <div className="cr-h">
@@ -172,7 +172,7 @@ function CaseRow({ r, first, going }) {
         {r.fb === '错' ? <Rv r={r} /> : null}
         {du ? <div className="cr-d" dangerouslySetInnerHTML={{ __html: du }} /> : null}
       </div>
-      {/* ★ 2026-10-23：竖三点挪到 `.cr-sw` **外面**，直接挂在行上。
+      {/* ★ 竖三点挪到 `.cr-sw` **外面**，直接挂在行上。
          原因：`.cr-sw` 为了做位移带了 `will-change:transform` ⇒ 它成了绝对定位的包含块，
          `right:4px` 是相对那条窄窄的头部算的（实测三点落在 x=55 而不是行尾）。 */}
       <button type="button" className="cr-more" data-more={r.id} aria-label="更多操作" aria-haspopup="menu">⋮</button>
@@ -231,12 +231,12 @@ export default function Records({ open = false, onClose }) {
   const [q, setQ] = useState(() => String((typeof window !== 'undefined' && window.__sdbQ) || ''));
   const [detailId, setDetailId] = useState('');   /* ⇔ 早前的版本 `window.__sdbDetail`（bindCaseBox L458 / L464-465） */
   const [trashId, setTrashId] = useState('');     /* ⇔ 早前的版本 `[data-open]` 那条「直接写 box」的临时详情（L264） */
-  /* ★ 2026-10-22（现象：「点了彻底删就返回到列表去了、回收站收起来，不能连着删」）：
+  /* ★ （现象：「点了彻底删就返回到列表去了、回收站收起来，不能连着删」）：
      回收站那一栏改成 **受 state 控制**（原来 open 只住在 DOM 上，任何一次刷新就没了）。
      `keepTrash` = 「这次刷新是回收站里的动作引起的」⇒ 刷新后照样展开，人留在回收站里连着删。 */
   const [trashOpen, setTrashOpen] = useState(false);
   const keepTrash = useRef(false);
-  /* ★ 2026-10-22（要求）：手机端「选项面板」—— 长按一条记录、或点尾部竖三点，都弹出它 */
+  /* ★ （要求）：手机端「选项面板」—— 长按一条记录、或点尾部竖三点，都弹出它 */
   const [sheetId, setSheetId] = useState('');
   /* 浮出菜单落点（贴着被操作的那一行；见 openMenu） */
   const [sheetPos, setSheetPos] = useState(null);
@@ -399,7 +399,7 @@ export default function Records({ open = false, onClose }) {
     setTab('rules');
   };
 
-  /* ★ 2026-10-22（要求）：手机记录行手势 —— 长按 520ms 出选项面板；横向左滑露出删除按钮。
+  /* ★ （要求）：手机记录行手势 —— 长按 520ms 出选项面板；横向左滑露出删除按钮。
      规则：竖向滑动一律让给页面滚动（不抢），只有「横向明显大于纵向」才当作左滑。 */
   useEffect(() => {
     /* ⚠ 挂 document 而不是 rootRef：抽屉是点开后才渲染的，effect 只在挂载时跑一次，
@@ -545,7 +545,7 @@ export default function Records({ open = false, onClose }) {
     window.addEventListener('pointermove', onMove, { capture: true, passive: false });
     window.addEventListener('pointerup', onUp, true);
     window.addEventListener('pointercancel', onUp, true);
-    /* ★ 2026-10-23（真机上才会踩到）：`phoneAnim.initEdgeSwipe` 的 `document touchend`
+    /* ★ （真机上才会踩到）：`phoneAnim.initEdgeSwipe` 的 `document touchend`
        也是「抽屉开着 + 往左划 36px ⇒ sdbClose()」⇒ 行内左滑会顺手把抽屉关掉。
        这里只在**这一下确实是横向的**时，把 touchend/touchmove 在 window 捕获阶段截住。 */
     let tx0 = 0, ty0 = 0;
@@ -598,7 +598,7 @@ export default function Records({ open = false, onClose }) {
     return () => mo.disconnect();
   }, []);
 
-  /* ★ 2026-10-23 第四轮：菜单 portal 到 body 之后，不能再靠"点遮罩"关它 ——
+  /* ★ 第四轮：菜单 portal 到 body 之后，不能再靠"点遮罩"关它 ——
      遮罩那一下点击会落到 body 层，抽屉自己那套「点在面板外 ⇒ 收起」就跟着关抽屉。
      改成：菜单开着时，**菜单外的任何 pointerdown** 就收菜单（并把这一下吞掉，别牵连别的东西）。 */
   useEffect(() => {
@@ -621,7 +621,7 @@ export default function Records({ open = false, onClose }) {
     if (!t || typeof t.closest !== 'function') return;
     if (swallowClick()) return;   /* ★ 长按 / 左滑之后紧跟的那一下 click 不算（350ms 内） */
     let b;
-    /* ★ 2026-10-22（要求）：尾部竖三点 → 选项面板；面板里的动作 */
+    /* ★ （要求）：尾部竖三点 → 选项面板；面板里的动作 */
     if ((b = t.closest('[data-more]'))) { openMenu(b.getAttribute('data-more'), b.closest('.case-row')); return; }
     if (t.closest('[data-sheetclose]')) { setSheetId(''); return; }
     if ((b = t.closest('[data-sheetact]'))) {
@@ -705,7 +705,7 @@ export default function Records({ open = false, onClose }) {
   const listFootN = cases.length ? (rows.length ? rows.length : 0) : 0;
   if (!detail) footSnap.current = { n: listFootN, dead };
   const footView = detail ? footSnap.current : { n: listFootN, dead };
-  /* ★ 2026-10-22：选项面板的数据（点完就清空；记录被删掉时也自然没了） */
+  /* ★ 选项面板的数据（点完就清空；记录被删掉时也自然没了） */
   const sheetRec = sheetId ? (readCasesRaw().find((r) => r.id === sheetId) || null) : null;
   const sheetActs = sheetRec ? [
     { k: 'open', t: '看这一卦' },
@@ -780,7 +780,7 @@ export default function Records({ open = false, onClose }) {
         </div>
         <div className="sdb-b">
           <div id="sdbCases" hidden={tab !== 'cases'}>
-            {/* ★ 2026-10-15：抽屉里的内容套一层 SafeZone —— 数据出问题时**只废掉这一块**，
+            {/* ★ 抽屉里的内容套一层 SafeZone —— 数据出问题时**只废掉这一块**，
                 抽屉壳（标题/页签/底栏/遮罩）照旧在，里面显示一句「记录出错了」而不是整片失灵。 */}
             <SafeZone what="记录">
               {detail ? <Detail r={detail} /> : (cases.length
@@ -803,7 +803,7 @@ export default function Records({ open = false, onClose }) {
               ★ 详情态**也照旧渲染**（值取自 `footView` 快照）—— 见上面「底栏始终在」的说明。 */}
           <Foot n={footView.n} dead={footView.dead} armed={armed} trashOpen={trashOpen} onTrashToggle={setTrashOpen} />
         </div>
-        {/* ★ 2026-10-23：贴着这一行浮出的小菜单（不是底部面板）。
+        {/* ★ 贴着这一行浮出的小菜单（不是底部面板）。
             portal 到 body 是为了层级（`#sdb` 是 z-index 420，菜单必须 900 才压得住），
             同时避开抽屉那层的 transform 对定位的影响。 */}
         {sheetRec ? createPortal((

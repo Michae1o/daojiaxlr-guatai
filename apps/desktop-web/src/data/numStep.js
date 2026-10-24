@@ -25,7 +25,7 @@ function stepOnce(el, box) {
       el.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
-  /* ★ 2026-10-09：数字框被 buildCastPanel 搬进了 #castPanel，不在 #castFields 里了，
+  /* ★ 数字框被 buildCastPanel 搬进了 #castPanel，不在 #castFields 里了，
      而「自动取数」这个状态类还挂在 #castFields 上 ⇒ CSS 够不着。把状态抄一份到 #castPanel
      （.auto 转发），CSS 才能按状态切换外观。 */
   function syncAuto() {
@@ -56,7 +56,7 @@ function stepOnce(el, box) {
       wrap.className = 'nwrap';
       el.parentNode.insertBefore(wrap, el);
       wrap.appendChild(el);
-      /* ★ 2026-10-10（现象：「报数页面不太适配」）：原来两个钮打包在 input **后面** ⇒ 看着是 [数字][−][+]。
+      /* ★ （现象：「报数页面不太适配」）：原来两个钮打包在 input **后面** ⇒ 看着是 [数字][−][+]。
          拆成左右分列（− 在数字前、+ 在数字后）＝常见「数量步进」的样子，也和卡片里那一排胶囊同族。 */
       var bMinus = document.createElement('button');
       bMinus.type = 'button'; bMinus.className = 'nsb';
@@ -68,7 +68,7 @@ function stepOnce(el, box) {
       bPlus.setAttribute('aria-label', '加一'); bPlus.textContent = '+';
       wrap.insertBefore(bMinus, el);
       wrap.appendChild(bPlus);
-      /* ★ 2026-10-10：窄屏每格只有 ~86px，减号+数字+加号之后留给文字的只有 24px ⇒
+      /* ★ 窄屏每格只有 ~86px，减号+数字+加号之后留给文字的只有 24px ⇒
          「第一数」这种占位会被裁成一个字（早前的版本截图里就是"只剩第"）。窄屏换成一道短横，
          该填第几个由上面那行标签（随口报三个数…）交代。 */
       try {

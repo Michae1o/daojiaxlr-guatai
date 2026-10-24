@@ -237,7 +237,7 @@ html[data-swipedir="r"] .v-in { animation: xlrSlideInR .52s cubic-bezier(.16, 1,
 .cr-ovl{position:fixed;inset:0;z-index:899;pointer-events:none;
   background:rgba(20,17,14,.18);animation:crFade .16s ease both}
 .cr-menu{position:fixed;z-index:900;min-width:178px;padding:5px 0;border-radius:16px;
-  /* ★★ 2026-10-23 第五轮（真凶）：`#sdb` 的 `z-index` 是 **420**，而菜单以前是 121
+  /* ★★ 第五轮（真凶）：`#sdb` 的 `z-index` 是 **420**，而菜单以前是 121
      ⇒ portal 到 body 之后菜单**整体压在抽屉底下**：他看到的「一块糊白、字全没了」
      其实是抽屉的行盖在菜单卡上面（元素截图里能读到的是抽屉的字，不是菜单的字）。
      ⇒ 抬到 900（高于抽屉 420、设置页 600）。

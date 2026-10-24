@@ -1,8 +1,8 @@
 /* =========================================================
-   legacy.css —— 桌面端**样式真源**（D-⑤ / 2026-10-14 起）
+   legacy.css —— 桌面端**样式真源**（变更记录 / 2026-10-14 起）
    来源：apps/desktop-web/src/legacy/parts/{04,06,08,10,28}-style.txt
          —— 也就是「今天真正进产物的那 5 个 style 段」（逐块 sha16 见 legacy-css.manifest.json）
-   上一版的源是旧产物 E:\小六壬呐\…\dist\新版-现代.html —— 实测那是 **A5 之前**的取样，
+   上一版的源是早期产物 (upstream) —— 实测那是 **A5 之前**的取样，
    第 5 块比本版多 6,551 字符（A5 真删的手机底栏等）⇒ 换源，避免产物把已删规则重新长回来。
    抽法：5 块按文档顺序拼接（块间 1 个 \n），除包一层 @layer 外**一字符未改**
    生成器：tools/port-legacy-css.mjs（重跑应得到同一份；parts 归档后本脚本随之归档）
@@ -637,7 +637,7 @@ html[data-skin="xuan"]{
   --accent:#9c3b28;
   --on-accent:#fffefa; --accent-bg:rgba(156,59,40,.07); --accent-bg2:rgba(156,59,40,.14);
   --accent-line:rgba(156,59,40,.30);
-  --jyc:#1a778a;          /* ★ 2026-10-10 结论判定词的「补色」：accent 色相 10°→190°，明度压到对白卡 5.0:1 */
+  --jyc:#1a778a;          /* ★ 结论判定词的「补色」：accent 色相 10°→190°，明度压到对白卡 5.0:1 */
   --ok:#3d6748; --warn:#7d6120; --bad:#8f3325;
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
 }
@@ -682,7 +682,7 @@ html[data-skin="jin"]{
 }
 
 /* 卡通 —— 纯白底 + 纯白卡 + 纯黑粗框 + 朱红 */
-/*    ★ 2026-10-06 两处改动都是他定的：
+/*    ★ 两处改动都是他定的：
       ① 底色原来是 #f0eee8（跟原版宣纸 #f5f3ee 几乎一样 ⇒ 看着像没换肤），
          我中间试过混凝土灰 #cfcec9，他否了：「就要纯白」⇒ 改为纯白 #ffffff。
       ② 名字他定的：不叫「粗野」，叫「卡通」（白底黑框硬阴影确实更像漫画分镜）。 */
@@ -819,7 +819,7 @@ html[data-skin] body{font-family:var(--font)}
 
 /* ---------- 三、主题选择面板 ---------- */
 /* 主题选择面板
-   ★ 2026-10-06 修「换皮肤时菜单位置会跳」：按钮本身没有定位，而宣纸皮肤给
+   ★ 修「换皮肤时菜单位置会跳」：按钮本身没有定位，而宣纸皮肤给
      按钮开了 backdrop-filter（会充当绝对定位的参照），其它皮肤 --m-blur:none
      没有这层参照 ⇒ 同一份菜单在宣纸下贴按钮、在别的皮肤下跑去找顶栏甚至视口。
      JS 给按钮打的是 data-skinbtn 属性（不是 class），所以这里必须两个选择器都写上。 */
@@ -1042,7 +1042,7 @@ html[data-skin="bru"] .ibt:hover{background:var(--accent)!important;color:#fff!i
 .onb .gbody .lead{margin-top:0}
 .onb .gimg{margin:16px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;
   background:var(--surface2);box-shadow:0 1px 2px rgba(28,25,20,.05);max-height:52vh}
-/* ★ 2026-10-08：小图别再被拉大（拉大就糊），大图才缩 —— 一律按原始像素上限铺开 */
+/* ★ 小图别再被拉大（拉大就糊），大图才缩 —— 一律按原始像素上限铺开 */
 .onb .gimg img{display:block;width:auto;max-width:100%;height:auto;margin:0 auto;max-height:46vh;
   object-fit:contain;object-position:top center}
 .onb .glink{margin:10px 0 0;font-size:11.5px;color:var(--dim2)}
@@ -1239,10 +1239,10 @@ select{padding-right:36px;background-size:6px 6px,6px 6px;
 .chk.on{background:var(--accent-bg);box-shadow:inset 0 0 0 1px var(--accent-line);margin-left:-10px;padding-left:10px;margin-right:-10px;padding-right:10px}
 .chk.on span{color:var(--ink)}
 .chk.on span b{color:var(--accent)}
-/* ★ 2026-10-07 三宫具象下架（XLR_XIANG=false）：入口/结果全隐藏，代码保留待启用 */
+/* ★ 三宫具象下架（XLR_XIANG=false）：入口/结果全隐藏，代码保留待启用 */
 .no-xiang .chk{display:none!important}
 .no-xiang #xiangBoard,.no-xiang .xb,.no-xiang #btnXiang,.no-xiang #xwrap{display:none!important}
-/* ★ 2026-10-08：断辞右上角的小复制图标（低存在感，悬停才亮） */
+/* ★ 断辞右上角的小复制图标（低存在感，悬停才亮） */
 .doc-copy{background:transparent;border:0;padding:2px 3px;margin-left:6px;cursor:pointer;color:var(--dim2,#999);
   display:inline-flex;align-items:center;border-radius:6px;opacity:.75;
   transition:color .15s var(--m-ease),background .15s var(--m-ease),opacity .15s var(--m-ease)}
@@ -1705,7 +1705,7 @@ html[data-step="q"] .greetsub{margin-top:9px}
 html[data-step] #castPanel .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 html[data-step] #castPanel .row input,
 html[data-step] #castPanel .row select{width:100%;min-width:0;height:40px;font-size:14px}
-/* ★ 2026-10-10：数字格与「巳时」原来各带一套材质（数字格＝深色发丝描边，巳时＝深色 6% 底、无描边），
+/* ★ 数字格与「巳时」原来各带一套材质（数字格＝深色发丝描边，巳时＝深色 6% 底、无描边），
    跟下面那排胶囊（`--surface 42% + 1px 白 .7`，见本文件末尾手机块的 .seg/#cat）不是一家 ⇒
    一律抄胶囊那套数值收进来（用 var(--surface) 换算 ⇒ 换皮肤跟着走）。 */
 html[data-step] #castPanel .row select{color:var(--ink);
@@ -1851,7 +1851,7 @@ html[data-step="jie"] .right>.pane.gua{display:none}
    同时钉住 hover 底色 ⇒ 悬停时底变浅、字还是白 = 看不见。这里钉死。 */
 .cbar .go:hover,.cbar .go:active{background:var(--accent);color:var(--on-accent,#fffefa);
   border-color:var(--accent)}
-/* ★ 2026-10-06 第二起同类案：「让模型解卦」悬停后消失。
+/* ★ 第二起同类案：「让模型解卦」悬停后消失。
    基础层还有一条 .btn.pri:hover{color:var(--accent)} —— :hover 多一级特异性，
    悬停时朱砂字压朱砂底。现代层只钉了底色没钉字色，所以中招。全部钉死。 */
 .btn.pri:hover,.btn.pri:active{color:var(--on-accent,#fffefa);background:var(--accent)}
@@ -1918,7 +1918,7 @@ html[data-step] .seg button[aria-pressed="true"]{background:transparent;color:va
 
 
 /* ---------- 五之六、手机底栏留白 + 顶栏去重（放在文件末尾：靠顺序决胜） ---------- */
-/* ★ 2026-10-07：加密壳给 html,body 写了 height:100%;background:#f5f3ee。
+/* ★ 加密壳给 html,body 写了 height:100%;background:#f5f3ee。
    ① body 恢复自适应高度、至少一屏 ⇒ 纹理铺满；
    ② html 的底色换成皮肤色（壳的写死色被盖掉）⇒ 内容矮时露出的是皮肤底色而不是壳白。 */
 html[data-step]{background-color:var(--bg)}
@@ -1937,7 +1937,7 @@ html[data-step] body{height:auto;min-height:100vh}
 /* ---------- 五之十四、手机端帧率 + 主题菜单手机化 ---------- */
 
 
-/* ---------- 五之九、hidden 属性守护：作者样式里的 display 会压掉 [hidden] 原生隐藏 ---------- */
+/* ---------- 五之九、hidden 属性守护：维护者样式里的 display 会压掉 [hidden] 原生隐藏 ---------- */
 html[data-step] [hidden]{display:none !important}
 
 /* ---------- 五之十、问题输入框：隐掉常显的滚动条（占位提示溢出不露灰条） ---------- */
@@ -2025,7 +2025,7 @@ html[data-step] .dpft button:hover{background:var(--accent-bg)}
   display:flex;align-items:flex-start;justify-content:center;overflow:auto;
   /* ★ 固定定位层必须自己保证不透：不透明底色兜底，上面再叠三层氛围 */
   background-color:var(--bg);
-  /* ★ 2026-10-09 风格稿＝零彩色灰阶：去掉之前那团暖金晕，改成「中心偏上亮 → 四角缓暗」的
+  /* ★ 风格稿＝零彩色灰阶：去掉之前那团暖金晕，改成「中心偏上亮 → 四角缓暗」的
      中性柔光（去暖：用 #f4f4f4 这类中性色参与混合，别用 #fff 直接冲淡出暖调）。 */
   background-image:radial-gradient(120% 90% at 50% 32%,
     color-mix(in srgb, var(--bg) 34%, #fdfdfd) 0%,
@@ -2094,7 +2094,7 @@ html[data-step] .dpft button:hover{background:var(--accent-bg)}
 #xlrSplash .sl-motto{font-family:var(--m-serif);font-size:19px;letter-spacing:.16em;
   color:color-mix(in srgb, var(--ink) 62%, var(--bg));
   animation:slUp .7s var(--m-glide) .32s both}
-/* ★ 2026-10-09 新风格稿明确「零彩色、没有印章」⇒ 朱砂印删掉，不再往回加。 */
+/* ★ 新风格稿明确「零彩色、没有印章」⇒ 朱砂印删掉，不再往回加。 */
 #xlrSplash .sl-notes{margin-top:26px;font-family:var(--m-serif);font-size:13.5px;line-height:2.2;
   letter-spacing:.06em;color:color-mix(in srgb, var(--ink) 46%, var(--bg));
   animation:slUp .7s var(--m-glide) .44s both}
@@ -2374,7 +2374,7 @@ html[data-step] .recap{padding:16px 22px 0;border-bottom:1px solid var(--line)}
 #sdbCases .sdb-foot{position:sticky;bottom:0;z-index:3;
   padding:11px 0 12px;background:var(--bg);border-top:1px solid var(--line);
   box-shadow:0 -14px 22px -18px rgba(20,22,28,.55)}
-/* ★ 2026-10-09（第三轮）：「没有记录的时候清空是无法点选的状态」+ 回收站空态 + 回收站条目可点开 */
+/* ★ （第三轮）：「没有记录的时候清空是无法点选的状态」+ 回收站空态 + 回收站条目可点开 */
 #sdbCases .sdb-foot .btn[disabled],#sdbCases .sdb-foot .btn[disabled]:hover{
   opacity:.4;cursor:default;background:transparent;border-color:var(--line);
   color:var(--dim2);box-shadow:none;filter:none}
@@ -2740,7 +2740,7 @@ html[data-theme="dark"] #xlrSplash .sl-sub{color:color-mix(in srgb,var(--ink) 76
 html[data-theme="dark"] #xlrSplash .sl-motto{color:color-mix(in srgb,var(--ink) 86%,var(--bg))}
 html[data-theme="dark"] #xlrSplash .sl-notes{color:color-mix(in srgb,var(--ink) 74%,var(--bg))}
 html[data-theme="dark"] #xlrSplash .sl-hint{color:color-mix(in srgb,var(--ink) 68%,var(--bg))}
-/* ★★ 2026-10-10 二改（3D 液态太极）在深色主题上的三处适配：
+/* ★★ 二改（3D 液态太极）在深色主题上的三处适配：
    ① 液墨瓣会沉进深底 ⇒ 整体提亮一档（保留渐变，不是拍平成纯色）；
    ② 水波外环那条深灰细环在深底上等于没有 ⇒ 换成固定白；
    ③ 月牙棱光在深底上本来就跳，收一点，免得过曝成「一圈白边」。 */

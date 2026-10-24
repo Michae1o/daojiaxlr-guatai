@@ -56,7 +56,7 @@ SPLASH_SRC = Path(__file__).resolve().parents[1] / "src" / "components" / "splas
 def _splash_taiji() -> str:
     """开屏那颗太极的 SVG 内层（**逐字取自** splashMarkup.js）。
 
-    ★★ 2026-10-23（你：「加密壳的加载动画不要大太极变小了，就改成开屏页的太极，
+    ★★ （你：「加密壳的加载动画不要大太极变小了，就改成开屏页的太极，
        原样式，原位置，只是在转」）：
        以前这层画的是一颗**自己现算几何**的无鱼眼太极（200px，纯黑纯白），落定时再缩到开屏那颗珠子上；
        你要的是「就是开屏那颗，别缩」。⇒ 直接从**开屏的源**里把那份 SVG 抠出来用，
@@ -159,7 +159,7 @@ SHELL = """<!DOCTYPE html>
     }
     return o;
   }
-  /* ★ 2026-10-23：解密**之前**先把「加载层」的两块东西抓成引用 ——
+  /* ★ 解密**之前**先把「加载层」的两块东西抓成引用 ——
      document.open() 会把整棵文档清掉（Chromium 是替换、WebView2 是追加），节点从树上掉了
      但 JS 引用还在；write 完再挂回去，它才能接着在开屏那颗太极上换手。 */
   var bootEl = document.querySelector('.boot');
@@ -175,7 +175,7 @@ SHELL = """<!DOCTYPE html>
     // 占位块已改成 position:fixed（不占布局空间），这里只负责写完把它摘掉。
     document.open();
     document.write(txt);
-    // ★ 2026-10-07 修正：原先写完无条件补发一个合成 DOMContentLoaded。实测在
+    // ★ 修正：原先写完无条件补发一个合成 DOMContentLoaded。实测在
     //   Chromium/Tauri 里**真实事件也会来** ⇒ 挂在它上面的初始化跑两遍；对
     //   「开关式」监听（皮肤面板：点一下开、再点一下关）就是瞬间开→关互相抵消，
     //   先挂标记监听（真实事件一到就置位），80ms 后仍未置位才补发合成事件。
@@ -193,7 +193,7 @@ SHELL = """<!DOCTYPE html>
     }, 80);
 
     // 应用渲染出来后摘掉开机占位（Chromium 下 write 已替换整页，这里找不到也是正常的）
-    // ★ 2026-10-08 质感改版：加「最短展示 700ms」，随后淡出 320ms 再摘——开屏要看得清，
+    // ★ 质感改版：加「最短展示 700ms」，随后淡出 320ms 再摘——开屏要看得清，
     //   也不能久留（8 秒兜底强制淡出，绝不让它一直盖着应用）。
     function hideBoot() {
       var b = (bootEl && document.contains(bootEl)) ? bootEl : document.querySelector('.boot');

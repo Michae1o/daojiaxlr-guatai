@@ -37,7 +37,7 @@ var OUT = null, KILL = null;
        `@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}` 关掉，
        开屏照常静态停在「点击进入」。 */
     window.__xlrSplashReduce = !!reduce;
-    /* ★ 2026-10-10 现象：「一切到位之后，框内还是会像刷新了一样」：
+    /* ★ 现象：「一切到位之后，框内还是会像刷新了一样」：
        真因是**首次配置引导层**（#onbLayer，整屏 var(--bg) 半透明底）踩着开屏的尾巴出场，
        整片盖上来 ⇒ 看着就是"页面被刷了一下"。
        开屏本身就是一道"入口"，引导不该踩着它的尾巴弹 ⇒ 给个标记，让引导**别在开屏期间自动弹**
@@ -144,7 +144,7 @@ var OUT = null, KILL = null;
               '<circle class="tjY" cx="60" cy="59.5" r="52" fill="url(#tjYang)"/>' +
               '<circle class="tjEdge" cx="60" cy="59.5" r="50.6" fill="none" stroke="rgba(30,36,44,.07)" stroke-width="2.6"/>' +
               '<path class="tjD" d="M60 7.5 A52 52 0 0 1 60 111.5 A26 26 0 0 1 60 59.5 A26 26 0 0 0 60 7.5 Z" fill="url(#tjYin)"/>' +
-              /* ★ 2026-10-10 二改补丁：**外轮廓细圈**。48px 实尺下浅瓣是白、底色是米白，
+              /* ★ 二改补丁：**外轮廓细圈**。48px 实尺下浅瓣是白、底色是米白，
                  白对米白 ≈ 没有边界 ⇒ 整颗被读成「浮着一块深色月牙」。给整颗描一道
                  */
               '<circle class="tjRim" cx="60" cy="59.5" r="51.4" fill="none" stroke="rgba(52,60,70,.26)" stroke-width="1.5"/>' +

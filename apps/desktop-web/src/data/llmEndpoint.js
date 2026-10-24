@@ -1,6 +1,6 @@
 /* llmEndpoint.js —— 「设置里填的那几格」换算成「真正要发出去的请求」：全仓只此一处。
  *
- * ★★ 2026-10-22（现象：：智谱预设填官方地址连不上，红字只写「Failed to fetch」）：
+ * ★★ （现象：：智谱预设填官方地址连不上，红字只写「Failed to fetch」）：
  *   实测（在线上 https://fairy-deepdive.cn/xlr/ 里直接 fetch，Origin 就是本站）——
  *     open.bigmodel.cn/api/paas/v4/chat/completions  → Failed to fetch
  *     open.bigmodel.cn/api/anthropic/v1/messages     → Failed to fetch

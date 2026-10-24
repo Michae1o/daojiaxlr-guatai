@@ -48,7 +48,7 @@ node -e 'require.resolve("@capacitor/ios",{paths:[require("path").resolve("apps/
 echo "  @capacitor/ios 已就位"
 
 echo ""
-echo "== 2. 前端壳在场 + 自证（手机端加密壳，与安卓同一份）=="
+echo "== 2. 前端壳在场 + 核对（手机端加密壳，与安卓同一份）=="
 [ -f "$APP/www/index.html" ] || { echo "✗ 缺 $APP/www/index.html"; exit 1; }
 echo "  www/index.html  $(wc -c <"$APP/www/index.html" | tr -d ' ') B"
 node -e '
@@ -72,7 +72,7 @@ fi
 
 echo ""
 echo "== 3b. Info.plist：状态栏交给原生插件 =="
-# ★ 2026-10-23（用户报「做成 app 之后用起来和网页一样」）：
+# ★ （现象：「做成 app 之后用起来和网页一样」）：
 #   @capacitor/status-bar 在 iOS 上靠 UIApplication.statusBarStyle 改样式，
 #   而 Info.plist 里默认是 `UIViewControllerBasedStatusBarAppearance = YES`
 #   ⇒ view controller 说了算 ⇒ 插件调 setStyle 无效（症状：深色皮肤下状态栏黑字压深底看不见）。
@@ -106,7 +106,7 @@ cd - >/dev/null
 SIM_APP="$APP/ios/build/Build/Products/Debug-iphonesimulator/App.app"
 [ -d "$SIM_APP" ] || { echo "✗ 没找到模拟器产物：$SIM_APP"; exit 1; }
 echo ""
-echo "== 5. 产物自证 =="
+echo "== 5. 产物核对 =="
 file "$SIM_APP/App" 2>/dev/null || file "$SIM_APP/$(ls "$SIM_APP" | grep -v '\.' | head -1)"
 /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$SIM_APP/Info.plist" 2>/dev/null | sed 's/^/  CFBundleIdentifier = /'
 /usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$SIM_APP/Info.plist" 2>/dev/null | sed 's/^/  CFBundleDisplayName = /'

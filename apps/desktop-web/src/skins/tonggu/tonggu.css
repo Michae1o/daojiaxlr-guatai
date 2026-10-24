@@ -516,8 +516,8 @@ html[data-skin="tonggu"] .go:hover::before { opacity: 1; }
 html[data-skin="tonggu"] .go:hover { color: #F6EFD6 !important; }
 html[data-skin="tonggu"] .go:active::before { opacity: 0; }
 html[data-skin="tonggu"] .go:active::after { opacity: 1; }
-/* ★ 2026-10-16 T 批 1 实测抓到：`.go` 初始是**禁用**的（没写问题），而 `.go:disabled` 与 `.go:hover`
-   同权重、`disabled` 在后 ⇒ 禁用时贴图不跟着 hover 变。我们的叠层不受那条影响，会**在禁用态上
+/* ★ T 批 1 实测抓到：`.go` 初始是**禁用**的（没写问题），而 `.go:disabled` 与 `.go:hover`
+   同权重、`disabled` 在后 ⇒ 禁用时贴图不跟着 hover 变。本项目的叠层不受那条影响，会**在禁用态上
    冒出 hover 反馈** ⇒ 这里显式把两层压掉（`.go` 的禁用观感只由 `.go:disabled` 那条决定）。 */
 html[data-skin="tonggu"] .go[disabled]::before,
 html[data-skin="tonggu"] .go:disabled::before,
@@ -704,7 +704,7 @@ html[data-skin="tonggu"] .gua-top .g { color: var(--ink) !important; }
 html[data-skin="tonggu"] .tag { background: var(--accent-bg) !important; border-color: rgba(105, 116, 88, .38) !important; color: var(--dim) !important; }
 html[data-skin="tonggu"] .tag.a { border-color: var(--tg-gold) !important; color: #7A5530 !important; }
 /* ⚠ 2026-10-16（T 批 2）：原来这里写的是 `#walk .wcell` / `#walk .cell` —— **运行时根本没有这两个类**
-   （实测：桌面端跑的是圆盘那套，格子类是 `.wc`）⇒ 两条死规则删掉，真规则见 §4.3。 */
+   （实测：桌面端跑的是圆盘那套，格子类是 `.wc`）⇒ 两条死规则删掉，真规则见 原记录。 */
 html[data-skin="tonggu"] #walk .walk-orb { border-color: var(--tg-gold) !important; box-shadow: inset 0 0 0 1px rgba(197, 166, 108, .65), 0 3px 8px -4px rgba(44, 43, 31, .55) !important; }
 html[data-skin="tonggu"] #askBox,
 html[data-skin="tonggu"] #askBox .bar { border-color: rgba(105, 116, 88, .32) !important; }
@@ -967,7 +967,7 @@ html[data-skin="tonggu"] .stab {
     inset 0 0 0 1px rgba(16, 22, 17, .50),
     0 3px 8px -4px rgba(44, 43, 31, .40) !important;
 }
-/* ---- 5.5 复扫剩下的几处「冷色 / legacy 玻璃」——逐条收干净（`_tgT3-scan.mjs` 复扫到 0） ----
+/* ---- 5.5 复扫剩下的几处「冷色 / legacy 玻璃」——逐条收干净（（实测） 复扫到 0） ----
    ① 抽屉面板的**边框色**还是 legacy 的 `--m-glass-line`（color-mix 出来的冷灰）；
    ② 关闭「×」与设置屏两张卡（`#stCard` / `#stWiz`）还带着 legacy 的**冷色阴影** rgbrgba(12,16,26)/冷调玻璃影。 */
 html[data-skin="tonggu"] aside.sdb-p { border-color: rgba(105, 116, 88, .42) !important; }

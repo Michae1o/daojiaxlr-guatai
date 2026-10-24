@@ -385,7 +385,7 @@ export default function AskPanel() {
           </div>
           <button className="castsw" id="castToggle" type="button" aria-expanded="false" aria-controls="castFields">详情</button>
         </div>
-        {/* ★ 2026-10-17：初始带 `off`（详情默认收起），与 legacy 建的 `#castPanel`（初始 `.off`）**同步**。
+        {/* ★ 初始带 `off`（详情默认收起），与 legacy 建的 `#castPanel`（初始 `.off`）**同步**。
             之前只写 `className="f"`，靠 `setMode('clock')` 里的 `setCastOpen(false)` 补上 `.off`；
             而要求「切方式不自动收回」后，clock 时不再调 `setCastOpen` ⇒ 少了这次补齐，
             `castFields` 会停在「展开」、`castPanel` 在「收起」，第一次点「详情」就等于把 fields 收起（看着没反应）。 */} 

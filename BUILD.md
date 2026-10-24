@@ -100,7 +100,7 @@ cd ../desktop-shell && npx --yes @tauri-apps/cli@^2 build            # → exe
 | `mac/` | macOS / iOS 构建脚本 |
 | `docs/images/` | README 里的截图 |
 
-不含：网站、密钥、签名物料、构建产物、旧版本快照。
+不含：网站、密钥、签名物料、构建产物、早期版本本快照。
 
 ---
 

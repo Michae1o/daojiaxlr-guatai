@@ -60,7 +60,7 @@
     // 占位块已改成 position:fixed（不占布局空间），这里只负责写完把它摘掉。
     document.open();
     document.write(txt);
-    // ★ 2026-10-07 修正：原先写完无条件补发一个合成 DOMContentLoaded。实测在
+    // ★ 修正：原先写完无条件补发一个合成 DOMContentLoaded。实测在
     //   Chromium/Tauri 里**真实事件也会来** ⇒ 挂在它上面的初始化跑两遍；对
     //   「开关式」监听（皮肤面板：点一下开、再点一下关）就是瞬间开→关互相抵消，
     //   先挂标记监听（真实事件一到就置位），80ms 后仍未置位才补发合成事件。
@@ -78,7 +78,7 @@
     }, 80);
 
     // 应用渲染出来后摘掉开机占位（Chromium 下 write 已替换整页，这里找不到也是正常的）
-    // ★ 2026-10-08 质感改版：加「最短展示 700ms」，随后淡出 320ms 再摘——开屏要看得清，
+    // ★ 质感改版：加「最短展示 700ms」，随后淡出 320ms 再摘——开屏要看得清，
     //   也不能久留（8 秒兜底强制淡出，绝不让它一直盖着应用）。
     function hideBoot() {
       var b = document.querySelector('.boot');
@@ -90,7 +90,7 @@
     var kill = setInterval(function () {
       if (!document.getElementById('btnGo')) return;
       clearInterval(kill);
-      /* ★ 2026-10-08：这一层只是「解密前的占位」。真正的开屏（含使用纪律、3 秒、可跳过）
+      /* ★ 这一层只是「解密前的占位」。真正的开屏（含使用纪律、3 秒、可跳过）
          在应用层（modern.js 的 #xlrSplash，z-index 更高）——所以这里尽快让位，别抢戏。 */
       var wait = 260 - (Date.now() - t0);
       if (wait > 0) setTimeout(hideBoot, wait); else hideBoot();

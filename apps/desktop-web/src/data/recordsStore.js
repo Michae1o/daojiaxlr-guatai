@@ -62,7 +62,7 @@ function stamp() {
 function addCase() {
   var c = window.__ctx;
   if (!c) return;
-  if (window.__recId) return;   /* ★ 2026-10-08：每起一卦自动记一次，同一卦不重记 */
+  if (window.__recId) return;   /* ★ 每起一卦自动记一次，同一卦不重记 */
   var rec = {
     id: 'c' + Date.now(), t: stamp(), q: c.q, bg: c.bg || '',
     gua: c.g1 + ' · ' + c.g2 + ' · ' + c.g3 + '　' + zhi[c.zi - 1] + '时',
@@ -119,7 +119,7 @@ function markCase(id, dead) {
 function restoreCase(id) { markCase(id, false); }
 function purgeCase(id) { saveCases(loadCasesRaw().filter(function (r) { return r.id !== id; })); }
 function purgeAllDeleted() { saveCases(loadCasesRaw().filter(function (r) { return !r.deleted; })); }
-/* ★ 2026-10-22（要求：回收站多选）—— 一批 id 一次落盘，别一条一条写（省得刷十几次） */
+/* ★ （要求：回收站多选）—— 一批 id 一次落盘，别一条一条写（省得刷十几次） */
 function purgeMany(ids) {
   var m = {}; (ids || []).forEach(function (id) { m[id] = 1; });
   saveCases(loadCasesRaw().filter(function (r) { return !m[r.id]; }));

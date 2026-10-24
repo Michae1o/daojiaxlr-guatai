@@ -17,7 +17,7 @@
  *      ⇒ 这里也显式 `String(...)`，**不要**写成布尔（React 对 `aria-*` 布尔会写成 "true"/"false"
  *      其实也对，但显式更稳、且与 legacy 的取值路径一致）。
  *
- * 数据源：`../data/skinVisible.js` 的 **`VISIBLE_SKINS`**（★ 2026-10-15 改，见 变更记录 ****）
+ * 数据源：`../data/skinVisible.js` 的 **`VISIBLE_SKINS`**（★ 改，见 变更记录 ****）
  *   ⇒ 本面板 **9 项**，与早前的版本面板行数一致（上面那行「× 9」现在重新成立；07 屏那 31px 差随之归零）。
  *   ⚠ **过滤只发生在呈现层**：共享数据源 `data/skinsCore.js` / `skinPrepaint.js` / `skinExtra.json`
  *     是**两端逐字节相同**的（动了会连桌面端一起改）⇒ 那边一个字没动，理由与「开机仍认铜古键」写在

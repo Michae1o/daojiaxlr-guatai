@@ -72,13 +72,13 @@ label.chk[for="optXiang"] { display: none !important; }
 
 @media (min-width: 561px) { #sdb .sdb-set { display: none !important; } }
 #btnAskMore.asking .sl-taiji .tjHi { animation-duration: 11s; }
-/* ★ 2026-10-16（重启36）位图版（`askTaijiImg.js`）：位图没有内部动效 ⇒ 只能靠外层带动。
+/* ★ （）位图版（`askTaijiImg.js`）：位图没有内部动效 ⇒ 只能靠外层带动。
    `.atk-breath` 承接「呼吸」，`.atk-img` 定尺寸；`.asking` 时整块仍由上面那条 `askSpin` 慢转。 */
 #btnAskMore .atk-breath { position: absolute; left: 0; top: 0; width: 44px; height: 44px; display: block; }
 #btnAskMore .atk-img { width: 44px; height: 44px; display: block; }
 #btnAskMore.asking .atk-breath { animation: atkBreath 7.2s ease-in-out infinite alternate; }
 @keyframes atkBreath { from { transform: scale(1); } to { transform: scale(1.045); } }
-/* ★ 2026-10-16：太极放大到 44 ⇒ 这一行整体抬到 **48 行高**（输入框与按钮文字态一起）。
+/* ★ 太极放大到 44 ⇒ 这一行整体抬到 **48 行高**（输入框与按钮文字态一起）。
    ⚠ 特异性：`#right > #askBox .ask-line #btnAskMore` 是 (3,1,0)，压过 `#btnAskMore.asking` 的 (1,1,0)
    ⇒ 必须补一条 `.asking` 覆盖，否则「在转」时按钮会被挤到**第二行**（手机端实测踩到过）。 */
 #right > #askBox .ask-line input,
@@ -122,7 +122,7 @@ label.chk[for="optXiang"] { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   html #xlrSplash { display: flex !important; }
-  /* ★★ 2026-10-17 续（与手机端同一段）：开屏自己的入场/退场是一次性动画，不归 reduce 管 ——
+  /* ★★ 续（与手机端同一段）：开屏自己的入场/退场是一次性动画，不归 reduce 管 ——
      逐条还原 legacy 原文，别处一概不动。特异性 1,0,1 + !important 压过
      `@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}`。 */
   html #xlrSplash { transition: opacity .5s var(--m-glide), visibility .5s var(--m-glide) !important; }

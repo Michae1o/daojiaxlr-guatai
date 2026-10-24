@@ -221,7 +221,7 @@ function useAskCore() {
     });
     mark('castFx');
 
-    /* ★ 2026-10-15（）：「空框置灰」这条链**从来没接过线** —— 实测两个产物：
+    /* ★ （）：「空框置灰」这条链**从来没接过线** —— 实测两个产物：
          旧 APK  `#btnGo` disabled=true  / opacity .3 / filter saturate(.15)   （标记里就写着 disabled=""）
          新 APK  `#btnGo` disabled=false / opacity 1    / filter none
        机制：规则在（`.cbar .go[disabled]{opacity:.3;cursor:default;filter:saturate(.15);box-shadow:none}`

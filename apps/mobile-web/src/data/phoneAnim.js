@@ -54,7 +54,7 @@ function alignStepBar() {
     if (bs[i].offsetWidth > 8 && bs[i].offsetHeight > 8) { ref = bs[i]; break; }
   }
   if (!ref) return;
-  /* ★★ 2026-10-17 改（现象：「步进条有时候不显示，有时候位置不一样」）：
+  /* ★★ 改（现象：「步进条有时候不显示，有时候位置不一样」）：
      原来是 `getBoundingClientRect()` —— 那是**含 transform 的绘制位**。开屏收尾 / 切页那一拍
      顶栏有 `translateY` 的入场过渡（0.35s），在这段里量到的是「上移 6px」的位置
      ⇒ 把错的 top 钉在 `position:fixed` 的 .vstep 上，而且之后再没人纠正（实测：壹页钉成 40，
@@ -143,7 +143,7 @@ function stepBarScrollFade(st) {
   bar.style.transform = 'translateY(' + (-14 * p).toFixed(1) + 'px)';
   bar.style.pointerEvents = (p > .5) ? 'none' : '';
 }
-/* ★★ 2026-10-17 新增（现象：「步进条有时候不显示」）：
+/* ★★ 新增（现象：「步进条有时候不显示」）：
    背景光晕 `#xlrAura`（它自己就能滚 200px）、记录抽屉、设置页、皮肤菜单、引导层、九数面板。
    只要其中一个滚过 72px，步进条就被淡成 0；而复位只认「滚回顶部」那一拍，主页面没滚
    ⇒ 条一直不回来（实测：把 #xlrAura 的 scrollTop 设成 200 ⇒ .vstep opacity 0 + translateY(-14px)）。
@@ -270,7 +270,7 @@ function initStepSwipe() {
       cur = StepCore.currentStep();
       dir = dx < 0 ? 1 : -1;
       tgt = targetOf(cur, dir);
-      /* ★ 2026-10-17：到头不放弃手势，改走「阻尼跟手 + 松手回弹」（gentle） */
+      /* ★ 到头不放弃手势，改走「阻尼跟手 + 松手回弹」（gentle） */
       gentle = !tgt;
       dragging = true;
       pageEls = stepPageEls(cur);
@@ -495,7 +495,7 @@ function animateIn() {
 
 /* ===== 首启配置引导：等开屏真退场后再补一次 =====
    来源：旧 `apps/mobile-web/src/mobile-extra.html` L223–L238（**整段照抄**，旧注释原文：
-   「★ 2026-10-10 手机端应用本体：首启自动弹一次配置引导。应用自身在「开屏还在」时会跳过
+   「★ 手机端应用本体：首启自动弹一次配置引导。应用自身在「开屏还在」时会跳过
      自动引导，这里等开屏真正退场后再补一次。」）
    ⚠ 为什么必须有：本仓 `Guide.maybeWelcome()` 只在 DCL+260ms 跑一次，那一刻开屏在场 ⇒
      守卫（`window.__xlrSplashOn || document.getElementById('xlrSplash')`）当场早退；
@@ -532,7 +532,7 @@ function installGuideRetry() {
 
 /* ===== 引导便利性：大图层补 ✕、引导卡底部补【我已知晓，跳过】 =====
    来源：旧 `apps/mobile-web/src/mobile-extra.html` L354–L379（**整段照抄**，旧注释原文：
-   「★ 2026-10-10 引导便利性：①大图层补 ✕ 关闭键 ②引导卡底部补【我已知晓，跳过】」）
+   「★ 引导便利性：①大图层补 ✕ 关闭键 ②引导卡底部补【我已知晓，跳过】」）
    ⚠ 为什么必须有：新仓的引导卡是从**桌面端**那份 legacy（`36-script.txt`）提取的 ⇒ 少了手机端
      这两件便利件 ⇒ 实测引导卡比早期产物矮 61px（旧 `.card` 495px / 新 434px，缺 `.xlr-onb-done[47]`），
      相位锚点比对在卡下方两点上留着 18~21 的色差。CSS（`.onb .xlr-onb-done` / `.gzoom .xlr-zoom-x`）
@@ -619,11 +619,11 @@ export const PhoneAnim = {
     try { installGateGuard(); ev.wired.push('gateGuard'); } catch (e5) { }
     try { installSwipeBlock(); ev.wired.push('swipeBlock'); } catch (e6) { }
     try { installStepTapTouch(); ev.wired.push('tapTouch'); } catch (e7) { }
-    /* ★ 2026-10-15：首启引导的"等开屏退场后再补一次"（早期 mobile-extra.html L223–238 整段照抄） */
+    /* ★ 首启引导的"等开屏退场后再补一次"（早期 mobile-extra.html L223–238 整段照抄） */
     try { installGuideRetry(); ev.wired.push('guideRetry'); } catch (e11) { }
-    /* ★ 2026-10-16：序号展开守卫（早期 mobile-extra.html L240–262 整段照抄 —— `.vsl` 行内写值） */
+    /* ★ 序号展开守卫（早期 mobile-extra.html L240–262 整段照抄 —— `.vsl` 行内写值） */
     try { installStepVslGuard(); ev.wired.push('stepVslGuard'); } catch (e13) { }
-    /* ★ 2026-10-15：引导便利件（✕ / 我已知晓，跳过；早期 mobile-extra.html L354–L379 整段照抄） */
+    /* ★ 引导便利件（✕ / 我已知晓，跳过；早期 mobile-extra.html L354–L379 整段照抄） */
     try { installOnbExtras(); ev.wired.push('onbExtras'); } catch (e12) { }
     /* 换步那一拍（源在 setStep 尾部；本仓 setStep 在生成物里、那两处是空实现 ⇒ 这里等价补上） */
     try {
@@ -632,7 +632,7 @@ export const PhoneAnim = {
         var k = document.documentElement.getAttribute('data-step') || 'q';
         try { syncPhoneStep(); } catch (eA) { }
         try { if (k !== last) phoneStepSettle(k); } catch (eB) { }
-        /* ★★ 2026-10-17：切页后按**新页的真实滚动位置**把滚动渐隐复位。
+        /* ★★ 切页后按**新页的真实滚动位置**把滚动渐隐复位。
            否则：在贰页往下读（条淡成 0）→ 切回壹页（壹页本来就滚不动）⇒ 没人再发 scroll
            ⇒ 条永远不回来（现象：的「有时候不显示」有这一条）。 */
         try { stepBarScrollFade(mainScrollTop()); } catch (eC2) { }
@@ -647,7 +647,7 @@ export const PhoneAnim = {
       window.__xlrPhoneStepSettle = phoneStepSettle;
       window.__xlrSyncPhone = syncPhoneStep;
       window.__xlrAlignStepBar = alignStepBar;
-      /* ★ 2026-10-15：`animateIn` 也挂回**同名全局** —— 开屏收掉那一下的既有调用
+      /* ★ `animateIn` 也挂回**同名全局** —— 开屏收掉那一下的既有调用
          （splash 内联脚本里的 `try{ animateIn() }catch{ }`）读的就是这个名字；
           */
       window.animateIn = animateIn;

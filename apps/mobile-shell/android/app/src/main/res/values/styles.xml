@@ -9,7 +9,7 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!-- ★ 2026-10-23（实测「做成 app 之后用起来和网页一样」）：
+    <!-- ★ （实测「做成 app 之后用起来和网页一样」）：
          状态栏/导航栏这四行是**开机那一帧**的底 —— 默认皮肤「黑白」的 bg = #F4F4F5，
          深色图标（浅底上的黑字）。运行时由 @capacitor/status-bar 按皮肤改，
          真源是 apps/mobile-web/src/native/nativeShell.js 的 syncStatusBar()。

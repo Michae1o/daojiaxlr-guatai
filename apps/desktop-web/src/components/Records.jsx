@@ -34,14 +34,14 @@ import { useEffect, useRef, useState } from 'react';
 import { RecordsStore } from '../data/recordsStore.js';
 import SafeZone from './SafeZone.jsx';
 import { ReviewCore } from '../review/reviewCore.js';
-import { recAskHtml } from '../data/modelAskCore.js';   /* ★ 2026-10-15：记录行「接着问」区（原先只读 window.recAskHtml ⇒ 渲染成空） */
-import { htmlEsc as esc } from '../data/docRender.js';   /* ★ 2026-10-15：收敛到唯一一份转义实现（原先降级成不转义的 String()） */
+import { recAskHtml } from '../data/modelAskCore.js';   /* ★ 记录行「接着问」区（原先只读 window.recAskHtml ⇒ 渲染成空） */
+import { htmlEsc as esc } from '../data/docRender.js';   /* ★ 收敛到唯一一份转义实现（原先降级成不转义的 String()） */
 
 /* legacy 全局取值（装载顺序：classic 脚本段在前、外壳 module 在后 ⇒ 渲染期一定已在） */
 const g = (k) => (typeof window !== 'undefined' ? window[k] : undefined);
-/* ★ 2026-10-15：`esc` 不再本地降级——已改为上面从 docRender.js 导入的唯一一份 `htmlEsc`。 */
+/* ★ `esc` 不再本地降级——已改为上面从 docRender.js 导入的唯一一份 `htmlEsc`。 */
 
-/* ★ 2026-10-15：`bold` / `renderDoc` 这两个 legacy 全局**在新产物里根本不在 window 上**
+/* ★ `bold` / `renderDoc` 这两个 legacy 全局**在新产物里根本不在 window 上**
    （实测 `typeof window.bold === 'undefined'`；同批的 `esc` 早有守卫兜底，只剩这两个是裸调用）
    ⇒ 记录里只要有一条**带断辞**（`duanci` 非空），`CaseRow` 一渲染就抛 `TypeError: Xr(...) is not a function`
    （干净 profile 里 `xlr-cases` 是空的 ⇒ 走不到这句 ⇒ 之前的复现全是假阴性。）
@@ -85,7 +85,7 @@ function dayOf(t) {
 }
 
 /* 回收站行（`sdbFootHtml` L169–181 里的 `.tr-list` 分支）
-   ★ 2026-10-22（要求）：多选态时前面出现圆形选框（选中＝主题色渐变填满），
+   ★ （要求）：多选态时前面出现圆形选框（选中＝主题色渐变填满），
      并且这一行的「点开看」让位给「点一下选中」——所以多选态不挂 data-open。 */
 function TrashRows({ dead, msMode, msSel }) {
   const sel = msSel || [];
@@ -129,7 +129,7 @@ function Foot({ n, dead, armed, trashOpen, onTrashToggle, msMode, msSel }) {
         <summary>{'回收站 · ' + dead.length + ' 则'}</summary>
         {dead.length ? (
           <>
-            {/* ★ 2026-10-22（要求）：多选按钮 → 点开后出现 全选 / 删除 / 还原（外加「完成」退出） */}
+            {/* ★ （要求）：多选按钮 → 点开后出现 全选 / 删除 / 还原（外加「完成」退出） */}
             <div className="tr-tools">
               {!msMode ? (
                 <button type="button" className="btn sm" data-msenter="1">多选</button>
@@ -239,12 +239,12 @@ export default function Records({ open = false, onClose }) {
   const [q, setQ] = useState(() => String((typeof window !== 'undefined' && window.__sdbQ) || ''));
   const [detailId, setDetailId] = useState('');   /* ⇔ 早前的版本 `window.__sdbDetail`（bindCaseBox L458 / L464-465） */
   const [trashId, setTrashId] = useState('');     /* ⇔ 早前的版本 `[data-open]` 那条「直接写 box」的临时详情（L264） */
-  /* ★ 2026-10-22（现象：「点了彻底删就返回到列表去了、回收站收起来，不能连着删」）：
+  /* ★ （现象：「点了彻底删就返回到列表去了、回收站收起来，不能连着删」）：
      回收站那一栏改成 **受 state 控制**（原来 open 只住在 DOM 上，任何一次刷新就没了）。
      `keepTrash` = 「这次刷新是回收站里的动作引起的」⇒ 刷新后照样展开，人留在回收站里连着删。 */
   const [trashOpen, setTrashOpen] = useState(false);
   const keepTrash = useRef(false);
-  /* ★ 2026-10-22（要求）：回收站多选 —— msMode=多选态，msSel=选中的 id 列表 */
+  /* ★ （要求）：回收站多选 —— msMode=多选态，msSel=选中的 id 列表 */
   const [msMode, setMsMode] = useState(false);
   const [msSel, setMsSel] = useState([]);
   const [armed, setArmed] = useState(false);      /* ⇔ 早前的版本 `[data-clear]` 的 `data-armed`（L270-277） */
@@ -427,7 +427,7 @@ export default function Records({ open = false, onClose }) {
       if (st) st.click();
       return;
     }
-    /* ★ 2026-10-22（要求）：回收站多选 —— 进入 / 退出 / 全选 / 单条勾选 / 批量删除 / 批量还原 */
+    /* ★ （要求）：回收站多选 —— 进入 / 退出 / 全选 / 单条勾选 / 批量删除 / 批量还原 */
     if ((b = t.closest('[data-msenter]'))) { setMsMode(true); setMsSel([]); return; }
     if ((b = t.closest('[data-msdone]'))) { setMsMode(false); setMsSel([]); return; }
     if ((b = t.closest('[data-msall]'))) {
@@ -472,7 +472,7 @@ export default function Records({ open = false, onClose }) {
       setArmed(true);
       return;
     }
-    /* ★ 2026-10-22：多选态里点行 ＝ 选中／取消（点「还原/彻底删」那种按钮的照常走上面的分支） */
+    /* ★ 多选态里点行 ＝ 选中／取消（点「还原/彻底删」那种按钮的照常走上面的分支） */
     if (msMode && !t.closest('button') && (b = t.closest('.tr-row'))) {
       const id = b.getAttribute('data-msrow');
       setMsSel((cur) => (cur.indexOf(id) >= 0 ? cur.filter((x) => x !== id) : cur.concat([id])));
@@ -549,7 +549,7 @@ export default function Records({ open = false, onClose }) {
         </div>
         <div className="sdb-b">
           <div id="sdbCases" hidden={tab !== 'cases'}>
-            {/* ★ 2026-10-15：抽屉里的内容套一层 SafeZone —— 数据出问题时**只废掉这一块**，
+            {/* ★ 抽屉里的内容套一层 SafeZone —— 数据出问题时**只废掉这一块**，
                 抽屉壳（标题/页签/底栏/遮罩）照旧在，里面显示一句「记录出错了」而不是整片失灵。 */}
             <SafeZone what="记录">
               {detail ? <Detail r={detail} /> : (cases.length

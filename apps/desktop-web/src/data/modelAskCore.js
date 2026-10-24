@@ -1,6 +1,6 @@
 /* modelAskCore.js —— 「让模型解卦」那条链唯一一份：设置读取 · 请求 · 流式读取 · 落笔 · 补进记录。
  *
- * 来源（**逐字**）：旧仓 `E:\小六壬呐\现代版-预览.html`，sha256[:16] = 56c9970ea6be9bfa
+ * 来源（**逐字**）：上游 `(upstream)`，sha256[:16] = 56c9970ea6be9bfa
  *   loadSet L2063–2068 · apiURL L2253–2257 · hdr L2258–2262 · payloadOf L2263–2267 ·
  *   needsKey L2268–2272 · readSSE L2274–2300 · askModel L2319–2370 · recAskHtml L2833–2843
  *
@@ -12,13 +12,13 @@
  *   updateCaseDuanci/markModelAnswered → recordsStore.js
  */
 import { plainAll, SYS, buildBlocks as pkgBuildBlocks } from '@xlr/shared-judgment';
-/* ★★ 2026-10-15 你点名：「问着…」不要文字，换成**开屏那款液态太极**（含从按钮到太极的过渡）。
+/* ★★ 你点名：「问着…」不要文字，换成**开屏那款液态太极**（含从按钮到太极的过渡）。
    markup 当时直接 import 复用开屏那一份（`splashMarkup.js`，零复制）。
    ⇒ 桌面端也换成**手机端同款位图徽章**（`askTaijiImg.js`，两端各存一份逐字节相同的 PNG ——
      **开屏那份画稿一字未动**（ 的纯黑白说法照旧）。 */
 import { ASK_TAIJI_IMG_MARKUP } from '../components/askTaijiImg.js';
 import { SettingsCore } from './settingsCore.js';
-/* ★ 2026-10-22：地址换算 / 请求头 / 正文形状 / 流式增量 / 非流式正文，全走 llmEndpoint 一处
+/* ★ 地址换算 / 请求头 / 正文形状 / 流式增量 / 非流式正文，全走 llmEndpoint 一处
    （智谱官方地址在网页版与安卓上要换成本站中转；Anthropic 协议地址要换形状）。 */
 import { endpoint as epOf, headers as hdrsOf, payload as pyOf, deltaOf, textOf, IS_TAURI } from './llmEndpoint.js';
 /* 真正发请求那一下住 src/llm/（`src/data/**` 不许出现网络原语，见该文件头） */
@@ -50,7 +50,7 @@ function loadSet() {
   return s;
 }
 
-/* ★ 2026-10-22 这三支改成薄壳、转发给 llmEndpoint（行为比以前多两件事：
+/* ★ 这三支改成薄壳、转发给 llmEndpoint（行为比以前多两件事：
    ① 非 Tauri（网页版 / 安卓）里智谱官方地址换成本站中转；② 带 /anthropic 的地址走 Anthropic 形状）。
    签名里 `proxy` 那一参换成 `ep`（endpoint() 的返回值），调用点已同步。 */
 function apiURL() { return epOf(loadSet()); }
@@ -82,7 +82,7 @@ function readSSE(resp, onDelta) {
             if (d === '[DONE]') { resolve(); return; }
             try {
               var j = JSON.parse(d);
-              var t = deltaOf(j);          /* ★ 2026-10-22：OpenAI 与 Anthropic 两种流式事件都认 */
+              var t = deltaOf(j);          /* ★ OpenAI 与 Anthropic 两种流式事件都认 */
               if (t) onDelta(t);
             } catch (e) { }
           }
@@ -97,12 +97,12 @@ function askModel() {
   var c = window.__ctx;
   if (!c) return;
   var s = loadSet();
-  var doc = document.getElementById('doc'), stat = document.getElementById('stat'), btn = document.getElementById('btnSolve');   /* ★ 声明差异：源里是旧层的 `btnAsk`；本仓 React 版这颗按钮 id = `btnSolve`（实测产物里只有它） */
+  var doc = document.getElementById('doc'), stat = document.getElementById('stat'), btn = document.getElementById('btnSolve');   /* ★ 声明差异：源里是早期实现的 `btnAsk`；本仓 React 版这颗按钮 id = `btnSolve`（实测产物里只有它） */
   var bad = needsKey(s);
   if (bad) { doc.innerHTML = '<span style="color:var(--bad)">' + esc(bad) + '</span>'; return; }
 
   var sysC = SYS, usrC = '请按格式解这一卦：\n\n' + plainAllOf();
-  /* ★ 2026-10-07 你点名：结果部分要能解三宫具象——勾了三宫具象时，
+  /* ★ 你点名：结果部分要能解三宫具象——勾了三宫具象时，
      断辞里要把三盘读出来再合回落宫（不显示依据，但解读要有它）。 */
   if (c.withXiang) usrC += '\n\n【附】这一卦带三宫具象：请在断辞里把三盘读出来（前因 → 中段 → 后果），再合回落宫；只读象、不越出这一卦。';
   var ep = apiURL();
@@ -135,10 +135,10 @@ function askModel() {
     })
     .catch(function (e) {
       var m = String(e && e.message || e);
-      /* ★ 2026-10-22（你定的说法）：「无法连接。请检查网络设置，或更换供应商。
-         如仍有问题，请到【关于】页面加作者微信。」—— 网络层失败不甩 Failed to fetch，
+      /* ★ （你定的说法）：「无法连接。请检查网络设置，或更换供应商。
+         如仍有问题，请到【关于】页面加维护者微信。」—— 网络层失败不甩 Failed to fetch，
          HTTP 错误（Key 错 / 余额不足）保留服务商原话。
-         ★ 2026-10-23：设置里「联系」并入「关于」、那一栏已删 ⇒ 文案改指【关于】。 */
+         ★ 设置里「联系」并入「关于」、那一栏已删 ⇒ 文案改指【关于】。 */
       var netFail = !ep.proxy && /Failed to fetch|NetworkError|Load failed|网络/i.test(m);
       doc.innerHTML = '<span style="color:var(--bad)">' + (netFail ? '无法连接。' : '调用失败：' + esc(m)) + '</span>' +
         '<div class="warn" style="margin-top:10px">请检查网络设置，或更换供应商。如仍有问题，请到【关于】页面加作者微信。</div>';
@@ -160,27 +160,27 @@ function recAskHtml(r) {
 
 /* ============================================================================
  *
- * 来源（**逐字**）：旧仓 `apps/mobile-web/chunks/a10.html`（**进产物的那份**）
+ * 来源（**逐字**）：上游 `apps/mobile-web/chunks/a10.html`（**进产物的那份**）
  *   plainCore L333–337 · followupUser L339–360 · streamAsk L362–387 · runFollowup L389–393 ·
  *   noModelAskHint L610–613 · threadMerge L616–624 · persistThread L626–635 · askMore L638–662 ·
  *   事件委托（click L755–769 / keydown L770–776）
  *
  *   实测本仓只有 `showCore.js` 里那段 HTML（`#askBox`/`#askQ`/`#btnAskMore` 都在），
- *   **没有任何人在听这两个事件**（旧版靠 a10.html 末尾那两条 document 委托）。
+ *   **没有任何人在听这两个事件**（早期版本靠 a10.html 末尾那两条 document 委托）。
  *
  * ★ 声明差异（3 处，逐条注明）：
  *   ① 委托里 `btnNew → newCast()` 那条**不搬** —— 本仓已由 `DivinationPane.jsx` 的 React `onClick` 接；
  *      再搬一份会让同一个动作跑两遍。
  *      锚点保留、用 `typeof … === 'function'` 守卫（未接时静默跳过，不抛错）。
  *   ③ `loadCases/saveCases` 从 `RecordsStore` 取（本模块已 import 它）；取不到时退化为空操作
- *      —— 旧版读的是 legacy 全局，本仓没有那套全局。
+ *      —— 早期版本读的是 legacy 全局，本仓没有那套全局。
  * ========================================================================== */
 
 /* L333–337 逐字 */
 function plainCore(c, B) {
   var oc = window.__ctx, ob = window.__blocks;
   window.__ctx = c; window.__blocks = B;
-  try { return plainAllOf(); } finally { window.__ctx = oc; window.__blocks = ob; }   /* ★ 声明差异 ④（2026-10-15 修）：旧版这里是**零参** `plainAll()`（旧层的全局版，从 window 读卦）；本仓 `plainAll` 是包内**三参纯函数** `plainAll(c,B,hooks)` —— 照旧搬会传进 undefined、它去读 `c.q` 就抛「Cannot read properties of undefined (reading 'q')」。⇒ 走本模块已有的三参适配器 `plainAllOf()`（它读 window.__ctx/__blocks，并在形状不对时现搭 buildBlocks）。 */
+  try { return plainAllOf(); } finally { window.__ctx = oc; window.__blocks = ob; }   /* ★ 声明差异 ④（2026-10-15 修）：早期版本这里是**零参** `plainAll()`（早期实现的全局版，从 window 读卦）；本仓 `plainAll` 是包内**三参纯函数** `plainAll(c,B,hooks)` —— 照旧搬会传进 undefined、它去读 `c.q` 就抛「Cannot read properties of undefined (reading 'q')」。⇒ 走本模块已有的三参适配器 `plainAllOf()`（它读 window.__ctx/__blocks，并在形状不对时现搭 buildBlocks）。 */
 }
 
 /* L339–360 逐字 */
@@ -256,7 +256,7 @@ function threadMerge(x, y) {
   return out;
 }
 
-/* 声明差异 ③：旧版读 legacy 全局 loadCases/saveCases；本仓取 RecordsStore 的导出，取不到则退化为空操作 */
+/* 声明差异 ③：早期版本读 legacy 全局 loadCases/saveCases；本仓取 RecordsStore 的导出，取不到则退化为空操作 */
 var RC_loadCases = (RecordsStore && typeof RecordsStore.loadCases === 'function') ? RecordsStore.loadCases : function () { return []; };
 var RC_saveCases = (RecordsStore && typeof RecordsStore.saveCases === 'function') ? RecordsStore.saveCases : function () { };
 
@@ -272,7 +272,7 @@ function persistThread() {
   RC_saveCases(a);
 }
 
-/* ★★ 2026-10-15（本批）：这个函数按你两条新说法改了三处（其余仍与旧版逐字一致）——
+/* ★★ （本批）：这个函数按你两条新说法改了三处（其余仍与早期版本逐字一致）——
    ① 按钮**不再写「问着…」文字**，改走 `asking` 类 ⇒ 按钮形变成开屏那款液态太极；
    ③ 太极 markup 从 `splashMarkup.js` import（零复制）。
    ⚠ 提交即清 ⇒ 失败时输入的字不在框里了；但那条问题已被写进问答项（`.ask-q`）、错误也显示在同一项里，
@@ -318,7 +318,7 @@ export function askMore() {
   var elA = item.querySelector('.ask-a');
   var btn = document.getElementById('btnAskMore');
   if (btn) askTaijiOn(btn);                                /* ① 太极接棒 */
-  /* ★ 2026-10-23：记下「这是第几卦」。你这一问还在路上时又起了一卦 ⇒ 既不该往新的记录条里塞，
+  /* ★ 记下「这是第几卦」。你这一问还在路上时又起了一卦 ⇒ 既不该往新的记录条里塞，
      也不该把答案画到已经被清空的列表上（resetAskBox 会 +1）。 */
   var askSeq = window.__askSeq | 0;
   runFollowup(c, window.__blocks, window.__thread, q, elA, function (err, ans) {
@@ -337,7 +337,7 @@ document.addEventListener('click', function (ev) {
   while (t && t !== document) {
     if (t.id === 'btnAskMore') { askMore(); return; }
     if (t.id === 'btnXiang') { if (typeof askXiang === 'function') askXiang(); return; }
-    /* ① 旧版这里还有一条 `if (t.id === 'btnNew') { newCast(); return; }` —— 本仓由 DivinationPane 的 React onClick 接，不重复 */
+    /* ① 早期版本这里还有一条 `if (t.id === 'btnNew') { newCast(); return; }` —— 本仓由 DivinationPane 的 React onClick 接，不重复 */
     if (t.getAttribute) {
       var a1 = t.getAttribute('data-ask');
       if (a1) { if (typeof openRecAsk === 'function') openRecAsk(a1); return; }
@@ -355,7 +355,7 @@ document.addEventListener('keydown', function (ev) {
   else { var aq = t.getAttribute('data-askq'); if (aq && typeof recAskGo === 'function') recAskGo(aq); }
 });
 
-/* ★ 2026-10-22：把出口那四个**旧全局**重指到本仓这份 —— 复盘（src/review/reviewCore.js 经 window 转发）
+/* ★ 把出口那四个**旧全局**重指到本仓这份 —— 复盘（src/review/reviewCore.js 经 window 转发）
    以及任何还走旧全局的路径，因此也跟着走「智谱中转 / Anthropic 形状」，不会一半能连一半不能。
    ⚠ 旧签名是 `hdr(s, proxy)` / `payloadOf(s, proxy, msgs, stream)` ⇒ 各加一层薄适配再挂，别直接换。 */
 function hdrLegacy(s, proxy) { return hdrsOf(s, { proxy: !!proxy }); }

@@ -21,7 +21,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { zhi } from '@xlr/shared-judgment';
 import { ResultCore } from '../data/resultCore.js';
-import { askModel } from '../data/modelAskCore.js';   /* ★ 2026-10-15：模型链本体（原先只读 window.askModel ⇒ 静默无反应） */
+import { askModel } from '../data/modelAskCore.js';   /* ★ 模型链本体（原先只读 window.askModel ⇒ 静默无反应） */
 
 export default function DivinationPane({ c }) {
   const [copyState, setCopyState] = useState('');        /* '' | 'ok' | 'no' */
@@ -49,8 +49,8 @@ export default function DivinationPane({ c }) {
       navigator.clipboard.writeText(t).then(function () { done(true); }, function () { ResultCore.fallback(t, done); });
     } else ResultCore.fallback(t, done);
   };
-  const onSolve = function () { try { askModel(); } catch (e) { } };   /* ★ 2026-10-15：直调模块（原先 typeof window.askModel 恒假） */
-  /* ★★ 2026-10-15（(会话)）现象：「新开一卦点了没用」：早前的版本 `newCast()`（上游 chunks/a10.html L488–500）
+  const onSolve = function () { try { askModel(); } catch (e) { } };   /* ★ 直调模块（原先 typeof window.askModel 恒假） */
+  /* ★★ （(会话)）现象：「新开一卦点了没用」：早前的版本 `newCast()`（上游 chunks/a10.html L488–500）
      搬过来时**漏了接线** —— `#btnNew` 上根本没有 onClick。此处逐字搬回：清空 q/bg/n1–n3、点步进条回第 1 步、聚焦回输入框。
      ⚠ 逐字 = 连那句 `.vstep button[data-k="q"]` 也照旧（早前的版本同样带 `if (st)` 守卫）。 */
   const onNew = function () {
