@@ -14,7 +14,7 @@
 /* eslint-disable */
 
 /* ===== DEF（默认设置）（源 24-script.txt）===== */
-var DEF = { wire: 'direct', base: 'https://api.deepseek.com', model: 'deepseek-chat', key: '', temp: 0.5, proxy: 'http://127.0.0.1:8788' };
+var DEF = { wire: 'direct', base: 'https://api.deepseek.com', model: 'deepseek-chat', key: '', temp: 0.5, proxy: 'http://127.0.0.1:8080' };
 
 /* ===== loadSet（源 24-script.txt）===== */
 function loadSet() {

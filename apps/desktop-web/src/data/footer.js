@@ -6,8 +6,7 @@
    ⚠ 源里的调用点有两处：载入期 ready()（38-script L1984，**实测就是它建的**）与看门狗（L2085，
      被它自己的 !document.querySelector('.vstep') 挡着，实测没轮到）。本仓的调用点 = src/shell/main.jsx 模块顶层。
      .left > .pane」那段**至今是死代码**；.mfoot 里只有 .mf-bar；**摘掉后不会自己回来**
-   来源 sha16 = 1eb17e2ab562b52b
-*/
+   来*/
 function buildFooter() {
     var wrap = document.querySelector('.wrap');
     if (!wrap || document.querySelector('.mfoot')) return;

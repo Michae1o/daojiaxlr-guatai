@@ -1,9 +1,8 @@
 /*
-   规矩：**提取不重写** —— 下面每一段都是从源文件**逐字节切片**搬过来的原文；工具每次运行都会
+   规矩：**原样搬运** —— 下面每一段都是从源文件**逐字节搬运**搬过来的原文；工具每次运行都会
       ；本文件只给 DOM 取值的薄包装。
    ⚠ 提取出来的正文引用 `h1/h2/mNum/mTime/mClock` 这几个自由变量（源里是全局）⇒ 由 bind() 注入。
-   源 sha16 = 601f0a75442e2beb
-*/
+   */
 /* eslint-disable */
 import { zhi, clockNums, normalizeNums, numsFilled } from '@xlr/shared-judgment';
 

@@ -16,7 +16,7 @@
  *      —— React 若自己渲染 `.spill`，守卫直接 return ⇒ 药丸**位置不摆、模式切换也不滑动**；
  *      同族的 `buildCastPanel` 也有「`#castPanel` 已存在 ⇒ return」）。
  *
- * 搬法照全仓老规矩：**提取不重写** —— `18-script.txt` 里 `setMode / setCastOpen / castOpen / refreshClock /
+ * 搬法照全仓老规矩：**原样搬运** —— `18-script.txt` 里 `setMode / setCastOpen / castOpen / refreshClock /
  * 归属（保证「每个状态只有一个写者」）：
  *   · **React 侧（本文）**：方式三键 → `setMode`；详情键 → `setCastOpen(!castOpen())`；
  *     九数手改 → 源里 `onEdit` 的语义；`#h1/#h2` 的 change → 置 `window.__ziTouchH1/H2`；

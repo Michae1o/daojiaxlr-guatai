@@ -33,7 +33,7 @@ var PRESETS = [
   { n: 'LM Studio 本地', base: 'http://localhost:1234/v1', model: '', local: 1 },
   { n: '自定义', base: '', model: '' }
 ];
-var DEF = { wire: 'direct', base: 'https://api.deepseek.com', model: 'deepseek-chat', key: '', temp: 0.5, proxy: 'http://127.0.0.1:8788' };
+var DEF = { wire: 'direct', base: 'https://api.deepseek.com', model: 'deepseek-chat', key: '', temp: 0.5, proxy: 'http://127.0.0.1:8080' };
 function loadSet() {
   var s = {};
   try { s = JSON.parse(localStorage.getItem('xlr-llm') || '{}') || {}; } catch (e) { s = {}; }

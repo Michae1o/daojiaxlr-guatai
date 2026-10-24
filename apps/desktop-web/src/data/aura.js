@@ -4,8 +4,7 @@
    ★ 与原文的差异：**零处**（本族里第一个「一字不改」的件）。源里那道幂等闸是**共用的 id**
      （谁先建谁赢、后来者看到 #xlrAura 就跳过）⇒ 它本身就是封条，不属于"必须改自用名"那几种情形。
    ⚠ 源里的调用点：**只在看门狗里**（38-script L2089，每 125ms 一次、共 20 秒），不是加载期建。
-   来源 sha16 = 1eb17e2ab562b52b
-*/
+   来*/
 function buildAura() {
     if (document.getElementById('xlrAura')) return;
     var d = document.createElement('div');

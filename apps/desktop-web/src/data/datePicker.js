@@ -3,8 +3,7 @@
       入口闸 data-dp → 自用 data-dpx（封条 data-dp 照盖）。
    ⚠ 为什么必须改：照抄原判据 ⇒ 把 React 自己盖的封条当成「已接线」⇒ 日期点不开。
    ℹ 它没有一次性 document 级闸；点外面关那条 listeners 每次调用都装，legacy 那份绑在旧节点上 ⇒ 空转、不冲突。
-   来源 sha16 = 1eb17e2ab562b52b
-*/
+   来*/
 function buildDatePicker() {
     var dt = document.getElementById('dt');
     var pop = document.getElementById('dppop');

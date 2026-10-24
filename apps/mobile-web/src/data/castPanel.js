@@ -8,8 +8,7 @@
    ⚠ 它做的是**搬节点**（把 #castFields 的子节点搬进 #castPanel），不是重建 —— 所以换主人之后
      仍然必须**由同一次调用**把节点搬完（不能只建个空壳）。
    ⚠ 切片末尾那句 setCastOpen(castOpen()) 在本仓走成空操作（那两个函数是早期实现全局）；
-   来源 sha16 = 1eb17e2ab562b52b
-*/
+   来*/
 function buildCastPanel() {
     var cf = document.getElementById('castFields');
     var cbar = document.querySelector('.cbar');

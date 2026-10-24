@@ -41,7 +41,7 @@ import { SetDot } from '../data/setDot.js';
 import { SettingsCore } from '../data/settingsCore.js';
 /* ★ 变更记录（砍段前置，2026-10-14 你放行第 1 条）：旧「设置对话框」两块列表的填充 ——
    `#presets`（10 个预设按钮）＋ `#modelMenu`（7 条模型）。早期实现由 `24-script` 在**解析期**填；
-   生成物（勿手改）：src/data/llmDialogCore.js ← tools/extract-llm-dialog.mjs（import 即执行，与早期实现同款）。 */
+   生成物（改动后重新构建）：src/data/llmDialogCore.js ← tools/extract-llm-dialog.mjs（import 即执行，与早期实现同款）。 */
 import '../data/llmDialogCore.js';
 /* ★ 引导配图（`window.XLR_GUIDE_IMG`）： 删段时 `34-script` 的 5 张 data-URI 跟着删了、
    import 即执行（早期实现同款：解析期赋值）。 */
@@ -128,7 +128,7 @@ Object.defineProperty(window, '__xlrShell', { value: api, writable: false, confi
 
 /* 「已接管项」登记表（ 批 A）：**定义在 api 上**，各挂载块按自己的顺序调用都能登记到。
    ⚠ 原先它定义在 S2/ASK 块里 ⇒ 更早跑的 S2/MAIN 块调不到（A3① 的 `bindResult` 就在那块里）。
-   同一个数组被 `api.s2ask.owned` 引用 ⇒ 判据（`(实测探针)` 读 `sh.s2ask.owned`）不变。
+   同一个数组被 `api.s2ask.owned` 引用 ⇒ 判据（`(实测)` 读 `sh.s2ask.owned`）不变。
    登记由**真正接线的那一处**现场做（组件 effect / 外壳的中和动作）⇒ 读到的是证据，不是声明。 */
 api.owned = [];
 api.markOwned = function (k) { if (k && api.owned.indexOf(k) < 0) api.owned.push(k); };
@@ -167,7 +167,7 @@ mountAura();
  *   **载入期 `ready()` 回调**（`38-script` L1984，产物 html 内联栈：`at buildFooter ← at <html>:10989`），
  *   而那一刻 `window.__xlrShell` **已经定义**（新仓两臂 true）⇒ 本模块顶层先建，早期实现那次必然看到 `.mfoot` 已在、直接 return。
  *   （看门狗那次调用（L2085）被它自己的 `!document.querySelector('.vstep')` 挡着，实测没轮到。）
- * ⚠ 只读实测（`(实测探针)`，三臂逐项一致）：`.left` 里**只有一块** `.pane`（所问之事）
+ * ⚠ 只读实测（`(实测)`，三臂逐项一致）：`.left` 里**只有一块** `.pane`（所问之事）
  *   ⇒ 源里「把**最后一个** `.left > .pane` 搬进脚注」那段至今是**死代码**（`.mfoot` 里只有 `.mf-bar`）；
  *   我们照旧逐字切片（将来那块 pane 真回来了，行为与早期版本一致）。
  *   这条是确定性的（同步任务里看门狗/定时器插不进来）。实测**早期版本摘掉后它不会自己回来**（三臂一致）⇒ 对照干净。
@@ -187,7 +187,7 @@ function mountFooter() {
 mountFooter();
 
 /* ============  批 C-①：I 段的三个全局小函数改由本仓这套装 ============
- * 源与接管手法见 `src/data/globals.js` 头注（`tools/extract-globals.mjs` 生成，**提取不重写**）：
+ * 源与接管手法见 `src/data/globals.js` 头注（`tools/extract-globals.mjs` 生成，**原样搬运**）：
  *   ① 顶栏吸顶 `markTop`（`18-script` L11–14，**零声明差异**）：先按名摘掉早期实现那条 scroll 监听，再装我们这份
  *      —— 早期实现那份绑的是 18-script 的**全局函数**，所以「按名摘」是确定性的；摘完只剩我们这一条。
  *   ② 浮条 `toast`（`18-script` L356–368）：**不另切一份**（`resultCore.js` 里那份就是同源正文），
@@ -286,7 +286,7 @@ function mountSkins() {
 mountSkins();
 
 /* ============  批 C-①b：外链统一出口 `openOut` 改由本仓这份跑 ============
- * 源与接管手法见 `src/data/openOut.js` 头注（`tools/extract-open-out.mjs` 生成，**提取不重写**）：
+ * 源与接管手法见 `src/data/openOut.js` 头注（`tools/extract-open-out.mjs` 生成，**原样搬运**）：
  *   ① 统一出口 `openOut(url)`（`18-script` L227–235，**零声明差异**）：桌面走 Tauri 的 `open_url`、
  *      安卓走 `location.href`、网页照常 `window.open`。
  *   ② 紧随其后那条**页级捕获委托**的回调正文（L237–246，**声明差异 1 处**）：早期实现那条挂在
@@ -313,7 +313,7 @@ function mountOpenOut() {
 mountOpenOut();
 
 /* ============  批 C-②：开屏引导分步（`#onbLayer`）改由本仓这套跑 ============
- * 源与接管手法见 `src/data/guideCore.js` 头注（`tools/extract-guide.mjs` 生成，**提取不重写**）：
+ * 源与接管手法见 `src/data/guideCore.js` 头注（`tools/extract-guide.mjs` 生成，**原样搬运**）：
  *   ① `buildWelcome()`（`36-script` L267–357，**声明差异 1 处**：`show()` 幂等早退）：建 `#onbLayer`
  *      ＋ 接线（下一步 / 上一步 / 跳过 / 点层外跳过）＋ `goConfig()`，并导出 `window.__xlrGuideShow`；
  *   ② `guideImg()` 配图（`window.XLR_GUIDE_IMG`）· ③ `GUIDE_STEPS` 8 步文案 · ④ `maybeWelcome()` 首屏自动弹。
@@ -322,7 +322,7 @@ mountOpenOut();
  *      `#s-llm` / `#stProvs` / `#stKey`，不同步提交那几行会全落空）。
  *   ⚠ **位置**：早期实现是在 DCL 的 `init()` 里把它 append 在 **`#setScreen` 之后**；我们比它早建（模块顶层，
  *     共用 id 闸因此把早期实现那份挡掉）⇒ 落点在 body 末尾 ⇒ **必须在 DCL 调 `placeGuide()` 归位**，
- *     只读实测（`(实测探针)`）旧路径开的是**早期实现那份**设置页（`#setScreen` 节点没换、
+ *     只读实测（`(实测)`）旧路径开的是**早期实现那份**设置页（`#setScreen` 节点没换、
  *     `s2settings.mountedAt=null`）；本仓的设置页与它逐条同形，落点照旧由下面那条 `#gNext` 纠正兜着。
  *   ⚠ **自动弹在开屏在场时是死路**（`maybeWelcome` 第一条就早退；实测两臂都不弹）⇒ 真实入口 = `window.__xlrGuideShow`
  *     （设置页那颗「重新看配置引导」）。我们仍按早期实现同一时刻（DCL + 260ms）调一次 ⇒ 行为归我们。
@@ -381,7 +381,7 @@ function mountGuide() {
 mountGuide();
 
 /* ============  批 C-⑤：步进条一族（`.vstep` ＋ `html[data-step]`）改由本仓这套跑 ============
- * 源与接管手法见 `src/data/stepCore.js` 头注（`tools/extract-step.mjs` 生成，**提取不重写**、正文零声明差异）：
+ * 源与接管手法见 `src/data/stepCore.js` 头注（`tools/extract-step.mjs` 生成，**原样搬运**、正文零声明差异）：
  *   ① 状态（`STEPS`/`revealMax`）· ② 判据（`currentStep`/`hasCtx`）· ③ 骨架 `buildStepper()`（含药丸几何）
  *   ④a `placePill` · ④b IIFE 顶层 `resize` 监听 · ④c `placeSpill`（分段控件那颗药丸）
  *   ⑤ `syncStep`/`pillSplit`/`pillBusy`/`revealBtn`/`animateIn`/`narrowPhone` · ⑥ `VISITED`/`goStep`/`setStep`
@@ -510,7 +510,7 @@ function mountSplash() {
 }
 mountSplash();
 
-/* ============ S2/C2：设置页接管（**本步起真挂载 React 设置页**）============
+/* ============ ：设置页接管（**本步起真挂载 React 设置页**）============
  * 拦的机制（为什么拦得住）：legacy 打开设置页靠的是一条 **document 捕获阶段的事件委托**
  *   （`36-script.txt` 里 `closest('#btnSet, #btnSet2')` + `preventDefault/stopPropagation` + `open()`）。
  *   捕获阶段的事件顺序是 **window → document → … → 目标**；我们把监听器装在 **window 捕获阶段**，
@@ -542,8 +542,8 @@ function setSettingsOpen(v) {
 function openSettings() {
   if (!settingsRoot) {
     /* ★  尾项（2026-10-14）：早期实现的「让位/摘旧节点」动作随段退役 —— 砍段之后 `#setScreen`
-       ⚠ 字段名 `legacyNodeRemoved` **沿用不改**（判据 `(实测探针)` /
-         `(实测探针)` 读它）；语义升级为**更强的事实**：本仓接管时文档里本来就没有它。 */
+       ⚠ 字段名 `legacyNodeRemoved` **沿用不改**（判据 `(实测)` /
+         `(实测)` 读它）；语义升级为**更强的事实**：本仓接管时文档里本来就没有它。 */
     const legacyNodeRemoved = !document.getElementById('setScreen');
     settingsHost = document.createElement('div');
     settingsHost.setAttribute('data-xlroot', 'settings');

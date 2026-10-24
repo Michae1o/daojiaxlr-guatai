@@ -9,8 +9,7 @@ import { IS_PHONE } from '../platform.js';
       ② 照抄会把 React 自己盖的封条 data-nstep="1" 当成"已接线"⇒ 一个钮都不建。
    ⚠ 接线前提：`buildNumStep` 开头是 `if (!document.getElementById('castPanel')) return;`，
       而 `#castPanel` 由 legacy 的 `buildCastPanel` 建 ⇒ 调用方必须**轮询等它出现**（见 AskPanel.jsx）。
-   来源 sha16 = 1eb17e2ab562b52b
-*/
+   来*/
 function stepOnce(el, box) {
     box.addEventListener('click', function (ev) {
       var b = ev.target;

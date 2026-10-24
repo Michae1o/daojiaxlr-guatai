@@ -3,8 +3,7 @@
      不能改成模块：皮肤/明暗必须在**画第一帧之前**定到 html 上，defer 模块赶不上第一帧。
    ⚠ 源里「挂 window.XLR_SKINS / XLR_SKIN_APPLY / XLR_SKIN_CUR」那三行**不在这里** ——
      由本仓模块在模块期指向本仓实现（src/shell/main.jsx 的 mountSkins；模块期晚于解析期 ⇒ 本仓赢）。
-   源 sha16 = 306931ad3e1f1bca
-*/
+   */
 (function () {
 var SKINS = [
     { k: 'bw', n: '黑白', t: '浅 · 无色相', bg: '#f4f4f5', ac: '#0f1013' },

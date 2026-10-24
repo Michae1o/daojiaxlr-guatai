@@ -1,11 +1,10 @@
 /*
-   规矩：**提取不重写** —— 下表每一个成员都是从源文件**逐字节切片**搬过来的原文；
+   规矩：**原样搬运** —— 下表每一个成员都是从源文件**逐字节搬运**搬过来的原文；
       ① 幂等标记 data-gsel → 自用 data-xgs；② 块内另盖自用标记 data-xgs（data-gsel 那句照留）；
       ③ 一次性闸 window.__gselWired → 自用 window.__xgsWired。
    ⚠ 为什么必须改（两条都是「照抄会坏」）：① 照抄原判据 ⇒ 把 React 自己盖的封条当成「不用接管」⇒ 弹层永远不开；
       ② 沿用同名闸 ⇒ React 这份被自己的闸挡死 ⇒ 弹层的 Esc / ↑↓ / 回车全没人接。
-   来源 sha16 = 1eb17e2ab562b52b
-*/
+   来*/
 var gselOpen = null;
   function closeGlass() {
     if (!gselOpen) return;

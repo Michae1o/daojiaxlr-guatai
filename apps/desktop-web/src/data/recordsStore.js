@@ -7,8 +7,7 @@
    ⚠ 与 legacy 的共存（A4① 的接缝）：legacy 那份同名函数**仍在原位**（`legacy/**` 一字不动），
      但外壳把 `window.loadCasesRaw/loadCases/saveCases/loadRules/saveRules` 换成本模块的导出
      ⇒ 名字虽然还在 legacy 段里，**活得是这一份**（记账 / CRUD / 复盘那些函数都通过这几个原语读写）。
-   源 sha16 = 4c73659130aa6351
-*/
+   */
 /* eslint-disable */
 
 import { zhi } from '@xlr/shared-judgment';   /* `addCase` 正文里的 `zhi[c.zi - 1]`（源里是 18-script 的全局）*/

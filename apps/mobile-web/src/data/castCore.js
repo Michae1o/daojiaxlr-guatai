@@ -2,8 +2,7 @@
         唯一例外逐条列在本工具 `PATCHES`（当前 1 条，见控制台「有意改动」）。
       buildBlocks / GONG / zhi）**一律 import 自 @xlr/shared-judgment**。
    ⚠ 提取出来的正文引用 `mClock / mNum` 两个节点（源里是全局）⇒ 由 bindCast() 注入；`show` 转发到 window.show。
-   源 sha16 = 601f0a75442e2beb
-*/
+   */
 /* eslint-disable */
 import { clockNums, zhi, lunarOf, advance, GONG, autoCat, buildContext, buildBlocks } from '@xlr/shared-judgment';
 import { AskCore, numVals, numsFilledDom as numsFilled } from './askCore.js';

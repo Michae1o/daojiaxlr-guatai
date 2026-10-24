@@ -3,7 +3,7 @@
  *     · 外壳/头部/身体   L133–L253（`build()` 里拼的那份 html，L249–253 挂到 body）
  *     · 五个 section     L149–L243 + 五步向导 L159–L194 + 进阶设置 L198–L210
  *     · **运行期填充/改写** L478–L571（`render()`）+ L127–L131（`#stThemes`）+ L978–L984（`open()`）
- *   数据与纯逻辑来源：`src/data/settingsCore.js`（工具机械提取、逐字、勿手改）
+ *   数据与纯逻辑来源：`src/data/settingsCore.js`（工具机械提取、逐字、改动后重新构建）
  *     ⇒ 本文件**只负责把同样的 DOM 摆出来**，不重写任何计算逻辑
  *       （`pvValid / guessProv / missing / load / loadSvcs / …` 一律调 `SettingsCore`）。
  *
@@ -776,7 +776,7 @@ export default function SettingsScreen({ open, onClose }) {
                       `render()` 里**直接改 DOM**（源文件此处是静态 `display:none`）⇒ JSX 照做：
                       静态保持 `none`，切换在"每次重画后"的 effect 里赋同一表达式。 */}
                   <div className="stf" id="stProxyRow" style={{ display: 'none' }}><label htmlFor="stProxy">中转地址</label>
-                    <input type="text" id="stProxy" spellCheck="false" defaultValue={s.proxy} placeholder="http://127.0.0.1:8788" ref={proxyRef} onChange={onProxy} /></div>
+                    <input type="text" id="stProxy" spellCheck="false" defaultValue={s.proxy} placeholder="http://127.0.0.1:8080" ref={proxyRef} onChange={onProxy} /></div>
                 </div></details>
             </section>
 

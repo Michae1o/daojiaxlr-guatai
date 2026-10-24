@@ -3,8 +3,7 @@
      判不过就不播四拍、也不补发那一次点击（提示由干跑自己写进 #err）。没注入 / 注入的抛了 ⇒ fail-open。
    ⚠ 与 legacy 的共存：外壳把 `window.__xlrCasting` **常置 1** ⇒ legacy 那个拦截器整体空转，
      只剩本模块这一份在播 ⇒ 不会播两遍。
-   源 sha16 = 1eb17e2ab562b52b
-*/
+   */
 /* eslint-disable */
 
 function syncGo() {

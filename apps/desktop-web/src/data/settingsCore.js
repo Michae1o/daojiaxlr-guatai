@@ -1,14 +1,13 @@
-/* settingsCore.js —— **由工具生成，勿手改**（S2/C2）
-   规矩：**提取不重写** —— 下面每一段都是从源文件**逐字节切片**搬过来的原文；工具每次运行都会
+/* settingsCore.js —— 由脚本生成
+   规矩：**原样搬运** —— 下面每一段都是从源文件**逐字节搬运**搬过来的原文；工具每次运行都会
    共用/边界：本篇的 SKIN_KEY 与 skinsCore.js 的 KEY 是**同一个键名的两份字面量**（各按自己的源段逐字提取）；
-   源 sha16 = 0b71b790ca1ec608
-*/
+   */
 /* eslint-disable */
 var LLM_KEY = 'xlr-llm';
 var CASE_KEY = 'xlr-cases';
 var SKIN_KEY = 'xlr-skin';
 var DEF = { wire: 'direct', base: 'https://api.deepseek.com', model: 'deepseek-chat',
-              key: '', temp: 0.5, proxy: 'http://127.0.0.1:8788' };
+              key: '', temp: 0.5, proxy: 'http://127.0.0.1:8080' };
 var PROVS = [
     { k: 'deepseek', n: 'DeepSeek', base: 'https://api.deepseek.com', model: 'deepseek-chat',
       note: '便宜、稳，实测可直接连', rec: 1, url: 'https://platform.deepseek.com/api_keys' },

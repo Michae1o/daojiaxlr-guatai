@@ -1,5 +1,5 @@
 /*
-   规矩：**提取不重写** —— 下面 esc / chip / playWalk / calmWalk 是从源文件**逐字节切片**搬来的原文
+   规矩：**原样搬运** —— 下面 esc / chip / playWalk / calmWalk 是从源文件**逐字节搬运**搬来的原文
    ⚠ 与 legacy 的共存：外壳在「load」时把「window.playWalk」换成这里这一份 ⇒
      legacy 的 wireWalk / calmWalk 两层包装成为**不可达的死代码**；show() 里那句
      playWalk(c) 调到的就是本模块。
