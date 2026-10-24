@@ -1,40 +1,28 @@
 /* llmEndpoint.js —— 「设置里填的那几格」换算成「真正要发出去的请求」：全仓只此一处。
  *
- * ★★ （现象：：智谱预设填官方地址连不上，红字只写「Failed to fetch」）：
- *   实测（在线上 https://fairy-deepdive.cn/xlr/ 里直接 fetch，Origin 就是本站）——
- *     open.bigmodel.cn/api/paas/v4/chat/completions  → Failed to fetch
- *     open.bigmodel.cn/api/anthropic/v1/messages     → Failed to fetch
- *     api.deepseek.com / api.siliconflow.cn / api.moonshot.cn → 401（通，只是测试用的是假 key）
- *     api.openai.com                                 → Failed to fetch（国内网络到不了，跟软件无关）
- *   原因在「预检」：智谱那个网关只在 Origin == open.bigmodel.cn 时才回 Access-Control-Allow-Origin，
- *   别的域名一律 200 但**没有**这条头 ⇒ 浏览器直接把请求拦掉，页面只能看到 Failed to fetch。
- *   这跟「智谱是不是 OpenAI 兼容」没关系：/api/paas/v4 就是 OpenAI 那套的形状，
- *   拦人的是浏览器的同源策略，不是接口形状。
+ * 智谱预设的地址在浏览器里连不上的原因：
+ *   open.bigmodel.cn 的网关只在 Origin == open.bigmodel.cn 时才回 Access-Control-Allow-Origin，
+ *   别的域名一律 200 但没有这条头 ⇒ 浏览器把请求拦掉，页面只看到 Failed to fetch。
+ *   这跟「智谱是不是 OpenAI 兼容」无关：/api/paas/v4 就是 OpenAI 那套形状，拦人的是同源策略。
+ *   桌面 exe 走 Rust 侧 http_fetch，没有跨域问题 ⇒ 直接连官方地址，不依赖任何中转。
+ *   浏览器里（网页 / 安卓 WebView）如果连不上，把地址换成你自己的中转（见 README）。
  *
- *   ⇒ 不在 Tauri 里的（网页版 /xlr/、安卓 WebView、手机网页版）把智谱官方地址换成
- *     本站同源中转 `/llm/zhipu/<原路径>`（nginx 原样转给 open.bigmodel.cn，
- *     见 tools/_add-llm-relay-nginx.py：不记日志、不缓冲、只给必要的 CORS 头）。
- *     桌面 exe 走 Rust 侧 http_fetch 发请求、没有跨域这回事 ⇒ 仍然直连官方地址，不依赖本站。
- *
- *   ★ 两种地址都能用：`.../api/paas/v4`（标准 API）与 `.../api/anthropic`（Claude 协议，编码套餐）。
- *     中转是**按原路径转发**的，两种都通。
- *
- * 第二个换算：Anthropic 协议。地址里带 `/anthropic` 的（智谱的 /api/anthropic、真 Anthropic），
+ * 第二个换算：Anthropic 协议。地址里带 /anthropic 的（智谱的 /api/anthropic、真 Anthropic），
  *   请求/响应形状与 OpenAI 不同：x-api-key 头、max_tokens 必填、正文在 content[].text、
  *   流式是 content_block_delta。这里统一兜住，调用方不用各写一份。
  */
-
 /* 桌面 exe（Tauri）里才有 window.__TAURI__（tauri.conf.json 的 withGlobalTauri = true）；
    网页版 / 安卓 WebView 里没有 ⇒ 走本站中转。 */
 export var IS_TAURI = (typeof window !== 'undefined') && !!window.__TAURI__;
 
 var ZHIPU = /^https?:\/\/open\.bigmodel\.cn\//i;
-export var RELAY = 'https://fairy-deepdive.cn/llm/zhipu/';
+/* 浏览器里要中转才填这一行（填你自己中转的完整前缀）；留空 = 直连官方地址 */
+export var RELAY = '';
 
 /* 只在「非 Tauri」且「智谱官方域名」时换成中转；自定义家 / 别家一律原样 */
 export function resolveBase(base) {
   var b = String(base || '');
-  if (IS_TAURI || !ZHIPU.test(b)) return b;
+  if (IS_TAURI || !ZHIPU.test(b) || !RELAY) return b;
   return RELAY + b.replace(ZHIPU, '');
 }
 
