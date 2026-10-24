@@ -20,7 +20,6 @@
      共用 id 判定 ⇒ **不需要改名**）。
      ⇒ 外壳在 DCL 调 placeGuide() 把它**归位**到 #setScreen 的下一位（否则结构签名会变）。
    · 一键回退：VITE_BISECT=noreact ⇒ 不装（回到 legacy 全权）。
-   源 sha16：36-script = 0b71b790ca1ec608
 */
 /* eslint-disable */
 import { SettingsCore } from './settingsCore.js';

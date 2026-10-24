@@ -1,8 +1,8 @@
 /*
  *
  * 来源（只读，逐字基准）：`(upstream)`（上游手机段）
- *   · splitGreet  L340–L352   该片段 486 字节  sha16 `d04ce1cea5ab1041`
- *   · adaptPh     L357–L369   该片段 504 字节  sha16 `65ef98549aabe7c0`
+ *   · splitGreet  L340–L352   该片段 486 字节
+ *   · adaptPh     L357–L369   该片段 504 字节
  *
  * 上游当初怎么用它（`modern.js` L325–L334 的 `fitAll()`）：
  *   `fitCat()` / `adaptPh()` / `splitGreet()` / `syncPhoneStep()` 一串，boot、resize、换页各跑一次。
@@ -13,7 +13,7 @@
  *      `data/askCore.js` 的 `renderGreet()` 写、且**可能重渲染**（新词会跟首捕的旧词打架）
  *      ⇒ 这里改成**幂等判定**（已有换行就 return；否则按当前文本断一次）。
  *
- *   `styles/legacy.css` 被 manifest 记整份 sha16 ⇒ 改它链会拒装。
+ *   `styles/legacy.css` 被 改它要连带重算。
  * 幂等：两处都靠「值不同才写」收敛 ⇒ 被 watch() 的 MutationObserver 反复调用也不会抖。
  */
 /* eslint-disable */

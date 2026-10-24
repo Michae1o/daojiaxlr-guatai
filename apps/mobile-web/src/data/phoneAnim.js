@@ -27,11 +27,11 @@
  *   ② 第 ① 条的连带：源里 `stepSwipeBlocked()` 的「非窄屏 ⇒ 拦」在手机端恒为 false ⇒ 只留后面三条判定。
  *   ③ `syncPhoneStep()` 里那记 `markVisited(cur)` **不搬** —— 本仓 `StepCore.setStep()` 已自己 mark（L401）。
  *   ④ 调用点改挂 **MutationObserver(html[data-step])**：本仓 `setStep` 在生成物 `stepCore.js` 里、
- *      它内部把 `syncPhoneStep/phoneStepSettle` 绑成了**桌面空实现**（L54–56，那个文件由工具生成，不要手改）
+ *      它内部把 `syncPhoneStep/phoneStepSettle` 绑成了**桌面空实现**（L54–56，那个文件是生成物）
  *      ⇒ 等价做法＝在外面盯 `data-step`，变化时补这两拍（源里那条自愈观察者本来就是这么干的，见 L1568–L1571）。
  *   ⑤ `#sdb` 的开合走 `window.sdbOpen/sdbClose`（源里就是），本仓若没挂这两个全局则整段 inert（try/catch 保住）。
  *
- *   `styles/legacy.css` 被 manifest 记整份 sha16 ⇒ 改它链会拒装。
+ *   `styles/legacy.css` 被 改它要连带重算。
  */
 /* eslint-disable */
 import { StepCore } from './stepCore.js';

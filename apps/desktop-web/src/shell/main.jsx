@@ -1284,7 +1284,7 @@ mountAsk();
 
 /* ============ 变更记录 第 ② 步：左栏重排（`.cbar` 那条「起卦栏」）改由本仓这套建 ============
  * 源：`30-script.txt` 的 IIFE 内层 `init()`（逐字切片在 `src/data/variantC.js`，
- *   `tools/extract-variant-c.mjs` 生成，1360 字符 / sha16 `4cca55ae7151bb47`）。
+ *   `tools/extract-variant-c.mjs` 生成，1360 字符 /）。
  * 它干的事 = **纯 DOM 搬运**：把左栏 `.left .pane-b` 里那叠输入面板（`#q` / `#bgDet` / `.seg` /
  *   `#castFields` / `#cat` / `.gobar` ＋剩下的孩子）重排成一条横向「起卦栏」
  *   `.cbar > .cmain / .cside / .gobar`，然后**删掉 `.pane-b`**。

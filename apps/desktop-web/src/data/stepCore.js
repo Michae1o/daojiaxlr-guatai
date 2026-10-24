@@ -32,7 +32,6 @@
      但 `setStep('q')` **挡不住**（同一 try 行切不开）⇒ 依赖源里那条既有语义（同一步只做状态同步、不重播入场）
      ⇒ 判据必须实测「两次调用后 .vstep 子树逐属性一致」。
    · 一键回退：VITE_BISECT=noreact ⇒ 不装（回到 legacy 全权）。
-   源 sha16：38-script = 1eb17e2ab562b52b
 */
 /* eslint-disable */
 /*

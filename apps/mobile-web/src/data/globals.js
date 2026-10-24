@@ -8,7 +8,6 @@
       ⚠ 早期实现那份监听是 IIFE 内的函数、按名摘不掉 ⇒ 接管手法 = **document 捕获阶段拦 #btnDN**
       再盖上早期实现看的封条 data-dnwired（叫它的看门狗别再往上挂）。
       源里的自由变量 XLR_SKINS / applySkin 在这里分别绑定 SkinsCore.SKINS 与 src/data/skinApply.js。
-   源 sha16：18-script = 601f0a75442e2beb · 38-script = 1eb17e2ab562b52b
 */
 /* eslint-disable */
 import { SkinsCore } from './skinsCore.js';

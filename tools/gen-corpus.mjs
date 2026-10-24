@@ -22,7 +22,7 @@ const items = files.map(f => {
   return { id, file: f, title, chars: text.replace(/\s/g, '').length, heads, text };
 });
 
-const header = '/* corpus.js —— 由 tools/gen-corpus.mjs 从 corpus/*.md 生成，请由工具生成，不要手改。\n'
+const header = '/* corpus.js —— 由 tools/gen-corpus.mjs 从 corpus/*.md 生成。\n'
   + ' * 这就是开源版判据的真源：解卦提示词（prompt.js）与依据页都从这里取。\n'
   + ' * 生成时间：' + new Date().toISOString().slice(0, 10) + '，共 ' + items.length + ' 份。\n'
   + ' */\n';

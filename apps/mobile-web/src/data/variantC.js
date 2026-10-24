@@ -1,7 +1,7 @@
-/* apps/desktop-web/src/data/variantC.js —— 机械生成，请由工具生成，不要手改
+/* apps/mobile-web/src/data/variantC.js —— 机械生成的搬运用副本
  *
  * 内容 = 早期实现 `30-script.txt` IIFE 内层 `init()` 的**逐字切片**（零声明差异，1360 字符
- *   sha16 `4cca55ae7151bb47`）。那段干的事 = **纯 DOM 搬运**：
+ *）。那段干的事 = **纯 DOM 搬运**：
  *   把左栏 `.left .pane-b` 里那叠输入面板（`#q` / `#bgDet` / `.seg` / `#castFields` / `#cat` /
  *   `.gobar` ＋剩下的孩子）重排成一条横向「起卦栏」`.cbar > .cmain / .cside / .gobar`，
  *   然后**删掉 `.pane-b`**（源里写着一条死规矩：漏搬一个孩子，起卦时读它 `.checked` 直接抛 null）。

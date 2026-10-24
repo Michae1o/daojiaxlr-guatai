@@ -14,7 +14,6 @@
    —— 接管手法（装配，见 shell/main.jsx 的 mountMain()）——
    · 外壳把最外层 `window.show` 装成本仓这份：先 `flushSync` 渲染 React（DOM 归 React），再调本文件这份。
    · 一键回退：VITE_S2_MAIN=0 / VITE_BISECT=noreact ⇒ 不装（回到 legacy 全权）。
-   源 sha16：16-script = 344ac9fe11cebcc5 · 26-script = 541b71aafc960c05
 */
 /* eslint-disable */
 

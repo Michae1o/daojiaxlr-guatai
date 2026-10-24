@@ -6,7 +6,7 @@
  *   第 1 步（骨架）—— `#xlrSplash` 以下的外层骨架（span/div/b/button 与全部文本）写成真 JSX，
  *     属性、class、顺序、文本逐字照抄；
  *   第 2 步（渐变）—— `<defs>`（5 linearGradient + 7 radialGradient + 40 stop）由 `SplashDefs.jsx` 渲染
- *     （由 tools/gen-splash-jsx.mjs **机械生成**，零转录误差）；
+ *     （逐字搬运，零转录误差）；
  *   第 3 步（图形）—— 图形与路径（3 ellipse + 14 circle + 12 path + 1 g）由 `SplashShapes.jsx` 渲染；
  *     **宿主元素已全部清除**。
  * 判据①②（React 完全接管）：静态 0 处 `dangerouslySetInnerHTML`；运行时开屏子树 **0 次**字符串注入；

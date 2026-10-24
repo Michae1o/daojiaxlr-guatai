@@ -1256,7 +1256,7 @@ mountAsk();
 
 /* ============ 变更记录 第 ② 步：左栏重排（`.cbar` 那条「起卦栏」）改由本仓这套建 ============
  * 源：`30-script.txt` 的 IIFE 内层 `init()`（逐字切片在 `src/data/variantC.js`，
- *   `tools/extract-variant-c.mjs` 生成，1360 字符 / sha16 `4cca55ae7151bb47`）。
+ *   `tools/extract-variant-c.mjs` 生成，1360 字符 /）。
  * 它干的事 = **纯 DOM 搬运**：把左栏 `.left .pane-b` 里那叠输入面板（`#q` / `#bgDet` / `.seg` /
  *   `#castFields` / `#cat` / `.gobar` ＋剩下的孩子）重排成一条横向「起卦栏」
  *   `.cbar > .cmain / .cside / .gobar`，然后**删掉 `.pane-b`**。
@@ -1294,7 +1294,7 @@ mountVariantC();
 
 /* ============ 手机端说法补齐（★ ）：问候语断两行 + 输入框占位只留一句 ============
  * 源：上游手机段 `(upstream)` 的 `splitGreet()` / `adaptPh()`
- *   （逐字基准与两处有意偏离都写在 `src/data/phoneShims.js` 头注里，含源片段 sha16）。
+ *   （逐字基准与两处有意偏离都写在 `src/data/phoneShims.js` 头注里，含源片段哈希）。
  * 为什么现在补：变更记录 搬 React 时这两件没跟着搬（早期实现 `fitAll()` 那条链断了）⇒ 实测产物：
  *   · `#q` 占位是**桌面长版** 68 字（早期版本 18 字），16px 下溢出输入框（滚高 95 > 客户高 60）。
  * ⚠ 位置 = 紧接 `mountVariantC()` 之后：`.cbar` 已建 ⇒ `#q` 一定在文档里；`#greet` 来自静态骨架。

@@ -1,7 +1,7 @@
-/* apps/desktop-web/src/data/splashCore.js —— 机械生成，请由工具生成，不要手改
+/* apps/desktop-web/src/data/splashCore.js —— 机械生成的搬运用副本
  *
  * 内容 = 早期实现 `38-script.txt` L1305–1786 那整个 `buildSplash()` 的**逐字切片**
- *   （482 行 / 28,895 字符 / sha16 `921b52f23d8de551`），**声明差异唯一 1 处**（见下）。
+ *   （482 行 / 28,895 字符 /），**声明差异唯一 1 处**（见下）。
  *
  * 为什么在本仓（ 砍段前置）：早期实现那 14 个内联脚本一不在，`#xlrSplash` 就**根本不存在** ——
  *   `shell/main.jsx` 的 `mountSplash()` 只是**桥接**（轮询等早期实现那张节点再接管）⇒ 等不到就放弃 ⇒

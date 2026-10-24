@@ -1,4 +1,4 @@
-/* apps/desktop-web/src/data/setDot.js —— 机械生成，请由工具生成，不要手改
+/* apps/desktop-web/src/data/setDot.js —— 机械生成的搬运用副本
  *
  * 内容 = 早期实现那五块的**逐字切片**（零声明差异）：
  *   `24-script.txt` → `DEF`(L15) · `loadSet`(L16–21) · `updateSetDot`(L30–35)
