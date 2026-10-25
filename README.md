@@ -88,7 +88,8 @@ cd android && ./gradlew assembleDebug
 # → app/build/outputs/apk/debug/app-debug.apk
 ```
 
-编完的 `xiaoliuren.exe` **要和同目录的 `WebView2Loader.dll` 放在一起**，单独拷 exe 出去会双击没反应。
+编完是个单文件 exe（WebView2 加载器已经静态链进去），双击就能开。旧版 Tauri 会额外生成一个
+`WebView2Loader.dll`，如果你的构建产物旁边有它，一起带着就行。
 
 没配签名也能编 —— 不填钥匙就走 Android 自带的调试签名，能装能玩。前端改完怎么重新打进产物、
 每个目录干什么，写在 [BUILD.md](BUILD.md)。
