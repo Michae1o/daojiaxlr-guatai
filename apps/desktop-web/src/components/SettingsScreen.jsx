@@ -313,12 +313,12 @@ export default function SettingsScreen({ open, onClose }) {
       .catch((e) => {
         const m = C.esc(String(e.message || e));
         /* ★ （已定的口径）：不解释机制，只说下一步 ——
-           「无法连接。请检查网络设置，或更换供应商。如仍有问题，请到【关于】页面加维护者微信。」
+           「无法连接。请检查网络设置，或更换供应商。」
            网络层失败不把 Failed to fetch 甩给用户；HTTP 错误（Key 错/余额）留服务商原话。
            ★ 设置里「联系」并入「关于」、那一栏已删 ⇒ 文案改指【关于】。 */
         const netFail = !ep.proxy && /Failed to fetch|NetworkError|Load failed|网络/i.test(String(e.message));
         say('bad', (netFail ? '✗ 无法连接。<br>' : '✗ 没通：' + m + '<br>') +
-          '请检查网络设置，或更换供应商。如仍有问题，请到【关于】页面加作者微信。');
+          '请检查网络设置，或更换供应商。');
       })
       .then(() => {
         if (tb) { tb.disabled = false; tb.textContent = '测试连接'; }
@@ -1100,7 +1100,7 @@ export default function SettingsScreen({ open, onClose }) {
             </section>
 
             {/* ★ （要求）：「设置里的关于里面加点内容，想加点免责条款……然后把联系的内容
-                都移动到关于吧，再把联系栏删了。」⇒ 原 `#s-contact` 整节删除，两处微信并进本页；
+                都移动到关于吧，再把联系栏删了。」⇒ 原 `#s-contact` 整节删除，两处联系方式并进本页；
                 免责声明按「它是什么 → 不能拿它干什么 → 数据与模型 → 责任 → 用法」分层写。
                 ★ （用户定）：这一整块后续已拆成「关于」（数据之后，只留版本与更新）＋「说明」
                 （末尾，简介 + 三条前提 + 免责声明 + 联系 + 仓库）—— 原位于此处的旧 `#s-about` 已删。 */}
@@ -1124,10 +1124,8 @@ export default function SettingsScreen({ open, onClose }) {
                 <li>请在所在地法律与公序良俗的范围内使用；不得用它行骗、敛财，或做其他违法的事。</li>
               </ul>
 
-              <h4 className="ab-h">联系作者</h4>
-              <p>软件使用反馈：微信 <b>Trick_Mage</b></p>
-              <p>小六壬交流：微信 <b>gny950107</b></p>
-              <p>添加请注明来意。</p>
+              <h4 className="ab-h">反馈</h4>
+              <p>问题与建议请提到仓库的 Issues。</p>
 
               <h4 className="ab-h">开源仓库</h4>
               <p><a href="https://github.com/Michae1o/daojiaxlr-guatai" target="_blank" rel="noopener">github.com/Michae1o/daojiaxlr-guatai</a></p>

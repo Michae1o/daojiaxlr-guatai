@@ -139,12 +139,12 @@ function askModel() {
     .catch(function (e) {
       var m = String(e && e.message || e);
       /* ★ （你定的说法）：「无法连接。请检查网络设置，或更换供应商。
-         如仍有问题，请到【关于】页面加维护者微信。」—— 网络层失败不甩 Failed to fetch，
+         」—— 网络层失败不甩 Failed to fetch，
          HTTP 错误（Key 错 / 余额不足）保留服务商原话。
          ★ 设置里「联系」并入「关于」、那一栏已删 ⇒ 文案改指【关于】。 */
       var netFail = !ep.proxy && /Failed to fetch|NetworkError|Load failed|网络/i.test(m);
       doc.innerHTML = '<span style="color:var(--bad)">' + (netFail ? '无法连接。' : '调用失败：' + esc(m)) + '</span>' +
-        '<div class="warn" style="margin-top:10px">请检查网络设置，或更换供应商。如仍有问题，请到【关于】页面加作者微信。</div>';
+        '<div class="warn" style="margin-top:10px">请检查网络设置，或更换供应商。</div>';
     })
     .then(function () { btn.disabled = false; btn.textContent = '让模型解卦'; });
 }
