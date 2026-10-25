@@ -2,4 +2,8 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <external-path name="my_images" path="." />
     <cache-path name="my_cache_images" path="." />
+    <!-- ★ 导出落盘（XlrFiles）。`external-files-path` = getExternalFilesDir()，
+         Android 9 及以下导出落到这里；打开文件夹时也要靠它换成 content:// URI，
+         否则会抛 FileUriExposedException。 -->
+    <external-files-path name="xlr_dl" path="." />
 </paths>

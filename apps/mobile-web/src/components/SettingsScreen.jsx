@@ -21,6 +21,7 @@
  *   `#stAgain`/`#stStart`(L500-514) · `#stEye`(L847-851) · 三个输入框(L853-868) ·
  *   `#stWireD`/`#stWireP`(L869-874) · `#stSave`(L876-881) · `#stCaseExp`(L917-936) ·
  *   `#stCaseClr`(L938-943) · `#stReset`(L945-955)
+ *   **已实现（2026-10-13 接线，用户「第二条接」）**：`#stPull`(拉模型 L883→pull) · `#stTest`(连通测试 L882→test) ·
  *   `#stKey` 失焦自动拉(L904-908) · `#stModels` 清单点击(L890-901) —— 见下面「出网两条」那一段
  *   （逐字照抄 `renderModels()` L583-605 / `pull()` L607-670 / `test()` L672-718）。
  *   **C1 已落地（2026-10-12）**：`#stThemes` 点击(L910-915) + `renderThemes()`(L573-578)
@@ -32,16 +33,31 @@ import { SettingsCore as C } from '../data/settingsCore.js';
    智谱官方地址在网页版与安卓上要换成本站中转；带 /anthropic 的地址要换请求形状。 */
 import { endpoint as epOf, headers as hdrsOf, payload as pyOf, textOf, errOf, resolveBase, isAnth, IS_TAURI } from '../data/llmEndpoint.js';
 import { fetchLLM } from '../llm/llmFetch.js';
-/* ★ （你要求）：「设置 → 常见问题」那一栏的条目，按平台过滤（本端专属 + 通用） */
+/* ★ （要求）：「设置 → 常见问题」那一栏的条目，按平台过滤（本端专属 + 通用） */
 import { faqList } from '../data/faq.js';
 import { SkinsCore } from '../data/skinsCore.js';
 import { VISIBLE_SKINS } from '../data/skinVisible.js';
 import { applySkin, currentSkin } from '../data/skinApply.js';
+/* ★ （要求）：数据栏的「准则」导出/清空 +「旧数据导入」——
+   准则 = RecordsStore 的第二个库（RULE_KEY = 'xlr-rules'），与卦例本同一个 store ⇒ 读写走同一份原语。 */
+import { RecordsStore } from '../data/recordsStore.js';
+/* ★ （app 内更新）：关于页「版本更新」——下 APK 交系统安装器覆盖装 */
+import * as Upd from '../data/updateCore.js';
 
 const VER = 'v1.0';   /* L16 `var VER = 'v1.0'` */
 
+/* ★ （现象：「手机导出之后，没出现导出的路径在哪里」）：
+   安卓 WebView 没挂 DownloadListener ⇒ 原来那套 `Blob + <a download>` 在手机上**什么都不做**
+   （连报错都没有，所以只有一句「已导出」然后找不到文件）。
+   这里接原生 XlrFiles：真写进「下载/道家小六壬/」并回一个能看见的路径。 */
+function filesPlugin() {
+  var C = (typeof window !== 'undefined') ? window.Capacitor : null;
+  return (C && C.Plugins && C.Plugins.XlrFiles) ? C.Plugins.XlrFiles : null;
+}
+
 /* `provCard()` L64–L68 的逐字对应（一张服务商卡片）+ `render()` 的高亮段 L526–L538：
    `aria-current` 是**每张卡都设**（`k2 === pv ? 'true' : 'false'`，L531）；
+   ⚠ 2026-10-23 起卡片末尾那个 `<em class="pst">已配置</em>` 小标**不再渲染**（用户：跟卡片上的介绍文字重叠了）。
    高亮仍走 `aria-current`；「配没配好」由下面那张状态卡说。
    ⚠ `data-p` / `data-del` 是**属性值**（早期版本经过 `esc()`），其等价性**不套用**文本节点那条，
    另有单独证明（`早期实现记录` 原记录：属性值也逐字等价）。 */
@@ -87,7 +103,7 @@ export default function SettingsScreen({ open, onClose }) {
      ⇒ `#stModels` 保持静态 `none`。 */
   const [, setTick] = useState(0);
   const [eyeOn, setEyeOn] = useState(false);
-  /* ★ （你报「本地没部署 qwen，点 Ollama 却说我已配置」）：
+  /* ★ （现象：「本地没部署 qwen，点 Ollama 却说我已配置」）：
      null = 正在探 / 还没探；true = 那台「本机模型」真在跑；false = 连不上。
      只对**本地地址**（localhost / 127.0.0.1）用；云端各家不探（白花请求、还容易被限流）。 */
   const [localUp, setLocalUp] = useState(null);
@@ -128,6 +144,7 @@ export default function SettingsScreen({ open, onClose }) {
     m.className = 'stmsg ' + (kind || '');
     m.innerHTML = txt;
     /* ⚠ 这里用 `innerHTML` 与早期版本一致（不是 textContent）。后果：提示语里嵌入的
+       **自定义家名字**（`cc.n` / `n`，用户自己输入）含 HTML 时会被解析 —— **早期版本行为如此，本轮照抄**；
        带 `<code>`/`<br>` 的提示语都在出网路径（留待），与本批无关。 */
   };
   const quiet = () => { const m = msgRef.current; if (m) m.style.display = 'none'; };    /* L461 */
@@ -142,7 +159,7 @@ export default function SettingsScreen({ open, onClose }) {
     setTick(t => t + 1);
   };
 
-  /* ---------- 出网两条：拉取可用模型 / 测试连接（★ 接线，你「第二条接」）----------
+  /* ---------- 出网两条：拉取可用模型 / 测试连接（★ 接线，用户「第二条接」）----------
      逐条照抄 `36-script.txt`：`renderModels()` L583-605 · `pull()` L607-670 · `test()` L672-718 ·
      清单点击 L890-901 · Key 失焦自动拉 L904-908 · 两颗按钮的禁用/文案（L615-616/667-668、L680-681/715-716）。
      ⚠ 早期版本用闭包 `models` 与缓存的 `el.stPull/…`；这里用上面那些 ref 持同一份东西，
@@ -244,6 +261,7 @@ export default function SettingsScreen({ open, onClose }) {
       .catch((e) => {
         const why = C.esc(String(e.message || e).slice(0, 170));
         /* ★ 本地地址**不许**回退内置清单 —— 那份清单是写死的（qwen2.5:7b 等），
+           本机没装 Ollama 时它会假装「拉到了」，用户以为配好了，等解卦才报连不上。
            ⇒ 本地这条直接把「怎么把它跑起来」说清楚。 */
         if (isLocalBase(base)) {
           if (hint) hint.textContent = '连不上本机，先把它跑起来。';
@@ -296,8 +314,9 @@ export default function SettingsScreen({ open, onClose }) {
       })
       .catch((e) => {
         const m = C.esc(String(e.message || e));
-        /* ★ （你定的说法）：不解释机制，只说下一步 ——
+        /* ★ （已定的口径）：不解释机制，只说下一步 ——
            「无法连接。请检查网络设置，或更换供应商。如仍有问题，请到【关于】页面加维护者微信。」
+           网络层失败不把 Failed to fetch 甩给用户；HTTP 错误（Key 错/余额）留服务商原话。
            ★ 设置里「联系」并入「关于」、那一栏已删 ⇒ 文案改指【关于】。 */
         const netFail = !ep.proxy && /Failed to fetch|NetworkError|Load failed|网络/i.test(String(e.message));
         say('bad', (netFail ? '✗ 无法连接。<br>' : '✗ 没通：' + m + '<br>') +
@@ -332,6 +351,7 @@ export default function SettingsScreen({ open, onClose }) {
   };
 
   /* ★ 接线一律走**原生监听**（照早期版本 `el.stPull.addEventListener` 那一套），**不在 JSX 上加 `ref`/`onClick`**：
+     那些「动态属性」要登记进 `tools/_check-settings-skeleton.mjs` 的声明表，而**改判据要已定** ⇒ 避开这条路。
      节点用 `getElementById` 取（同一份 DOM，id 与早期版本逐字相同），存进上面那几个 ref 供处理函数用。 */
   useEffect(() => {
     pullRef.current = document.getElementById('stPull');          /* L882-883 */
@@ -361,7 +381,7 @@ export default function SettingsScreen({ open, onClose }) {
   /* ---------- 事件（逐条照抄 36-script.txt） ---------- */
   const onGuide = () => {                                             /* L748-757 */
     try { localStorage.removeItem('xlr-onboarded-2'); } catch (e) { }
-    /* ★ （你报：「点了只有提醒，页面还是设置页」）：legacy 的引导层 `.onb` z-index = **90**
+    /* ★ （现象：：「点了只有提醒，页面还是设置页」）：legacy 的引导层 `.onb` z-index = **90**
        （`legacy.css` L1071），而设置页 `.setscreen` z-index = **600** ⇒ 从设置页里点开引导，
        引导**确实开出来了、但被设置页整个盖住**（实测：`#onbLayer` 已拿到 `.on`/`display:flex`/1280×900，
        但 `elementFromPoint` 在屏幕中心命中的仍是设置页）。
@@ -473,7 +493,7 @@ export default function SettingsScreen({ open, onClose }) {
   const onProxy = (e) => {                                           /* L866-868 */
     const s2 = C.load(); s2.proxy = e.target.value.trim(); C.save(s2); quiet();
   };
-  /* ★ （你要求）：智谱的地址一键切换 ——
+  /* ★ （要求）：智谱的地址一键切换 ——
      标准 API 走 `api/paas/v4`，token plan（编码套餐）走 `api/anthropic`（Claude 协议，软件自己认地址换形状）。
      点「这里」就换一次、记住；再点一次换回来。 */
   const onZipToggle = (e) => {
@@ -493,7 +513,7 @@ export default function SettingsScreen({ open, onClose }) {
     const s2 = C.load();
     C.save(s2);
     /* ★ 本地地址保存后**当场探一次**再说「成功」——
-       原来只写 localStorage 就报「已保存」，你没装 Ollama 也会以为配好了（解卦时才报连不上）。 */
+       原来只写 localStorage 就报「已保存」，用户没装 Ollama 也会以为配好了（解卦时才报连不上）。 */
     if (isLocalBase(s2.base)) {
       say('', '已保存，正在检查本机模型…');
       probeLocal(s2, (up) => {
@@ -507,14 +527,37 @@ export default function SettingsScreen({ open, onClose }) {
     say('good', '✓ 已保存。回到主界面点「让模型解卦」就会用它。');
     renderLike();
   };
+  /* ★ （用户要）：「导出按钮后面都加一个打开导出文件夹」。
+     记下最后一次落盘位置；点按钮就让系统文件管理器打开「下载/道家小六壬」。 */
+  const lastExport = useRef('');
+
+  const onOpenFolder = () => {
+    const F = filesPlugin();
+    if (!F) {
+      say('bad', '这条线打不开文件夹 —— 用系统「文件管理」找「下载/道家小六壬」。');
+      return;
+    }
+    F.openExportFolder()
+      .then(() => { say('good', '✓ 已打开导出文件夹。'); })
+      ['catch']((e) => { say('bad', (e && e.message) ? e.message : String(e)); });
+  };
+
   const onCaseExp = () => {                                          /* L917-936 */
     let a = [];
     try { a = JSON.parse(localStorage.getItem(C.KEYS.cases) || '[]') || []; } catch (e) { a = []; }
     const txt = JSON.stringify(a, null, 2);
     if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
       window.__TAURI__.core.invoke('save_export', { name: '道家小六壬-卦例本.json', text: txt })
-        .then((path) => { say('good', '✓ 已导出 ' + a.length + ' 则 → ' + path); })
+        .then((path) => { lastExport.current = path; say('good', '✓ 已导出 ' + a.length + ' 则 → ' + path); })
         ['catch']((e) => { say('bad', '导出失败：' + e); });
+      return;
+    }
+    /* ★ 手机（APK）：走原生写「下载/道家小六壬/」，路径直接写在提示里 */
+    const F = filesPlugin();
+    if (F) {
+      F.saveToDownloads({ name: '道家小六壬-卦例本.json', text: txt })
+        .then((r) => { lastExport.current = r.path; say('good', '✓ 已导出 ' + a.length + ' 则 → ' + r.path); })
+        ['catch']((e) => { say('bad', '导出失败：' + ((e && e.message) || e)); });
       return;
     }
     const blob = new Blob([txt], { type: 'application/json' });
@@ -548,7 +591,175 @@ export default function SettingsScreen({ open, onClose }) {
     say('good', '✓ 已重置。');
   };
 
-  /* ★ （你要「清空配置」）：一键把这页填过的东西全清掉。
+  /* ══════════ ★ （要求）：准则的导出/清空 + 旧数据导入 ══════════
+     与桌面端同一套口径（两端不共用组件，代码各写一份）：
+       · 准则 = RecordsStore 的第二个库（'xlr-rules'），一条 = {id,at,from,gua,q,rule,why}。
+       · **导入只加不覆盖**：按 id 去重，本地已有的不动；没有 id 的现补一个；
+         落盘前按时间排序 —— saveCases/saveRules 各自只留最后 200/100 条，不排序会把本地更早的挤掉。
+       · 文件用 <input type="file"> 读（Capacitor WebView 自带文件选择器，不加插件权限）。
+       · 兼容两种外形：数组（本应用导出就是数组）／{cases:[],rules:[]}。
+         归类判据：带 string 型 `rule` 的是准则，其余带 q/gua 的是卦例
+         （⚠ 准则对象自己也带 gua/q ⇒ **只能**用 `rule` 判）。 */
+  const [impAsk, setImpAsk] = useState(false);
+  const impKind = useRef('');
+  const impFile = useRef(null);
+
+  const onRuleExp = () => {
+    let a = [];
+    try { a = RecordsStore.loadRules() || []; } catch (e) { a = []; }
+    const txt = JSON.stringify(a, null, 2);
+    if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+      window.__TAURI__.core.invoke('save_export', { name: '道家小六壬-准则.json', text: txt })
+        .then((path) => { lastExport.current = path; say('good', '✓ 已导出 ' + a.length + ' 条准则 → ' + path); })
+        ['catch']((e) => { say('bad', '导出失败：' + e); });
+      return;
+    }
+    /* ★ 手机（APK）：同卦例本，走原生落盘 */
+    const F = filesPlugin();
+    if (F) {
+      F.saveToDownloads({ name: '道家小六壬-准则.json', text: txt })
+        .then((r) => { lastExport.current = r.path; say('good', '✓ 已导出 ' + a.length + ' 条准则 → ' + r.path); })
+        ['catch']((e) => { say('bad', '导出失败：' + ((e && e.message) || e)); });
+      return;
+    }
+    const blob = new Blob([txt], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a2 = document.createElement('a');
+    a2.href = url; a2.download = '道家小六壬-准则.json';
+    document.body.appendChild(a2); a2.click(); document.body.removeChild(a2);
+    setTimeout(() => { URL.revokeObjectURL(url); }, 4000);
+    say('good', '✓ 已导出 ' + a.length + ' 条准则。');
+  };
+  const onRuleClr = () => {
+    if (!window.confirm('清空准则？这个不能撤销。（卦例本不受影响）')) return;
+    try { localStorage.removeItem(RecordsStore.RULE_KEY); } catch (e) { }
+    if (window.__xlrRecordsRefresh) { try { window.__xlrRecordsRefresh(); } catch (e) { } }
+    say('good', '✓ 准则已清空。');
+    renderLike();
+  };
+  const impGo = (kind) => {
+    impKind.current = kind;
+    setImpAsk(false);
+    if (impFile.current) impFile.current.click();
+  };
+  const onImportFile = (ev) => {
+    const el = ev.target;
+    const f = el && el.files && el.files[0];
+    if (el) el.value = '';                      /* 清掉值 ⇒ 同一个文件能连着导两次 */
+    if (!f) return;
+    const kind = impKind.current || 'both';
+    const rd = new FileReader();
+    rd.onerror = () => say('bad', '读不了这个文件。');
+    rd.onload = () => {
+      let data = null;
+      try { data = JSON.parse(String(rd.result || '').replace(/^\uFEFF/, '')); }
+      catch (e) { say('bad', '这个文件不是本应用导出的 JSON。'); return; }
+      const incCases = [], incRules = [];
+      const eat = (arr) => (Array.isArray(arr) ? arr : []).forEach((r) => {
+        if (!r || typeof r !== 'object') return;
+        if (typeof r.rule === 'string' && r.rule) incRules.push(r);
+        else if (r.q != null || r.gua != null) incCases.push(r);
+      });
+      if (Array.isArray(data)) eat(data);
+      else if (data && typeof data === 'object') { eat(data.cases); eat(data.rules); }
+      const wantC = (kind === 'cases' || kind === 'both'), wantR = (kind === 'rules' || kind === 'both');
+      const gotC = wantC ? incCases : [], gotR = wantR ? incRules : [];
+      if (!gotC.length && !gotR.length) {
+        say('bad', (wantC && wantR) ? '这个文件里没有卦例，也没有准则。'
+          : wantC ? '这个文件里没有卦例。' : '这个文件里没有准则。');
+        return;
+      }
+      const byTime = (k) => (a, b) => String(a[k] || '').localeCompare(String(b[k] || ''));
+      const msg = [];
+      if (gotC.length) {
+        const cur = RecordsStore.loadCasesRaw();
+        const seen = {};
+        cur.forEach((r) => { if (r && r.id) seen[r.id] = 1; });
+        let add = 0;
+        gotC.forEach((r) => {
+          if (r.id && seen[r.id]) return;
+          if (!r.id) { r.id = 'c' + (Date.now() + add); }
+          seen[r.id] = 1; cur.push(r); add++;
+        });
+        cur.sort(byTime('t'));
+        RecordsStore.saveCases(cur);
+        msg.push('卦例 ' + add + ' 则' + (gotC.length > add ? '（跳过重复 ' + (gotC.length - add) + ' 则）' : ''));
+      }
+      if (gotR.length) {
+        const cur = RecordsStore.loadRules();
+        const seen = {};
+        cur.forEach((r) => { if (r && r.id) seen[r.id] = 1; });
+        let add = 0;
+        gotR.forEach((r) => {
+          if (r.id && seen[r.id]) return;
+          if (!r.id) { r.id = 'r' + (Date.now() + add); }
+          seen[r.id] = 1; cur.push(r); add++;
+        });
+        cur.sort(byTime('at'));
+        RecordsStore.saveRules(cur);
+        msg.push('准则 ' + add + ' 条' + (gotR.length > add ? '（跳过重复 ' + (gotR.length - add) + ' 条）' : ''));
+      }
+      say('good', '✓ 导入完成：' + msg.join('；') + '。');
+      renderLike();
+    };
+    rd.readAsText(f, 'utf-8');
+  };
+
+  /* ★ （app 内更新）：关于页那一行。
+     分三步 —— 检查 → 下载（报百分比）→ 交系统安装器。⛔ 做不到静默安装：
+     Android 一定要用户点一次「安装」，8+ 首次还得先给「安装未知应用」授权。 */
+  const [verTxt, setVerTxt] = useState('');
+  const [updBusy, setUpdBusy] = useState(false);
+  const [updReady, setUpdReady] = useState(false);
+  const updInfo = useRef(null);
+
+  /* Capacitor 有两种 reject 形态（Error / 字符串）⇒ 两种都收，别把真实原因丢掉 */
+  const errText = (e, fallback) => (e && e.message) ? e.message : (typeof e === 'string' && e.trim() ? e : fallback);
+
+  useEffect(() => {
+    if (!open || verTxt || !Upd.isAndroid()) return;
+    Upd.info().then((i) => { if (i && i.versionName) setVerTxt(i.versionName); }, () => { });
+  }, [open, verTxt]);
+
+  const onUpdate = () => {
+    if (updBusy) return;
+    setUpdBusy(true);
+    const done = (k2, t2) => { setUpdBusy(false); if (t2) say(k2, t2); };
+
+    if (updInfo.current) {
+      const target = updInfo.current;
+      Upd.canInstall().then((r) => {
+        if (!r || !r.allowed) {
+          done('bad', '系统里还没允许「安装未知应用」，去打开，回来再点一次「立即更新」。');
+          Upd.openInstallSettings();
+          return;
+        }
+        say('', '正在下载更新包…');
+        return Upd.download(target, (pct) => say('', '正在下载更新包… ' + pct + '%'))
+          .then(() => Upd.install())
+          .then(() => {
+            updInfo.current = null;
+            setUpdReady(false);
+            done('good', '✓ 已交给系统安装器，按弹出的提示点「安装」。');
+          });
+      }).catch((e) => done('bad', errText(e, '更新失败，请稍后再试')));
+      return;
+    }
+
+    say('', '正在检查…');
+    Upd.check().then((r) => {
+      if (!r.hasNew) {
+        done('good', '✓ 已经是最新版本（v' + ((r.current && r.current.versionName) || '—') + '）');
+        return;
+      }
+      updInfo.current = r.info;
+      const mb = r.info.size ? (r.info.size / 1048576).toFixed(1) : '?';
+      setUpdReady(true);
+      done('', '发现新版本 v' + r.info.version + '（' + mb + ' MB）。点「立即更新」。');
+    }, (e) => done('bad', errText(e, '连不上更新服务，稍后再试')));
+  };
+
+  /* ★ （用户要「清空配置」）：一键把这页填过的东西全清掉。
      ⚠ 输入框是**非受控**的（defaultValue + ref）⇒ 清完必须手工把 5 个框写回默认值，
         否则屏幕上还留着旧字，看着像没清。 */
   const onClearAll = () => {
@@ -575,6 +786,9 @@ export default function SettingsScreen({ open, onClose }) {
   const customs = C.loadCustoms();    /* gridHtml() 里那一支 */
   let caseN = 0;
   try { caseN = (JSON.parse(localStorage.getItem(C.KEYS.cases) || '[]') || []).length; } catch (e) { caseN = 0; }  /* L566-567 */
+  /* ★ （要求）：准则条数 —— 与 caseN 一样现读，renderLike() 之后自动跟上 */
+  let ruleN = 0;
+  try { ruleN = (RecordsStore.loadRules() || []).length; } catch (e) { ruleN = 0; }
 
   /* open()/close() 对 <html> 的两处副作用：L980-982 / L988-989（照抄，含 set-lock 类） */
   useEffect(() => {
@@ -583,6 +797,7 @@ export default function SettingsScreen({ open, onClose }) {
       de.style.overflow = 'hidden';
       de.classList.add('set-lock');
       /* L983：`open()` 末尾是 `render(); renderThemes(); quiet();` —— 三条都要照抄：
+         · `quiet()`：否则"关掉再打开"时上一次的 #stMsg 提示会留在页面上（交互比对抓到过）
          · `renderThemes()`：**C1（2026-10-12）已落地** —— 早期版本每次打开都按 `XLR_SKIN_CUR()`
            重标 `.theme` 的 aria-current（皮肤也可能被面板改过）⇒ 这边等价物 = `setSkin(currentSkin())`，
            把 state 拉回"当前真实皮肤"，重渲染即重标（不能只在首帧取一次，否则面板改肤后此处会陈旧）。 */
@@ -628,7 +843,7 @@ export default function SettingsScreen({ open, onClose }) {
   useEffect(() => {
     const body = bodyRef.current;
     if (!body) return;
-    const secs = ['s-llm', 's-skin', 's-data', 's-faq', 's-about'];
+    const secs = ['s-llm', 's-skin', 's-data', 's-about', 's-faq', 's-note'];
     const onScroll = () => {
       let best = secs[0], top = 1e9;
       for (let i = 0; i < secs.length; i++) {
@@ -644,6 +859,7 @@ export default function SettingsScreen({ open, onClose }) {
       });
     };
     /* ★ 补：`#setNav` 点击 → 滚到对应段落 —— **早期版本 L789-794 逐字照抄**。
+       此前只抄了下面的滚动高亮，漏了这一条 ⇒ 用户点「外观 / 数据」时页面纹丝不动
        （三臂实测：早期版本点「外观」`.setbody` scrollTop 0→1402、高亮跟着走；新版恒 0）。
        `block:'start'` + `behavior:'smooth'` 与早期版本一致；`closest('button[data-to]')` 同早期版本。 */
     const nav = navRef.current;
@@ -672,7 +888,7 @@ export default function SettingsScreen({ open, onClose }) {
         <button className="bk" type="button" id="setBack" onClick={onClose}>← 返回</button>
         <span className="ttl">设置</span>
         <span className="sp"></span>
-        <span className="v">{VER}</span>
+        <span className="v">{verTxt ? 'v' + verTxt : VER}</span>
       </div>
       <div className="setbody" ref={bodyRef}>
         <div className="setgrid">
@@ -680,8 +896,9 @@ export default function SettingsScreen({ open, onClose }) {
             <button type="button" data-to="s-llm" aria-current="true">大模型</button>
             <button type="button" data-to="s-skin">外观</button>
             <button type="button" data-to="s-data">数据</button>
-            <button type="button" data-to="s-faq">常见问题</button>
             <button type="button" data-to="s-about">关于</button>
+            <button type="button" data-to="s-faq">常见问题</button>
+            <button type="button" data-to="s-note">说明</button>
           </nav>
           <div className="setmain">
             <section className="setsec" id="s-llm">
@@ -692,6 +909,7 @@ export default function SettingsScreen({ open, onClose }) {
                 <span className="hint" style={{ margin: '0', alignSelf: 'center' }}>不知道去哪申请 Key？点这个，一步步来。</span>
               </div>
               {/* L484–L499：状态卡三态。**内容全部由 localStorage 决定**（运行期填充）⇒ 按 原记录 的分工，
+                  它不在结构核对器管辖内，由比对 06-settings 负责；这里的文字/结构与早期版本逐字相同
                   （`esc()` 走的是 JSX 文本节点，等价性见 原记录）。 */}
               <div className={'stcard' + (ok && (!localOnly || localUp === true) ? ' ok' : '')} id="stCard">
                 {ok && s.key ? (
@@ -732,7 +950,7 @@ export default function SettingsScreen({ open, onClose }) {
                           ? <>{'已切到 token plan 的地址（'}<code>api/anthropic</code>
                             {'）；普通 API Key 请点击'}<a href="#" role="button" id="stZipToggle" onClick={onZipToggle}
                               style={{ textDecoration: 'underline', cursor: 'pointer', color: 'inherit' }}>这里</a>{'切回标准地址。'}</>
-                          : <>{'智谱因其特殊性，已通过本服务器中转；若您用的是 token plan 套餐，请点击'}<a href="#" role="button"
+                          : <>{'智谱因其特殊性，已通过本服务器中转；若您是 token plan 用户，请点击'}<a href="#" role="button"
                             id="stZipToggle" onClick={onZipToggle}
                             style={{ textDecoration: 'underline', cursor: 'pointer', color: 'inherit' }}>这里</a>{'切换。'}</>)
                         : '预设已自动填好，一般不用改；要换成别家的地址，直接改这里。'}</div></div></div>
@@ -809,13 +1027,54 @@ export default function SettingsScreen({ open, onClose }) {
                 <span className="n" id="stCaseN">{caseN + ' 则'}</span>
                 {/* L569-570：`disabled = n === 0`（空卦例本 ⇒ 两个按钮都置灰） */}
                 <button className="sbtn" type="button" id="stCaseExp" disabled={caseN === 0} onClick={onCaseExp}>导出</button>
-                <button className="sbtn" type="button" id="stCaseClr" disabled={caseN === 0} onClick={onCaseClr}>清空</button></div>
+                <button className="sbtn" type="button" id="stCaseClr" disabled={caseN === 0} onClick={onCaseClr}>清空</button>
+                {/* ★ （用户要）：导出后不用自己照路径去找 */}
+                {filesPlugin() ? <button className="sbtn" type="button" onClick={onOpenFolder}>打开导出文件夹</button> : null}</div>
+              {/* ★ （要求）：准则一行 —— 与卦例本同构（导出 / 清空），空时两个按钮置灰 */}
+              <div className="datarow"><div className="m"><b>准则</b>
+                <p>复盘里你逐条确认过的修正，解卦时会一起交给模型。导出带得走，换机器不至于从零调教。</p></div>
+                <span className="n" id="stRuleN">{ruleN + ' 条'}</span>
+                <button className="sbtn" type="button" id="stRuleExp" disabled={ruleN === 0} onClick={onRuleExp}>导出</button>
+                <button className="sbtn" type="button" id="stRuleClr" disabled={ruleN === 0} onClick={onRuleClr}>清空</button>
+                {filesPlugin() ? <button className="sbtn" type="button" onClick={onOpenFolder}>打开导出文件夹</button> : null}</div>
+              {/* ★ （要求）：旧数据导入 —— 点「导入」先问导什么（卦例 / 准则 / 两者），再挑文件；
+                  只加不覆盖，重复的跳过。隐藏 input 复用同一个 ref。 */}
+              <div className="datarow"><div className="m"><b>旧数据导入</b>
+                <p>从早期版本或别的机器带来的备份。只往里加，不覆盖本机已有的，重复的自动跳过。</p></div>
+                <button className="sbtn" type="button" id="stImp" onClick={() => setImpAsk(true)}>导入</button>
+                <input ref={impFile} type="file" accept=".json,application/json" style={{ display: 'none' }} onChange={onImportFile} /></div>
+              {/* 点了「导入」就在这一行下面展开三选一（行内展开，不另做浮层：少一套遮罩/z-index，窄屏自动折行） */}
+              {impAsk ? (
+                <div className="datarow" id="stImpAsk">
+                  <div className="m"><b>导入什么</b><p>选好之后就开文件框挑备份。</p></div>
+                  <button className="sbtn pri" type="button" onClick={() => impGo('cases')}>只导入卦例</button>
+                  <button className="sbtn pri" type="button" onClick={() => impGo('rules')}>只导入准则</button>
+                  <button className="sbtn pri" type="button" onClick={() => impGo('both')}>卦例 + 准则</button>
+                  <button className="sbtn" type="button" onClick={() => setImpAsk(false)}>取消</button>
+                </div>
+              ) : null}
               <div className="datarow"><div className="m"><b>全部重置</b>
                 <p>清掉模型配置、主题选择和卦例本，回到刚装好的状态。</p></div>
                 <button className="sbtn" type="button" id="stReset" onClick={onReset}>重置</button></div>
             </section>
 
-            {/* 常见问题 —— 只显示问题，点一下才出解法；
+            {/* ★ （用户定）：「关于移动到数据的后面」；这一栏只留版本号与更新入口 ——
+                简介与三条前提已搬到「说明」栏最前面。 */}
+            <section className="setsec about" id="s-about">
+              <h3>关于</h3>
+              <p><b>道家小六壬 · 卦台</b>　{verTxt ? 'v' + verTxt : VER}</p>
+              {/* ★ （app 内更新·安卓）：下 APK → 交系统安装器。装的时候系统还会问一次，正常。
+                  只在 APK 里出现（网页版没有 XlrUpdate 插件，也没法装 APK ⇒ 不显示这一行）。 */}
+              {Upd.isAndroid() ? (
+                <div className="datarow"><div className="m"><b>版本更新</b>
+                  <p>下好会弹出系统的安装提示，点「安装」就覆盖成新版；卦例和配置都保留。</p></div>
+                  <button className="sbtn" type="button" id="stUpdBtn" disabled={updBusy} onClick={onUpdate}>
+                    {updBusy ? '请稍等…' : (updReady ? '立即更新' : '检查更新')}
+                  </button></div>
+              ) : null}
+            </section>
+
+            {/* ★ （要求）：常见问题 —— 只显示问题，点一下才出解法；
                 条目按平台过滤（安卓只出安卓 + 通用、手机网页只出网页 + 通用），
                 样式不写死颜色：用 --ink / --line 这些皮肤变量，各套皮肤与昼夜自动跟着变。 */}
             <section className="setsec" id="s-faq">
@@ -831,12 +1090,17 @@ export default function SettingsScreen({ open, onClose }) {
               </div>
             </section>
 
-            {/* 「关于」里的内容、免责条款与联系方式，
+            {/* ★ （要求）：「设置里的关于里面加点内容，想加点免责条款……然后把联系的内容
                 都移动到关于吧，再把联系栏删了。」⇒ 原 `#s-contact` 整节删除，两处微信并进本页；
-                免责声明按「它是什么 → 不能拿它干什么 → 数据与模型 → 责任 → 用法」分层写。 */}
-            <section className="setsec about" id="s-about">
-              <h3>关于</h3>
-              <p><b>道家小六壬 · 卦台</b>　v1.0</p>
+                免责声明按「它是什么 → 不能拿它干什么 → 数据与模型 → 责任 → 用法」分层写。
+                ★ （用户定）：这一整块后续已拆成「关于」（数据之后，只留版本与更新）＋「说明」
+                （末尾，简介 + 三条前提 + 免责声明 + 联系 + 仓库）—— 原位于此处的旧 `#s-about` 已删。 */}
+
+            {/* ★ （要求）：「既然你要放检查更新在关于里，那就再开一个说明栏」⇒
+                免责声明 / 联系维护者 / 开源仓库 从「关于」搬到独立的「说明」栏。
+                用 `setsec about` 类是为了复用 `.about .ab-h` / `.ab-list` 那套排版（样式不在这边写）。 */}
+            <section className="setsec about" id="s-note">
+              <h3>说明</h3>
               <p>本软件以邵一尘先生的小六壬神通·卜法卷为基础，部分功能及生成内容由人工智能技术辅助完成，结果仅供参考。所有内容仅供交流、学习使用，不用于商业用途；如涉及版权争议，请权利人联系删除，造成不便敬请谅解。</p>
               <p>三条前提：<b>无事不卦、心动即卦、一事不二卦</b>。</p>
 
