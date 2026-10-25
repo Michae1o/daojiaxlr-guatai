@@ -63,6 +63,13 @@ function ProvButton({ k, n, note, rec, del, pv, got }) {
 }
 
 export default function SettingsScreen({ open, onClose, preload }) {
+  /* ★ （用户质问「你知道它里面不能显示 key 吗」——这条确实没做到）：
+     便携版的用法是「在这份里填一次 Key → 整个文件夹发给别人 → 对方双击就能用」，
+     所以**收包的人不该在界面上看到那个 Key**。上一版只是把 sidecar 写回 localStorage，
+     设置页照样把 `s.key` 回填进输入框、还带一个「显示」按钮 ⇒ 对方点一下就看见明文。
+     现在：框里不回填真值、不给「显示」按钮；只有他自己粘一个新的才会覆盖
+     （`onField` 只在真输入时写 store，框是空的不碰）。 */
+  const PORTABLE = (typeof window !== 'undefined') && !!window.__XLR_PORTABLE__;
   /* 打开时解析"当前在用的是哪家服务商" —— 逐字对应 open() 前的 wire() L758-761：
        pv = loadProv(); if (!pvValid(pv)) pv = guessProv(load()); saveProv(pv);
      （`render()` L480 那句 `if (!pvValid(pv)) pv = guessProv(s)` 是给后续重渲染兜底的，同一套逻辑。） */
@@ -782,7 +789,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     C.clearAll();
     const d = C.load();
     if (baseRef.current) baseRef.current.value = d.base;
-    if (keyRef.current) keyRef.current.value = d.key;
+    if (keyRef.current) keyRef.current.value = PORTABLE ? '' : d.key;
     if (modelRef.current) modelRef.current.value = d.model;
     if (tempRef.current) tempRef.current.value = d.temp;
     if (proxyRef.current) proxyRef.current.value = d.proxy;
@@ -844,7 +851,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     const s2 = C.load();
     if (baseRef.current) baseRef.current.value = s2.base;
     if (modelRef.current) modelRef.current.value = s2.model;
-    if (keyRef.current) keyRef.current.value = s2.key;
+    if (keyRef.current) keyRef.current.value = PORTABLE ? '' : s2.key;
     if (tempRef.current) tempRef.current.value = s2.temp;
     if (proxyRef.current) proxyRef.current.value = s2.proxy;
     const pr = document.getElementById('stProxyRow');                  /* L563 */
@@ -972,12 +979,15 @@ export default function SettingsScreen({ open, onClose, preload }) {
                 <div className={'step' + (s.base ? '' : ' off')} id="stp3"><span className="no">3</span><span className="cn">把 API Key 粘进来</span>
                   <div className="bd">
                     <div className="stf"><label htmlFor="stKey">API Key<b>必填</b></label>
-                      <div className="strow"><input type={eyeOn ? 'text' : 'password'} id="stKey" spellCheck="false" autoComplete="off" defaultValue={s.key} placeholder="sk-..." ref={keyRef} onChange={onField('key')} />
-                      <button className="sbtn" type="button" id="stEye" onClick={onEye}>{eyeOn ? '隐藏' : '显示'}</button></div>
+                      <div className="strow"><input type={eyeOn ? 'text' : 'password'} id="stKey" spellCheck="false" autoComplete="off" defaultValue={PORTABLE ? '' : s.key} placeholder={PORTABLE ? '已随包配置（不可查看）' : 'sk-...'} ref={keyRef} onChange={onField('key')} />
+                      {/* 便携版不给「显示」按钮：那个按钮的唯一作用就是把 key 摊成明文 */}
+                      {PORTABLE ? null : <button className="sbtn" type="button" id="stEye" onClick={onEye}>{eyeOn ? '隐藏' : '显示'}</button>}</div>
                       {/* L547-558：三支（本地模型 / 有拿 Key 的地址 / 兜底）。`p` 只看 PROVS（见上面 `cur`）。 */}
-                      <div className="hint" id="stKeyHint">{cur && cur.url
+                      <div className="hint" id="stKeyHint">{PORTABLE
+                        ? '这份软件已经配好了，直接用就行。要换成你自己的 Key，就把新的粘进来（粘一次就顶掉包里的）。'
+                        : (cur && cur.url
                           ? <>{'去哪里拿：'}<a href={cur.url} target="_blank" rel="noopener">{cur.url.replace(/^https?:\/\//, '')}</a></>
-                          : '填服务商给你的 API Key，一般以 sk- 开头。'}</div>
+                          : '填服务商给你的 API Key，一般以 sk- 开头。')}</div>
                     </div></div></div>
                 <div className={'step' + (s.base ? '' : ' off')} id="stp4"><span className="no">4</span><span className="cn">从清单里挑一个模型</span>
                   <div className="bd">
