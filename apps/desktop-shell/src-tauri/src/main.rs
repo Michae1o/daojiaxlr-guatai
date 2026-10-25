@@ -281,7 +281,6 @@ fn plan_update() -> Result<Plan, String> {
 /// 更新日志：`%LOCALAPPDATA%\<identifier>\update.log`（每次覆盖写）。
 /// 出问题时用户把这一行发过来就能定位，不用再猜「他那台是什么结构」。
 fn write_update_log(app: &tauri::AppHandle, head: &str, result: &Result<String, String>) {
-    use tauri::Manager;
     let id = app.config().identifier.clone();
     let Ok(local) = std::env::var("LOCALAPPDATA") else { return };
     let dir = std::path::PathBuf::from(local).join(id);
