@@ -1014,6 +1014,16 @@ html[data-skin="bru"] .ibt:hover{background:var(--accent)!important;color:#fff!i
 .updbar .updpct{font-size:11px;letter-spacing:.06em;color:var(--dim2);min-width:40px;text-align:right;
   font-variant-numeric:tabular-nums}
 
+/* ★ （用户要）：启动查到新版本时，右下角那一条小提示。
+   只用皮肤变量；方角、细边、无渐变 —— 与 .sbtn / .datarow 同口径。 */
+.updtip{position:fixed;right:22px;bottom:22px;z-index:70;min-width:224px;padding:14px 16px;
+  background:var(--bg);border:1px solid var(--line2);box-shadow:0 8px 28px rgba(0,0,0,.16)}
+.updtip .t{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--ink)}
+.updtip .t b{font-weight:600}
+.updtip .t span{color:var(--accent);letter-spacing:.04em}
+.updtip .b{display:flex;gap:8px;margin-top:12px}
+.updtip .b .sbtn{padding:7px 14px}
+
 /* 「关于」的说明块 */
 .about p{font-size:12.5px;color:var(--dim);line-height:2;margin:0 0 12px}
 .about b{color:var(--ink);font-weight:600}

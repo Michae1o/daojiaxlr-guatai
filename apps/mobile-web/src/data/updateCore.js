@@ -12,7 +12,10 @@
  * 通道 = 包名，不是构建常量：
  *   包名来自系统，比任何前端常量都准。
  */
-export const MANIFEST_URL = '';   /* 填你自己的更新清单地址；留空 = 不做自动更新 */
+/* 更新清单地址：留空 = 不做自动更新。
+   ★ 想启用：把地址填进 ONLINE_MANIFEST，或者构建时设 XLR_UPDATE_URL 指到你的清单（不改源码）。 */
+const ONLINE_MANIFEST = '';
+export const MANIFEST_URL = (typeof __XLR_UPDATE_URL__ !== 'undefined' && __XLR_UPDATE_URL__) || ONLINE_MANIFEST;
 
 function plugin() {
   var C = (typeof window !== 'undefined') ? window.Capacitor : null;

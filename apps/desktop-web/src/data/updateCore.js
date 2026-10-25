@@ -17,7 +17,10 @@
 
 /* ★ 更新清单放官网静态目录（和下载物同站）。
    ⚠ 换域名 / 换路径时，`tools\生成更新清单.py` 里那份也要同步改（那边写的是同一串）。 */
-export const MANIFEST_URL = '';   /* 填你自己的更新清单地址；留空 = 不做自动更新 */
+/* 更新清单地址：留空 = 不做自动更新。
+   ★ 想启用：把地址填进 ONLINE_MANIFEST，或者构建时设 XLR_UPDATE_URL 指到你的清单（不改源码）。 */
+const ONLINE_MANIFEST = '';
+export const MANIFEST_URL = (typeof __XLR_UPDATE_URL__ !== 'undefined' && __XLR_UPDATE_URL__) || ONLINE_MANIFEST;
 
 /* 这份软件属于哪个通道（决定清单里取哪一条） */
 export function channel() {

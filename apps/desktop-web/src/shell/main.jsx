@@ -21,6 +21,8 @@ import { createPortal, flushSync } from 'react-dom';
 import { useEffect, useState } from 'react';
 import Splash from '../components/Splash.jsx';
 import SettingsScreen from '../components/SettingsScreen.jsx';
+import UpdateTip from '../components/UpdateTip.jsx';
+import * as Upd from '../data/updateCore.js';
 import SafeZone from '../components/SafeZone.jsx';
 import SkinMenu from '../components/SkinMenu.jsx';
 import Records from '../components/Records.jsx';
@@ -567,8 +569,16 @@ mountSplash();
  */
 
 let settingsRoot = null, settingsHost = null, settingsOpen = false;
+/* ★ （用户要：「小提示里可以有一个按钮叫去更新」）：
+   自动检查查到的清单条目先存在这儿，点「去更新」时随 render 一并交给设置页 ——
+   设置页据此把按钮直接置成「立即更新」（强调色），但**不自动下载**，还得他再点一下。 */
+let pendingUpdate = null;
 function paintSettings() {
-  if (settingsRoot) settingsRoot.render(<SettingsScreen open={settingsOpen} onClose={() => setSettingsOpen(false)} />);
+  if (settingsRoot) {
+    settingsRoot.render(
+      <SettingsScreen open={settingsOpen} preload={pendingUpdate} onClose={() => setSettingsOpen(false)} />
+    );
+  }
 }
 function setSettingsOpen(v) {
   settingsOpen = v;
@@ -1354,6 +1364,50 @@ function refocusQ() {
   api.qFocus = { step: step, freeFocus: freeFocus, focused: focused, active: sig, at: Date.now() };
 }
 refocusQ();
+
+/* ===== ★ （用户问「能自动提醒以前的人更新吗」）：启动静默查一次 =====
+ * 口径：
+ *   · 启动后 4 秒才查（别跟开屏动画抢时间）；查不到 / 没新版一律静默，界面上什么都不出。
+ *   · 有新版：右下角一条小提示（去更新 / 以后）。点「以后」本次运行不再弹。
+ *   · 点「去更新」只**跳到设置页**并把清单条目带过去 —— 那边按钮直接是「立即更新」（强调色），
+ *     但**不会自己开始下载**，要他再点一次才动（原文：「需要用户点击立即更新才可以」）。
+ *   · ⛔ 网页版没有 __TAURI__（Upd.isDesktop() 为假）⇒ 整段空转，不会去拉清单。
+ */
+let tipRoot = null, tipHost = null, tipInfo = null, tipMuted = false;
+
+function paintTip() {
+  if (!tipRoot) return;
+  tipRoot.render(
+    <UpdateTip
+      info={tipInfo}
+      onGo={() => {
+        pendingUpdate = tipInfo;
+        tipInfo = null;
+        paintTip();
+        openSettings();
+      }}
+      onLater={() => { tipMuted = true; tipInfo = null; paintTip(); }}
+    />
+  );
+}
+
+function showUpdateTip(info) {
+  if (!info || tipMuted) return;
+  tipInfo = info;
+  if (!tipRoot) {
+    tipHost = document.createElement('div');
+    tipHost.setAttribute('data-xlroot', 'updtip');
+    tipHost.style.display = 'contents';
+    document.body.appendChild(tipHost);
+    tipRoot = createRoot(tipHost);
+  }
+  paintTip();
+}
+
+setTimeout(() => {
+  if (!Upd.isDesktop()) return;
+  Upd.check().then((r) => { if (r && r.hasNew) showUpdateTip(r.info); }, () => { });
+}, 4000);
 
 
 

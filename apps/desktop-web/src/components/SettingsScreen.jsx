@@ -62,7 +62,7 @@ function ProvButton({ k, n, note, rec, del, pv, got }) {
   );
 }
 
-export default function SettingsScreen({ open, onClose }) {
+export default function SettingsScreen({ open, onClose, preload }) {
   /* 打开时解析"当前在用的是哪家服务商" —— 逐字对应 open() 前的 wire() L758-761：
        pv = loadProv(); if (!pvValid(pv)) pv = guessProv(load()); saveProv(pv);
      （`render()` L480 那句 `if (!pvValid(pv)) pv = guessProv(s)` 是给后续重渲染兜底的，同一套逻辑。） */
@@ -707,6 +707,21 @@ export default function SettingsScreen({ open, onClose }) {
   };
   useEffect(() => () => stopPoll(), []);
 
+  /* ★ （用户要）：「点了去更新转到页面，检查更新的按钮应该会自动变成立即更新，
+     需要用户点击立即更新才可以」⇒ 这里只预置清单条目与按钮状态，**不自动开始下载**；
+     并把这页滚到「关于」那一节，省得人自己找。 */
+  useEffect(() => {
+    if (!open || !preload) return undefined;
+    updInfo.current = preload;
+    setUpdReady(true);
+    say('', '发现新版本 ' + preload.version + '，点「立即更新」下载并装好。');
+    const t = setTimeout(() => {
+      const sec = document.getElementById('s-about');
+      if (sec) sec.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }, 80);
+    return () => clearTimeout(t);
+  }, [open, preload]);
+
   /* Tauri 的 invoke 失败时 reject 的是 **字符串**（Rust 的 Err），不是 Error 对象 ⇒ 两种都收，
      否则界面上只会显示兜底那句，真实原因（下载不完整 / 校验不过）就丢了。 */
   const errText = (e, fallback) => (e && e.message) ? e.message : (typeof e === 'string' && e.trim() ? e : fallback);
@@ -1069,7 +1084,7 @@ export default function SettingsScreen({ open, onClose }) {
               {IS_TAURI ? (
                 <div className="datarow"><div className="m"><b>版本更新</b>
                   <p>下好之后会自动重启完成更新；卦例、模型配置、皮肤都保留。</p></div>
-                  <button className="sbtn" type="button" id="stUpdBtn" disabled={updBusy} onClick={onUpdate}>
+                  <button className={'sbtn' + (updReady ? ' pri' : '')} type="button" id="stUpdBtn" disabled={updBusy} onClick={onUpdate}>
                     {updBusy ? (updPct >= 0 ? '下载中…' : '请稍等…') : (updReady ? '立即更新' : '检查更新')}
                   </button>
                   {/* 下载中才出这条：3px 细线 + accent 填充，跟 .sbtn/.datarow 一个口径（样式在 legacy.css） */}
