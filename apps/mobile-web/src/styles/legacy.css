@@ -3457,10 +3457,10 @@ html.sl-anim .wrap{opacity:0 !important}
     font-size:12px;color:var(--dim);letter-spacing:.02em}
   
   html[data-step] .vstep button{pointer-events:auto;cursor:pointer}
-  /* 拖动时页面跟手；没划够时退回；提交时新页从滑动方向滑进来（见文末 keyframes） */
-  html[data-step] .swipe-follow{animation:none !important;transition:none !important;
-    transform:translateX(var(--swx,0)) !important;opacity:var(--swo,1) !important}
-  html[data-step] .swipe-back{animation:none !important;
+  /* 拖动时页面跟手（平移 + 等比缩小）；没划够时退回；提交时走「旧页缩成照片淡出 + 新页从缩小放大」 */
+  html[data-step] .swipe-follow{animation:none !important;transition:none !important;transform-origin:50% 42%;
+    transform:translateX(var(--swx,0)) scale(var(--sws,1)) !important;opacity:var(--swo,1) !important}
+  html[data-step] .swipe-back{animation:none !important;transform-origin:50% 42%;
     transition:transform .34s cubic-bezier(.22,1,.36,1),opacity .34s ease !important}
 
 
@@ -3963,3 +3963,135 @@ html[data-skin="glass"] .skinmenu{
   -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
   box-shadow:0 22px 48px -22px rgba(16,13,10,.5),inset 0 1px 0 rgba(255,255,255,.6) !important;
 }
+
+/* ================================================================================
+   ★★★ 手机端（原文三句：
+     ①「有些按键都要划到下面才能看到…能不能让卦辞页里的文字能在卡片里滑动，而不是通过滑动整屏」
+     ②「第三页…还是能进行右划的动作，但是页面会卡住，并且好像还会放大之类的」
+     ③「我说过只要按了壹页的按钮问卦了就能左右滑」）
+
+   ① 叁页（断辞卡）＝一屏高的卡：所问/卦/时（.recap）钉卡顶，断辞（.llm-main/#doc）
+      **在卡内自己滚**，操作按钮（.llm-side：让模型解卦 / 新开一卦 / 状态）**钉卡底**
+      ⇒ 断辞再长也不用整屏下滑才够得到按钮。⛔ 只在 ≤560px 生效（手机端与 Win 端分开调）。
+   ② 横向手势归应用自己：body 只留纵向平移（touch-action:pan-y）⇒ 浏览器不再接管横向拖动
+      去做「整页平移 / 双指放大」，松手回弹也不会被半路截断（②里「放大」的那一半就死在这）。
+      例外：设置页顶部那条自己会横滚的导航（.setnav）仍还给它。
+   ================================================================================ */
+html[data-step] body{touch-action:pan-y;overscroll-behavior-y:contain}
+html[data-step] .setnav,html[data-step] .setnav *{touch-action:auto}
+
+@media (max-width:560px){
+  /* —— 叁页：断辞在卡内滚动，按钮钉底 —— */
+  html[data-step="jie"] #llmPane.pane.llm{
+    display:flex;flex-direction:column;
+    /* 卡高不再写死「视口减 214」那种魔法数：手机端由 JS（phoneAnim 的 layoutJie）实测
+       顶栏顶边 + 卡下那条「断卦依据」的实际高度，写进 --xlr-jie-h；
+       JS 没跑到时退回一个保守值 ⇒ 任何窗口尺寸都自己算，不靠 390×844 的假设。 */
+    max-height:var(--xlr-jie-h,62vh);
+    overflow:hidden;
+  }
+  /* 叁页不再需要给「整页下滑」留白：卡下面只留那条断卦依据 */
+  html[data-step="jie"] #right>.pane{margin-bottom:6px}
+  html[data-step="jie"] .wrap{padding-bottom:8px}
+  html[data-step="jie"] #llmPane .pane-h{flex:0 0 auto}
+  html[data-step="jie"] #llmPane .recap{flex:0 0 auto}
+  html[data-step="jie"] #llmPane .llm-body{
+    display:flex;flex-direction:column;flex:1 1 auto;min-height:0;
+    gap:0;padding:0;
+  }
+  html[data-step="jie"] #llmPane .llm-main{
+    flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;padding:16px 18px 12px;
+  }
+  html[data-step="jie"] #llmPane #doc{margin-top:0}
+  html[data-step="jie"] #llmPane .llm-side{
+    flex:0 0 auto;flex-direction:row;flex-wrap:wrap;gap:9px;
+    border-left:0;border-top:1px solid var(--line);
+    padding:11px 14px 12px;margin:0;
+  }
+  html[data-step="jie"] #llmPane .llm-side .btn{flex:1 1 140px;width:auto;padding:11px 10px}
+  html[data-step="jie"] #llmPane .llm-side .stat{flex:0 0 100%;margin:0;padding:0}
+}
+
+/* ================================================================================
+   ★★ 滚动条（原文：「我希望侧边的滚动条，需要适配每个主题，并且有整体 UI 的设计风格，
+   而不是默认条」）
+
+   安卓 WebView 的滚动条是 overlay（合成层那条），`::-webkit-scrollbar` 在安卓上不吃样式 ⇒
+   想跟皮肤/玻璃语言一致，只能「藏掉原生条 + 自己画一条」。
+   画法（JS 在 phoneAnim.js 的 initScrollHint）：一条 3px 圆角墨条，
+   颜色取 `--ink`（九套皮肤各有各的墨色，**不写死、不逐皮肤重复**），
+   比例随内容长度、跟随滚动位置；滚动时亮出来，停手 0.9 秒淡回去。
+   ================================================================================ */
+/* ★★★ 真凶（用户「壹页还是会闪，整页文字/卡片/按钮都上下抖一下」）：
+   页面级原生滚动条会**吃掉 10px 布局宽度**（Edge 桌面窗口里 clientWidth 380 vs 390）。
+   而三页里「这一页够不够高」不一样：
+     贰页 scrollH 987 ⇒ 有滚动条（clientW 380）；叁页 scrollH 844 ⇒ 没有（clientW 390）；
+     壹页 scrollH 845（比视口多 1px）⇒ 又有滚动条（clientW 380）。
+   ⇒ 换页时滚动条时有时无 ⇒ 整页宽度在 390/380 之间跳 10px ⇒ 文字重排、卡片和按钮一起错位，
+     看起来就是「整页抖一下 / 刷新一下」。安卓真机是 overlay 滚动条不吃宽度，所以真机上未必看得出来，
+     但调试窗口（Edge 桌面）一定闪。
+   ✅ 手机端把**页面级**滚动条也藏掉（列表/抽屉用自绘那条），三页 clientWidth 恒 390，换页不再重排。 */
+@media (max-width:560px){
+  html[data-step],
+  html[data-step] body{scrollbar-width:none;-ms-overflow-style:none}
+  html[data-step]::-webkit-scrollbar,
+  html[data-step] body::-webkit-scrollbar{width:0;height:0}
+}
+
+/* ① 藏掉原生条（只在这三个真会滚的容器上） */
+html[data-step] #llmPane .llm-main::-webkit-scrollbar,
+html[data-step] .sdb-b::-webkit-scrollbar,
+html[data-step] .setbody::-webkit-scrollbar{width:0;height:0}
+html[data-step] #llmPane .llm-main::-webkit-scrollbar-thumb,
+html[data-step] .sdb-b::-webkit-scrollbar-thumb,
+html[data-step] .setbody::-webkit-scrollbar-thumb{background:transparent}
+html[data-step] #llmPane .llm-main,
+html[data-step] .sdb-b,
+html[data-step] .setbody{scrollbar-width:none;-ms-overflow-style:none}
+
+/* ② 自绘的那一条 */
+html[data-step] .xlr-sb{
+  position:fixed;left:0;top:0;width:3px;z-index:1200;pointer-events:none;
+  opacity:0;transition:opacity .26s ease;will-change:transform,opacity;
+}
+html[data-step] .xlr-sb .xlr-sb-t{
+  display:block;width:3px;min-height:26px;border-radius:99px;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--ink) 30%,transparent),
+    color-mix(in srgb,var(--ink) 19%,transparent));
+  box-shadow:0 0 0 .5px color-mix(in srgb,var(--ink) 9%,transparent);
+}
+/* 深底皮肤（黑夜/墨/终端/鎏金/夜蓝/莫高窟）：--ink 本来就是浅色的，直接把对比再抬一档 */
+html:is([data-skin="hei"],[data-skin="term"],[data-skin="jin"],[data-skin="ye"],[data-skin="mo"],[data-skin="mg"])[data-step] .xlr-sb .xlr-sb-t{
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--ink) 42%,transparent),
+    color-mix(in srgb,var(--ink) 28%,transparent));
+}
+
+/* ③ 换页不重播「入场 / 模糊转清 / 掌诀盘放大」
+   原文：「每次滑倒壹页之后，整个页面都会刷新一下，并且在叁页往右滑，松开手指，也会刷新一下」
+   ⛔ 这里不要用 `html[data-swipedir] … {animation:none}`：属性 700ms 后摘掉，CSS 动画会**当场重新开播**
+      （实测 800ms 时 animationName 又变回 xaFocus）＝只是把闪一下推迟了。
+   ⇒ 壹/贰页改 JS 一次性锁死：phoneAnim.js 的 animPlayOnce()（第一次出现照播，之后封死）；
+     叁页（断辞卡）连第一次也不播 —— 它一出现就是「换页」，那条 `xaFocus`（blur 7px + 半透明 → 清）
+      实测每次进叁页都像重新加载，口径：不舒服，手机端整条去掉。 */
+@media (max-width:560px){
+  html[data-step] #llmPane.pane.llm,
+  html[data-step] .pane.llm{animation:none !important}
+}
+
+/* ★★★ 滑切换页的转场（原文：「滑到一半下一页会直接毫无预兆地出现，没有任何过渡；
+   理应是当前页慢慢等比缩小，然后下一页从等比缩小的状态逐渐变大，丝滑无比」）
+   做法：
+     ① 旧页冻结成「照片」——JS 把它 position:fixed 钉在当前 rect（`freezeAsGhost`），
+        于是 setStep 把它 display:none 也不影响它继续演：缩放 .9 + 淡出；
+     ② 新页先以 scale(.92)/opacity 0 起手，下一帧过渡到 1 —— 就是「从缩小状态逐渐变大」；
+     ③ 两者同时跑 340ms，交叉重叠，中间不会露空白。
+   这两条只加过渡，不加 keyframes（避免和 .pane 自身的 xaFocus/mRise 打架，用 animation:none 压掉）。 */
+html[data-step] .swipe-ghost{animation:none !important;pointer-events:none !important;
+  transition:transform .34s cubic-bezier(.22,1,.36,1),opacity .34s ease !important;
+  will-change:transform,opacity;transform-origin:50% 42%}
+html[data-step] .swipe-in-anim{animation:none !important;
+  transition:transform .34s cubic-bezier(.22,1,.36,1),opacity .3s ease !important;
+  will-change:transform,opacity;transform-origin:50% 42%}

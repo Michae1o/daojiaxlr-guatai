@@ -424,6 +424,13 @@ function setStep(k) {
       var q = document.getElementById('q');
       if (q && !q.value) { try { q.focus({ preventScroll: true }); } catch (e2) { } }
     }
+    /* ★ （用户「滑切换页生硬」的隐藏原因）：进「叁」这一步的第一件事是把「本机速断」
+       现算出来 —— 实测首次 `setStep('jie')` 卡 **104ms**，滑切时表现就是「松手后停一下才动」。
+       ⇒ 起卦落到「贰」的那一刻就把它算好写进 `#doc`（那时卡是藏着的，用户看不见）；预热后进叁只要 ~20ms。
+       已解过/速断过（`__md` 有内容）不覆盖。 */
+    if (k === 'gua' && !window.__md && typeof quickReadRun === 'function') {
+      try { quickReadRun(); } catch (e11) { }
+    }
     if (k === 'jie' && autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
     /*
        已经解过/速断过（__md 有内容）就不覆盖。 */
