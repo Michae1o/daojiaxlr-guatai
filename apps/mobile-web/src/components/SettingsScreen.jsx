@@ -709,12 +709,40 @@ export default function SettingsScreen({ open, onClose }) {
      分三步 —— 检查 → 下载（报百分比）→ 交系统安装器。⛔ 做不到静默安装：
      Android 一定要用户点一次「安装」，8+ 首次还得先给「安装未知应用」授权。 */
   const [verTxt, setVerTxt] = useState('');
+  /* 连点版本号 5 次 → 显示最近一次未捕获错误（配合 main.jsx 的全局捕获） */
+  const [diag, setDiag] = useState(null);
+  const tapRef = useRef(0);
+  const tapVer = () => {
+    tapRef.current += 1;
+    if (tapRef.current < 5) return;
+    tapRef.current = 0;
+    if (diag) { setDiag(null); return; }
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem('xlr-last-error') || 'null'); } catch (e) { }
+    let tr = '';
+    try { tr = localStorage.getItem('xlr-upd-trace') || ''; } catch (e) { }
+    setDiag(Object.assign({ msg: '（没有记录到错误）', stack: '' }, s || {}, { trace: tr }));
+  };
   const [updBusy, setUpdBusy] = useState(false);
   const [updReady, setUpdReady] = useState(false);
   const updInfo = useRef(null);
 
-  /* Capacitor 有两种 reject 形态（Error / 字符串）⇒ 两种都收，别把真实原因丢掉 */
-  const errText = (e, fallback) => (e && e.message) ? e.message : (typeof e === 'string' && e.trim() ? e : fallback);
+  /* Capacitor 有两种 reject 形态（Error / 字符串）⇒ 两种都收，别把真实原因丢掉；
+     再加栈的前两帧（压缩包里的函数名，配合 `xlr-upd-trace` 才能定位到具体哪一步） */
+  const errText = (e, fallback) => {
+    const m = (e && e.message) ? e.message : (typeof e === 'string' && e.trim() ? e : fallback);
+    const st = (e && e.stack) ? String(e.stack).split('\n').slice(1, 3).join(' ').replace(/\s+/g, ' ').trim().slice(0, 160) : '';
+    return st ? m + ' ⟵ ' + st : m;
+  };
+
+  /* 更新流程打点：每一步写进 localStorage，出问题时配合「连点版本号」一起看 */
+  const trace = (m) => {
+    try {
+      const k = 'xlr-upd-trace';
+      const old = localStorage.getItem(k) || '';
+      localStorage.setItem(k, (old + m + ' › ').slice(-600));
+    } catch (e) { }
+  };
 
   useEffect(() => {
     if (!open || verTxt || !Upd.isAndroid()) return;
@@ -728,26 +756,41 @@ export default function SettingsScreen({ open, onClose }) {
 
     if (updInfo.current) {
       const target = updInfo.current;
-      Upd.canInstall().then((r) => {
+      /* ★ 这里原样 `Upd.canInstall().then(...)` —— 生产包里报
+         「s.then is not a function」就出在这一句附近。改成先看返回值到底是什么再走，
+         非 Promise 也能继续（Promise.resolve 兜着），并且把类型记进 trace。 */
+      let canP;
+      try { canP = Upd.canInstall(); } catch (e) {
+        trace('canInstall 抛错');
+        done('bad', errText(e, '更新失败，请稍后再试'));
+        return;
+      }
+      trace('canInstall→' + (canP && typeof canP.then === 'function' ? 'promise' : 'NON-PROMISE(' + typeof canP + ')'));
+      Promise.resolve(canP).then((r) => {
+        trace('allowed=' + (r && r.allowed));
         if (!r || !r.allowed) {
           done('bad', '系统里还没允许「安装未知应用」，去打开，回来再点一次「立即更新」。');
-          Upd.openInstallSettings();
+          try { Upd.openInstallSettings(); } catch (e) { }
           return;
         }
         say('', '正在下载更新包…');
+        trace('download 开始');
         return Upd.download(target, (pct) => say('', '正在下载更新包… ' + pct + '%'))
-          .then(() => Upd.install())
+          .then(() => { trace('下载完成'); return Upd.install(); })
           .then(() => {
+            trace('install 已交给系统');
             updInfo.current = null;
             setUpdReady(false);
             done('good', '✓ 已交给系统安装器，按弹出的提示点「安装」。');
           });
-      }).catch((e) => done('bad', errText(e, '更新失败，请稍后再试')));
+      }).catch((e) => { trace('catch'); done('bad', errText(e, '更新失败，请稍后再试')); });
       return;
     }
 
     say('', '正在检查…');
+    trace('check 开始');
     Upd.check().then((r) => {
+      trace('check ok hasNew=' + (r && r.hasNew));
       if (!r.hasNew) {
         done('good', '✓ 已经是最新版本（v' + ((r.current && r.current.versionName) || '—') + '）');
         return;
@@ -756,7 +799,7 @@ export default function SettingsScreen({ open, onClose }) {
       const mb = r.info.size ? (r.info.size / 1048576).toFixed(1) : '?';
       setUpdReady(true);
       done('', '发现新版本 v' + r.info.version + '（' + mb + ' MB）。点「立即更新」。');
-    }, (e) => done('bad', errText(e, '连不上更新服务，稍后再试')));
+    }, (e) => { trace('check 失败'); done('bad', errText(e, '连不上更新服务，稍后再试')); });
   };
 
   /* ★ （用户要「清空配置」）：一键把这页填过的东西全清掉。
@@ -1062,7 +1105,18 @@ export default function SettingsScreen({ open, onClose }) {
                 简介与三条前提已搬到「说明」栏最前面。 */}
             <section className="setsec about" id="s-about">
               <h3>关于</h3>
-              <p><b>道家小六壬 · 卦台</b>　{verTxt ? 'v' + verTxt : VER}</p>
+              <p><b>道家小六壬 · 卦台</b>　<span onClick={tapVer} title="连点 5 次看最近一次报错">{verTxt ? 'v' + verTxt : VER}</span></p>
+              {/* ★ 连点版本号 5 次才出现 —— 安卓 release 没有 devtools，
+                  报错只给压缩名（`s.then is not a function`）根本定位不到行。 */}
+              {diag ? (
+                <div style={{ margin: '8px 0 10px', padding: '9px 11px', border: '1px solid var(--line, #3336)', borderRadius: '8px', fontSize: '11px', lineHeight: 1.55, opacity: .92 }}>
+                  <div><b>最近一次报错</b>（连点版本号关掉）{diag.at ? ' · ' + String(diag.at).replace('T', ' ').slice(0, 19) : ''}</div>
+                  <pre style={{ margin: '6px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'ui-monospace, monospace', fontSize: '10.5px', maxHeight: '220px', overflow: 'auto' }}>
+                    {(diag.kind ? diag.kind + ': ' : '') + (diag.msg || '') + (diag.stack ? '\n\n' + diag.stack : '')}
+                    {diag.trace ? '\n\n更新流程：' + diag.trace : ''}
+                  </pre>
+                </div>
+              ) : null}
               {/* ★ （app 内更新·安卓）：下 APK → 交系统安装器。装的时候系统还会问一次，正常。
                   只在 APK 里出现（网页版没有 XlrUpdate 插件，也没法装 APK ⇒ 不显示这一行）。 */}
               {Upd.isAndroid() ? (

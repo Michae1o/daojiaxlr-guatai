@@ -63,8 +63,10 @@ export function download(info, onProgress) {
   var handle = null;
   var ready = onProgress
     ? p.addListener('progress', function (d) { onProgress(d && d.percent ? d.percent : 0); })
-    : Promise.resolve(null);
-  return ready.then(function (h) {
+    : null;
+  /* `Promise.resolve` 兜一层：Capacitor 不同版本 addListener 可能给 Promise、也可能给 handle 本身，
+     直接 `ready.then` 在后者上就是 `s.then is not a function`。 */
+  return Promise.resolve(ready).then(function (h) {
     handle = h;
     return p.download({ url: info.url, sha256: info.sha256 || '' });
   }).then(function (r) {
