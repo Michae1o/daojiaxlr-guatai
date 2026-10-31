@@ -480,24 +480,12 @@ internal fun NotePage() {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            SetSecTitle("联系作者", top = 0)
-            Text_(text = "软件使用反馈：微信 Trick_Mage", fontSize = 12f, lineHeight = 21f, color = KY_DIM)
-            Text_(text = "小六壬交流：微信 gny950107", fontSize = 12f, lineHeight = 21f, color = KY_DIM)
-            Text_(text = "添加请注明来意。", fontSize = 12f, lineHeight = 21f, color = KY_DIM2)
+            SetSecTitle("反馈", top = 0)
+            Text_(text = "问题与建议请提到仓库的 Issues。", fontSize = 12f, lineHeight = 21f, color = KY_DIM)
 
             Spacer(modifier = Modifier.height(16.dp))
             SetSecTitle("开源仓库", top = 0)
-            /* 早先那一版这里是 <a href> 走 openOut 交系统浏览器（SettingsScreen.jsx:1202）⇒ K 里必须可点，
-               Platform.openUrl 早就接了（引导里的智谱链接在用），这里直接用 */
-            Text_(
-                text = "github.com/Michae1o/daojiaxlr-guatai  ↗",
-                modifier = Modifier.tapNoIndication {
-                    Platform.openUrl?.invoke("https://github.com/Michae1o/daojiaxlr-guatai")
-                }.padding(vertical = 4.dp),
-                fontSize = 12f,
-                lineHeight = 21f,
-                color = KY_ACCENT,
-            )
+            Text_(text = "源码就是本仓库", fontSize = 12f, lineHeight = 21f, color = KY_DIM)
             Spacer(modifier = Modifier.height(30.dp))
         }
     }

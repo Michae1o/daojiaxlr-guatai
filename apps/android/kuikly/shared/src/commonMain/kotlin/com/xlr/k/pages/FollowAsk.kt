@@ -129,7 +129,7 @@ internal fun askFollow(ctx: Context, B: List<Block>, scope: kotlinx.coroutines.C
     scope.launch {
         var ans = ""
         try {
-            val full = askModelStream(cfg, if (Platform.lite) com.xlr.k.judge.SYS_LITE else com.xlr.k.judge.SYS, followUserMain(ctx, B, thread, q)) { t ->
+            val full = askModelStream(cfg, com.xlr.k.judge.SYS, followUserMain(ctx, B, thread, q)) { t ->
                 ans = t
                 Follow.setLastA(t)
             }
