@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "判据模块（起卦 / 排盘 / 六宫 / 断辞的唯一实现）。两端只读引用，禁止 fork。",
+  "description": "判据模块（起卦 / 排盘 / 六宫 / 断辞的唯一实现）。界面层只读引用，禁止 fork。",
   "exports": {
     ".": "./src/index.js"
   },
