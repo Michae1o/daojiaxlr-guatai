@@ -185,7 +185,6 @@ internal fun SplashOverlay() {
     val glassMix = if (!tapped) 0f else bezier(floatArrayOf(0.2f, 0.85f, 0.25f, 1f), (t - MS_MOTION).coerceAtLeast(0f) / 260f)
 
     val textA = if (!tapped) 1f else (1f - (t - 150f).coerceAtLeast(0f) / 260f).coerceIn(0f, 1f)
-    val tint = if (!tapped) 0f else bezier(floatArrayOf(0.25f, 0.1f, 0.25f, 1f), (t - 150f).coerceAtLeast(0f) / 420f)
     /* 720ms 起开屏层自己的底色渐隐（旧 #xlrSplash{transition:background .42s ease}）。
        早先那一版是 .42s，这里放长到 560ms 并用 ease-out——`.42s ease` 在中段掉得很快，观感像"啪"一下没了 */
     val layerA = if (!tapped) 1f else
@@ -193,9 +192,11 @@ internal fun SplashOverlay() {
     val arrowA = if (!tapped) 1f else (1f - t / 220f).coerceIn(0f, 1f)
 
     /* 早先那一版 --accent-bg = accent 的 7%：黑皮肤下 ≈ #E4E4E5 */
-    val bgR = KY_BG.red + (0.895f - KY_BG.red) * tint
-    val bgG = KY_BG.green + (0.895f - KY_BG.green) * tint
-    val bgB = KY_BG.blue + (0.895f - KY_BG.blue) * tint
+    /* 统一黑底：开屏固定夜空黑，不再跟皮肤底色走 —— 星图是金线，只有黑底才读得出；
+       皮肤再换，开屏这一段都是同一个夜色。 */
+    val bgR = 0.047f
+    val bgG = 0.043f
+    val bgB = 0.035f
 
     Box(modifier = Modifier.fillMaxSize()) {
         /* 只是「底色」这一层跟着 layerA 渐隐；飞的那块和文字各自管自己的透明度 */
@@ -210,8 +211,11 @@ internal fun SplashOverlay() {
         /* ⚠ 现象：「点击后飞起来极其慢、像卡住」：这幅水墨每帧上千笔（160 弧 + 900 点 + 200 笔触），
            我上一版把它挂在「t < 720ms」里 ⇒ 恰好盖住了整个起飞段，每帧都被这堆绘制拖住，动画看起来像在爬。
            ⇒ 改成**只在没点之前挂载**：点下去的瞬间它就撤掉（文字本来也在 150ms 后开始淡出，看不出断）。 */
+        /* 背景星点：固定种子、静态，只作气氛；跟着底色一起淡出 */
+        StarField(alphaProvider = { layerA })
+
         if (!tapped) {
-            SplashArt(alphaProvider = { textA }, rise = rise)
+            SplashArt(alphaProvider = { textA })
         }
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -222,13 +226,13 @@ internal fun SplashOverlay() {
                 modifier = Modifier
                     .width(1.dp)
                     .height(18.dp)
-                    .background(Color(0.05f, 0.05f, 0.06f, 0.10f))
+                    .background(Color(0.86f, 0.73f, 0.47f, 0.22f))
                     .graphicsLayer { alpha = textA }
             )
             Box(
                 modifier = Modifier
                     .size(4.dp)
-                    .background(Color(0.05f, 0.05f, 0.06f, 0.30f), CircleShape)
+                    .background(Color(0.86f, 0.73f, 0.47f, 0.55f), CircleShape)
                     .graphicsLayer { alpha = textA }
             )
             Text_(
@@ -237,7 +241,7 @@ internal fun SplashOverlay() {
                 lineHeight = 46f,
                 letterSpacing = 10.2f,
                 serif = true,
-                color = KY_INK,
+                color = Color(0.95f, 0.93f, 0.88f),
                 modifier = Modifier.padding(top = 18.dp).graphicsLayer { alpha = textA },
             )
             Text_(
@@ -246,7 +250,7 @@ internal fun SplashOverlay() {
                 lineHeight = 20f,
                 letterSpacing = 0.75f,
                 serif = true,
-                color = KY_DIM,
+                color = Color(0.74f, 0.70f, 0.62f),
                 modifier = Modifier.padding(top = 11.dp).graphicsLayer { alpha = textA },
             )
             Box(
@@ -254,7 +258,7 @@ internal fun SplashOverlay() {
                     .padding(top = 18.dp)
                     .width(44.dp)
                     .height(1.dp)
-                    .background(Color(0.05f, 0.05f, 0.06f, 0.14f))
+                    .background(Color(0.86f, 0.73f, 0.47f, 0.30f))
                     .graphicsLayer { alpha = textA }
             )
             Text_(
@@ -263,7 +267,7 @@ internal fun SplashOverlay() {
                 lineHeight = 26f,
                 letterSpacing = 2.6f,
                 serif = true,
-                color = KY_INK,
+                color = Color(0.95f, 0.93f, 0.88f),
                 modifier = Modifier.padding(top = 16.dp).graphicsLayer { alpha = textA },
             )
             Column(
@@ -280,7 +284,7 @@ internal fun SplashOverlay() {
                         fontSize = 12f,
                         lineHeight = 24f,
                         serif = true,
-                        color = KY_DIM2,
+                        color = Color(0.60f, 0.57f, 0.50f),
                         modifier = Modifier.graphicsLayer { alpha = textA },
                     )
                 }
@@ -339,7 +343,7 @@ internal fun SplashOverlay() {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    if (tapped) KY_ACCENT else veil(0f),
+                                    if (tapped) Color(0.85f, 0.68f, 0.38f) else veil(0f),
                                     CircleShape,
                                 )
                         )
@@ -386,16 +390,16 @@ internal fun SplashOverlay() {
                         },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(modifier = Modifier.width(40.dp).height(1.dp).background(Color(0.05f, 0.05f, 0.06f, 0.14f)))
+                    Box(modifier = Modifier.width(40.dp).height(1.dp).background(Color(0.86f, 0.73f, 0.47f, 0.30f)))
                     Text_(
                         text = "点击进入",
                         fontSize = 11.5f,
                         lineHeight = 18f,
                         letterSpacing = 3.2f,
-                        color = KY_DIM2,
+                        color = Color(0.60f, 0.57f, 0.50f),
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
-                    Box(modifier = Modifier.width(40.dp).height(1.dp).background(Color(0.05f, 0.05f, 0.06f, 0.14f)))
+                    Box(modifier = Modifier.width(40.dp).height(1.dp).background(Color(0.86f, 0.73f, 0.47f, 0.30f)))
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -490,66 +494,56 @@ internal fun SplashOverlay() {
    全部用固定种子的伪随机：每次重绘一模一样，不会闪。
    金线：一根竖线穿过圆、三颗节点（圆/菱形）、下面一道浅弧 —— 就是参考图里那种「罗盘/星图」的味道。 */
 @Composable
-private fun SplashArt(alphaProvider: () -> Float, rise: Float) {
+private fun SplashArt(alphaProvider: () -> Float) {
     val dens = LocalDensity.current.density
     val swPx = (if (Platform.screenW > 0) Platform.screenW else 1080).toFloat()
     val shPx = (if (Platform.screenH > 0) Platform.screenH else 2400).toFloat()
-    /* 用户给的那张半透明水墨旋涡（assets/ink.png，640×1137；墨迹包围盒 x 9..633 / y 262..947）：
-       按「墨迹中心」对齐到原来那个墨团的圆心（屏宽一半、屏高 0.20），墨迹铺到 0.95 屏宽。
-       ⚠ 之前是拿图元画（160 弧 + 900 点 + 200 笔触），说「你好像没用我的 png」⇒ 换成真图。
-       位图走 coil3 的 assets://（FollowAsk 那颗球同一条路），不用碰 internal 的 KuiklyImageBitmap。 */
-    val imgW = swPx * 0.95f
-    val imgH = imgW * 1137f / 640f
-    val topPx = shPx * 0.20f - imgH * (604f / 1137f)
+    /* 开屏的「画」= 给的《金色北斗环绕二十八宿》（去字版）。
+       五次调整（按版面比例定，不再拍脑袋）：
+         · 整张必须完整露出 ⇒ 不能用「贴底出血」，改成「底边留 6% 屏高的安全边」
+         · 星图整块落在「点击进入」这条 CTA 线**之下**，不跟横线打架；
+         · 宽度收到 0.60 屏宽，让上沿刚好从 CTA 线下面开始，视觉重量压在下三分之一。 */
+    val artW = swPx * 0.60f
+    val artH = artW * 1672f / 941f
+    val leftPx = (swPx - artW) / 2f
+    val topPx = shPx - artH - shPx * 0.10f
     Box(
         modifier = Modifier
             .fillMaxSize()
             /* alpha 在 layer 里读：淡出只更新这一层的属性，不重新走绘制 */
-            .graphicsLayer { alpha = alphaProvider() },
+            .graphicsLayer { alpha = alphaProvider() * 0.9f },
     ) {
         Image(
-            painter = com.tencent.kuikly.compose.coil3.rememberAsyncImagePainter("assets://ink.png"),
+            painter = com.tencent.kuikly.compose.coil3.rememberAsyncImagePainter("assets://splash-stars-plain.png"),
             contentDescription = null,
             modifier = Modifier
-                .offset(x = ((swPx - imgW) / 2f / dens).dp, y = (topPx / dens).dp)
-                .size((imgW / dens).dp, (imgH / dens).dp),
+                .offset(x = (leftPx / dens).dp, y = (topPx / dens).dp)
+                .size((artW / dens).dp, (artH / dens).dp),
         )
-        /* 香槟金细线照旧压在墨团上：一根竖线穿过、三颗节点、下面一道浅弧 */
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val w = size.width
-            val h = size.height
-            val cx = w / 2f
-            val cy = h * 0.20f
-            val r = w * 0.40f
-            val gold = Color(0.86f, 0.73f, 0.47f)
+    }
+}
 
-            val ga = 0.78f
-            drawLine(
-                color = gold.copy(alpha = ga),
-                start = Offset(cx, h * 0.075f),
-                end = Offset(cx, cy + r * 0.62f),
-                strokeWidth = 1.4f,
-            )
-            listOf(h * 0.075f, h * 0.075f + 34f, cy - r * 0.42f).forEachIndexed { k, y ->
-                if (k == 1) {
-                    /* 菱形节点：两条斜线交叉 */
-                    val s = 4.3f
-                    drawLine(gold.copy(alpha = ga), Offset(cx - s, y - s), Offset(cx + s, y + s), strokeWidth = 1f)
-                    drawLine(gold.copy(alpha = ga), Offset(cx - s, y + s), Offset(cx + s, y - s), strokeWidth = 1f)
-                } else {
-                    drawCircle(gold.copy(alpha = ga), radius = 3.4f, center = Offset(cx, y), style = Stroke(1f))
-                }
+/* 开屏背景的星点：固定种子的伪随机（每次重绘一模一样，不会闪），150 颗，
+   白为主、约两成香槟金；透明度压得很低，只铺气氛，不跟文字抢。
+   跟着底色一起淡出（alphaProvider 传 layerA）。 */
+@Composable
+private fun StarField(alphaProvider: () -> Float) {
+    Canvas(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = alphaProvider() }) {
+        var s = 0x5EED20261031L
+        repeat(150) {
+            s = s * 6364136223846793005L + 1442695040888963407L
+            val x = ((s ushr 40) and 0x3FFF).toFloat() / 16383f * size.width
+            s = s * 6364136223846793005L + 1442695040888963407L
+            val y = ((s ushr 40) and 0x3FFF).toFloat() / 16383f * size.height
+            s = s * 6364136223846793005L + 1442695040888963407L
+            val t = ((s ushr 40) and 0x3FFF).toFloat() / 16383f
+            val radius = 0.5f + t * 1.2f
+            val alpha = 0.07f + t * 0.28f
+            if (t > 0.82f) {
+                drawCircle(Color(0.86f, 0.73f, 0.47f, alpha), radius, Offset(x, y))
+            } else {
+                drawCircle(Color(1f, 1f, 1f, alpha * 0.75f), radius, Offset(x, y))
             }
-            /* 圆下一道很浅的弧（像罗盘外圈） */
-            drawArc(
-                color = gold.copy(alpha = 0.46f),
-                startAngle = 200f,
-                sweepAngle = 140f,
-                useCenter = false,
-                topLeft = Offset(cx - r * 0.92f, cy - r * 0.92f + rise * 0.10f),
-                size = Size(r * 1.84f, r * 1.84f),
-                style = Stroke(1f),
-            )
         }
     }
 }

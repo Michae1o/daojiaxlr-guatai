@@ -3,7 +3,8 @@
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <!-- 开屏统一夜空黑：冷启动的第一帧就是这个底，不再是白底 -->
+        <item name="android:windowBackground">@color/splash_night</item>
     </style>
 
 </resources>

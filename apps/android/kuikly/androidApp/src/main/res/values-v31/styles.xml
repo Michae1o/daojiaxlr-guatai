@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ 的系统启动画面（SplashScreen）：只留夜空黑底 + 透明图标。
+     图形与文字全部交给应用自己的开屏去画（第一段带字、第二段去字）。 -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="android:windowBackground">@color/splash_night</item>
+        <item name="android:windowSplashScreenBackground">@color/splash_night</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_empty</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_night</item>
+    </style>
+
+</resources>

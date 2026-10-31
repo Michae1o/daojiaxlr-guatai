@@ -183,13 +183,16 @@ internal fun YiContent(onCast: () -> Unit) {
             ),
         )
         if (greetVis > 0.01f) {
+            /* 现象：「问候语字被截断」：十二时辰的句子带两个逗号 ⇒ 折成三行（3×42.6sp=128dp），
+               而这里写死 120dp（那是两行时的实测值）⇒ 第三行挤掉副句。按行数长高。 */
+            val greetH = 120f + (GREET_ONCE.first.count { it == '\n' } - 1).coerceIn(0, 1) * 42.6f
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height((120f * greetVis).dp)
+                    .height((greetH * greetVis).dp)
                     .clipToBounds(),
             ) {
-                Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
+                Box(modifier = Modifier.fillMaxWidth().height(greetH.dp)) {
                     Greeting()
                 }
             }
