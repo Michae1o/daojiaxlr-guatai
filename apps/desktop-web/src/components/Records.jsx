@@ -4,9 +4,9 @@
  *     `rvHtml` L409–424 · `sdbFootHtml` L162–191 · `renderRules` L426–450）。
  *
  * 分工（见 开发笔记 早期实现/早期实现）：
- *   · **读/写存储**：走 React 侧的 `data/recordsStore.js`（**A4① 2026-10-13 搬来**，是 `20-script.txt`
+ *   · **读/写存储**：走 React 侧的 `data/recordsStore.js`（**A4① 搬来**，是 `20-script.txt`
  *     L9–122 的逐字切片；外壳同时把 `window.load*`/`save*`/动词收到同一份上 ⇒ 全应用一份真相）
- *   · **复盘 / 准则**：走 React 侧的 `data/reviewCore.js`（**A4③ 2026-10-13 搬来**，是 22-script 的
+ *   · **复盘 / 准则**：走 React 侧的 `data/reviewCore.js`（**A4③ 搬来**，是 22-script 的
  *     复盘主流程 + 20-script 的 `reviewBlock`/`ruleBlock`/`confirmRule` 逐字切片）。
  *   · **照抄** 渲染与接线（legacy 那批自己写 `innerHTML`，不能复用）
  *
@@ -26,7 +26,7 @@
  *     `[data-purge]` / `[data-purgeall]` / `[data-open]` / `[data-clear]`（两段式 `data-armed` 4 秒）
  * 事件挂法：早前的版本是"按元素各挂一遍"，这边改成**根节点上一处捕获 + 一处冒泡**；
  *   分支判据与早前的版本**同序、同选择器**（`sdbFootDel` 是捕获阶段 ⇒ `onClickCapture`）。
- * 出网三条的现状（2026-10-13 A4③ 更新）：
+ * 出网三条的现状（A4③ 更新）：
  *   ③ 复盘的流式渲染（`RV_SYS` + `readSSE`）—— **已接**（同一份切片）
  *   ② `[data-ask]`（接着问）—— **仍未接**：早前的版本由 `26-script.txt` L762-763 的 document 委托 → `openRecAsk`
  */
@@ -73,7 +73,7 @@ const readCases = () => { try { return RecordsStore.loadCases() || []; } catch (
 const readCasesRaw = () => { try { return RecordsStore.loadCasesRaw() || []; } catch (e) { return []; } };
 const readRules = () => { try { return RecordsStore.loadRules() || []; } catch (e) { return []; } };
 
-/* `sdbDayOf`（20-script.txt L282–291）：'2026-10-09 14:32' → 今天/昨天/7 天内/更早 + MM-DD */
+/* `sdbDayOf`（20-script.txt L282–291）：'14:32' → 今天/昨天/7 天内/更早 + MM-DD */
 function dayOf(t) {
   const s = String(t || '').slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return { k: '更早', md: '' };
@@ -367,7 +367,7 @@ export default function Records({ open = false, onClose }) {
   };
 
   /* `[data-fb]`（L468-470 → `setFb` L84-95）。
-     A4③（2026-10-13）：**复盘接上了**。早前的版本「没应验」会顺手触发 `reviewCase()`（出网，20 L94 →
+     A4③（）：**复盘接上了**。早前的版本「没应验」会顺手触发 `reviewCase()`（出网，20 L94 →
      22-script L43 的复盘主流程）。这里照早前的版本语义走，只把**时机**改成「等渲染提交之后再跑」：
        ① 先在 setFb 里把复盘钩子**临时挂空** ⇒ 只做本地标记（等价于早前的版本 setFb 里那一步 saveCases）；
        ② 记下 `rvPending`，由上面的 effect 在 `#rv-<id>` 渲染出来之后跑 `reviewCase`（早前的版本是先

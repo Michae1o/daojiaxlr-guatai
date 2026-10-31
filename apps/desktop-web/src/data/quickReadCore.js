@@ -75,7 +75,7 @@ function seasonOf(GG) {
 }
 function whenPoint(GG, now) {
   const { span, name } = seasonOf(GG);
-  /* 2026-10-23：不再用体用判远近 —— 落宫是吉就按近的算，不吉就往后推一档。 */
+  /* 不再用体用判远近 —— 落宫是吉就按近的算，不吉就往后推一档。 */
   const near = /吉$/.test(String(GG.jx));
   let off = near ? 0 : 1;
   const m = now.getMonth() + 1;
@@ -168,7 +168,7 @@ export function quickRead(c) {
           head = '**还没定，眼下还拖着**';
           why.push('落宫是留连：六宫里只有它自带变数 —— 不是成了，也不是没成，是还缠着。');
         } else {
-          /* 2026-10-23：体用那两支（"有转机"/"得自己去争"）随体用一并去掉，只按吉凶给答案。 */
+          /* 体用那两支（"有转机"/"得自己去争"）随体用一并去掉，只按吉凶给答案。 */
           head = '**' + (good ? verb : (verb === '有' ? '没有' : '不' + verb)) + '**';
         }
       }
@@ -181,7 +181,7 @@ export function quickRead(c) {
       + (String(GG.jx) === String(g3) ? g3 : g3 + '，' + GG.jx) + '）。');
   }
 
-  /* ---- ② 理由：只留**一句**（2026-10-23 你要「结论简单点」） ---- */
+  /* ---- ② 理由：只留**一句**（你要「结论简单点」） ---- */
   const isWeather = c.catKey === 'weather' && !!(ASKS.weather && ASKS.weather.byPalace);
   if (!why.length && !isWeather) {
     /* 普通吉凶问 / 泛问：就一句三宫走向（前因 → 经过 → 结果），不铺别的 */

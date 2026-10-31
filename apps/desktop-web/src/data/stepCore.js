@@ -111,7 +111,7 @@ function buildStepper() {
       var bs = bar.querySelectorAll('button');
       if (!bs.length || probeIdx < 0) return null;
       var b = bs[probeIdx] || bs[0];
-      /* （用户：「步进条不灵敏，移上去有时不展开、在那抽搐，只有靠右一点才展开」）：
+      /* ：
          原来在**真按钮**上量：先加 .vopen 量展开宽 w1，再摘掉量收起宽 w0。
          可只要鼠标正悬停在这个按钮上，`.vstep button:hover .vsl` 那条规则照样生效 ——
          摘掉 .vopen 之后标签仍然是展开的 ⇒ w0 量成了**展开宽**（88 而不是 34）、d=0。

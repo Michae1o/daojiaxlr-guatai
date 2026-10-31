@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- app 内更新：只开放私有缓存里的 upd/ 目录给 FileProvider（别把整个 cacheDir 开出去） -->
+<paths>
+    <cache-path name="upd" path="upd/" />
+</paths>

@@ -13,6 +13,7 @@
 - [界面](#界面)
 - [技术栈](#技术栈)
 - [跑起来](#跑起来)
+- [手机端（安卓）](#手机端安卓)
 - [判据在哪、怎么改](#判据在哪怎么改)
 - [这个仓里有什么](#这个仓里有什么)
 - [什么不在这个仓里](#什么不在这个仓里)
@@ -51,6 +52,7 @@
 | 前端 | React 19、Vite 6、Tailwind 4、GSAP / Motion |
 | 外壳 | Tauri 2（Rust），Windows 走 WebView2，macOS 走 WKWebView |
 | 判据 | 纯 ES 模块（`apps/shared-judgment`），界面层 import，不含框架依赖 |
+| 安卓 | Kotlin Multiplatform + Kuikly + Compose（`apps/android`），判据另有一份 Kotlin 实现 |
 | 产物 | 前端用 `vite-plugin-singlefile` 打成单文件 HTML，再由 `protect.py` 上壳 |
 
 ## 跑起来
@@ -81,9 +83,23 @@ npm run dev                       # 浏览器里调界面，热更新
 
 改完怎么重新打进加密壳、怎么出 exe：[`BUILD.md`](BUILD.md)。
 
+## 手机端（安卓）
+
+手机那一版是**另一套原生实现**（Kotlin Multiplatform + Kuikly + Compose），源码在 `apps/android/`，
+与桌面前端不共用界面代码；判据在那边是 Kotlin 版（`kuikly/shared/.../judge/`）。
+
+```bash
+cd apps/android/kuikly
+JAVA_HOME=<JDK 17> ANDROID_HOME=<Android SDK> ./gradlew :androidApp:assembleRelease
+# → androidApp/build/outputs/apk/release/androidApp-release.apk
+```
+
+需要 JDK 17 与 Android SDK 34；仓里不带钥匙，没有签名配置时自动用调试签名。
+签名、目录、注意事项见 [`apps/android/README.md`](apps/android/README.md)。
+
 ## 判据在哪、怎么改
 
-判据只有一份，在 `apps/shared-judgment/`：
+判据只有一份真源，在 `apps/shared-judgment/`（安卓那份是它的 Kotlin 移植，语义要一致）：
 
 ```
 corpus/00…08.md          九份体系文档（人读的真源）
@@ -103,6 +119,7 @@ src/corpus.js            打包成代码读的形式
 |---|---|
 | `apps/desktop-web/` | 桌面前端：`src/` 界面、`skins/` 皮肤、`styles/` 样式、`legacy/` 历史模块 |
 | `apps/shared-judgment/` | 起卦 / 排盘 / 六宫 / 断辞 / 提示词 / 九份语料 |
+| `apps/android/` | 安卓端：Kotlin + Kuikly 工程（`kuikly/`）、判据的 Kotlin 实现、构建说明 |
 | `apps/desktop-shell/` | Tauri 2 壳；`web/index.html` 是入库的加密壳，`pkg/` 是 Windows 启动器 |
 | `apps/desktop-web/build/` | 上壳链：`protect.py`（加密）、`prep_tauri_web.py`（生成壳） |
 | `tools/` | 组装器、文档入口生成、语料打包 |
@@ -111,10 +128,9 @@ src/corpus.js            打包成代码读的形式
 
 ## 什么不在这个仓里
 
-- **安卓端**：手机上那一版是另一套原生实现，源码不随本仓发布；本仓只含桌面端。
 - 官网、部署脚本、更新清单服务端。
 - 密钥、签名物料、任何人的账号与环境配置。
-- 构建产物（`dist/`、`target/`、加密后的 exe）与早期版本快照。
+- 构建产物（`dist/`、`target/`、`build/`、编好的 exe / apk）与早期版本快照。
 
 ## 常见问题
 
@@ -131,7 +147,7 @@ src/corpus.js            打包成代码读的形式
 能。起卦、排盘、本机速断都不需要联网，模型只是把断辞说顺。
 
 **手机上能用吗？**
-本仓没有手机端。桌面网页版手机浏览器也能开，但那是桌面布局。
+能，安卓端就在 `apps/android/`（另一套原生实现，编译见那里的 README）。桌面网页版手机浏览器也能开，但那是桌面布局。
 
 更多问题（Key 报错、拉模型列表、解到一半停住、接着问…）在应用内 **设置 → 关于 → 常见问题** 里有 18 条。
 

@@ -61,7 +61,13 @@ cd ../desktop-shell && npx --yes @tauri-apps/cli@^2 build   # → exe / .app
 
 顺序别换：`make-doc-entry` 必须在 `vite build` 之前（它生成入口），`protect` 必须在 `prep` 之前。
 
-**安卓**：这一版的开源包不含安卓端（安卓那一侧是另一套技术栈，不在本仓）。
+**安卓**：是另一套工程（Kotlin Multiplatform + Kuikly），不在 `apps/desktop-*` 这条链里，
+编译见 [`apps/android/README.md`](apps/android/README.md)：
+
+```bash
+cd apps/android/kuikly
+JAVA_HOME=<JDK 17> ANDROID_HOME=<Android SDK 34> ./gradlew :androidApp:assembleRelease
+```
 
 ---
 

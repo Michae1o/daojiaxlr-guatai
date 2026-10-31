@@ -2,7 +2,7 @@
 @import "tailwindcss/theme.css" layer(theme) prefix(xlr);
 @import "tailwindcss/utilities.css" layer(utilities);
 
-/* 铜古皮肤模块（2026-10-14 v4）：**独立文件**，只在 `html[data-skin="tonggu"]` 下生效。
+/* 铜古皮肤模块（v4）：**独立文件**，只在 `html[data-skin="tonggu"]` 下生效。
    放在这里（未分层）⇒ 与 legacy 的未分层规则同层，靠「选择器更具体 + 涂装属性 !important」取胜；
    模块自己的结构 = 变量 → 可复用类（.tg-cast/.tg-frame/…）→ 末尾一节才映射到 legacy 选择器。 */
 @import "./skins/tonggu/tonggu.css";

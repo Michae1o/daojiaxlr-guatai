@@ -1,5 +1,5 @@
 /* guideImages.js —— 引导配图（`window.XLR_GUIDE_IMG`）：register / keynav / keynew / keyname / keycopy
-   为什么有这个文件（2026-10-17 现象：「引导图文里的图都没了」）：
+   为什么有这个文件（现象：「引导图文里的图都没了」）：
      早期版本「删段收口」(e1e1a63) 把 `legacy/parts/*` 37 个文件全删，`34-script` 里那 5 张 data-URI
      配图跟着没了；而 `src/data/guideCore.js` 只搬了读取方 `guideImg()`（`window.XLR_GUIDE_IMG` 空 ⇒
      `guideImg()` 返回 null ⇒ 引导第 2–6 步只剩文字）⇒ 本文件把配图表补回来。

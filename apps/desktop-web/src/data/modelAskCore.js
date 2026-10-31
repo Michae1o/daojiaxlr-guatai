@@ -30,7 +30,7 @@ import { ReviewCore } from '../review/reviewCore.js';   /* ruleBlock / reviewBlo
 var DEF = SettingsCore.DEF;   /* loadSet() 的兜底默认值——与设置界面同一份（一处定义） */
 var updateCaseDuanci = RecordsStore.updateCaseDuanci, markModelAnswered = RecordsStore.markModelAnswered;
 
-/* 声明差异（唯一 1 处，2026-10-15 实测三次）：源里那个 `plainAll` 调用 **不带参**、内部自己读
+/* 声明差异（唯一 1 处，实测三次）：源里那个 `plainAll` 调用 **不带参**、内部自己读
    `window.__ctx` / `window.__blocks`；包内那份（`@xlr/shared-judgment` 的 plain-text.js）是
    **三参纯函数** `plainAll(c, B, hooks)`，其中：
      · `B` 要的是「块」形状 `{n, t, items:[{lb,tx}]}`（第 23–29 行按 `b.items.forEach` 读）

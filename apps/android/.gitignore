@@ -1,0 +1,39 @@
+# ── 可重建产物 / 缓存：不入库 ─────────────────────────────
+node_modules/
+.tmp/
+**/build/
+**/.gradle/
+**/.kotlin/
+**/dist/
+.open-k-debug/
+*.apk
+*.aab
+*.jar.bak
+local.properties
+# 签名物料（自己放，永不提交）；模板 keystore.properties.example 除外
+keystore.properties
+*.keystore
+*.jks
+*.log
+*.hprof
+__pycache__/
+*.pyc
+.gradle/
+
+# ── 交付物（打包出来才有的）──────────────────────────────
+release/
+fork release/
+
+# ── 编辑器 / 系统 ────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# ── git 自己的临时消息文件 ───────────────────────────────
+.git-msg*.txt
+.tmp/commit-msg*.txt
+
+# 带真实 key 的测试便签（留盘不入库）
+手机算卦.txt

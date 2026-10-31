@@ -30,7 +30,7 @@
  * 🔸 与早前的版本的**属性级差异（已知且无害）**：① 属性顺序由 React 归一化；② 原骨架里那三条 HTML 注释 React 不渲染
  *    （注释不进布局/样式，结构判据按「元素 + 文本」比对，不比对注释）。
  *
- * 旧实现整块在 `38-script` L162–275，**在 IIFE 里** ⇒ 拿不到函数引用；但源码自带三道口子，全都能用：
+ * 早先的实现整块在 `38-script` L162–275，**在 IIFE 里** ⇒ 拿不到函数引用；但源码自带三道口子，全都能用：
  *   ① `data-gsel` ——每个 select 带它就跳过（L233）；
  *   ② `window.__gselWired` ——置上就连 document 级监听都不装（L246）；
  *   ③ 整块只互相引用（不依赖 IIFE 里别的变量）⇒ 可**逐字切片**。
@@ -134,7 +134,7 @@ function useAskCore() {
     /* ③ 事件接线（源里这些监听绑在旧节点上、节点被摘掉即失效 ⇒ 在 React 的节点上重接） */
     const nodes = { mClock: $('mClock'), mTime: $('mTime'), mNum: $('mNum'), castToggle: $('castToggle'), n1: $('n1'), n2: $('n2'), n3: $('n3'), h1: $('h1'), h2: $('h2') };
     const on = (el, type, fn) => { if (el) el.addEventListener(type, fn); };
-    /* B1-1（2026-10-13）：玻璃下拉（自绘弹层）改由 React 这份接管
+    /* B1-1（）：玻璃下拉（自绘弹层）改由 React 这份接管
        三道口子（都是源码里现成的，legacy 一个字不动）：
          · 三个 `<select>` **静态**带 `data-gsel="1"`（见下面的 JSX）⇒ legacy 的 `buildGlassSelect` 扫到就 `continue`；
          · 切片里的幂等标记用自用名 `data-xgs`、一次性闸用自用名 `window.__xgsWired`
@@ -203,7 +203,7 @@ function useAskCore() {
        「框里没字的时候，箭头和黑圈不该是亮的」。三处读数（（实测），1280×900）：
          · 新臂 disabled=false / 全实心黑 ⇒ 同一条规则（新 `legacy.css` **L2884**）**从不命中**；
          · 像素残差 46×46 @ [1034,454] = **1696 px**（1280/02-ask 四块之一 表）。
-       机制与手机端**完全同源**（手机端 2026-10-15 已修，见 `apps/mobile-web/src/components/AskPanel.jsx`
+       机制与手机端**完全同源**（手机端 已修，见 `apps/mobile-web/src/components/AskPanel.jsx`
        **L250–267**）：`src/data/castFx.js` 里那份 `syncGo()` 是逐字切片，但**零调用点**（定义 1 / 调用 0）；
        早期实现那条 `#q` 的 input 监听随  删段一起没了 ⇒ 输入时也不同步。
        ⇒ 这里把调用点补上：**初始一次 + `#q` 的 input**，判定复用 `castFx` 那份 `syncGo`（不另写第二套）。
@@ -226,14 +226,14 @@ function useAskCore() {
     glassRescan();
     mark('glassSelect');
 
-    /* B1-2（2026-10-13）：自绘日期选择器也改由 React 这份接管
+    /* B1-2（）：自绘日期选择器也改由 React 这份接管
        口子同 B1-1：`#dt` **静态**带封条 `data-dp="1"` ⇒ legacy 的 `buildDatePicker` 见到就 return（它一字不改）；
        切片内那处入口闸改自用名 `data-dpx`（照抄会把自己盖的封条当成「已接线」⇒ 日期点不开）。
         ℹ 它**不需要补扫**：入口闸没有 `offsetWidth` 那一条 ⇒ 隐藏时也照样接线（与 `#h2` 不同）。
         ℹ 它**不需要改一次性闸**：那条「点外面关」是 capture `click`、每次调用都装，legacy 那份绑在旧节点上 ⇒ 空转。 */
     try { DatePicker.buildDatePicker(); mark('datePicker'); } catch (eDP) { }
 
-    /* B2-⑤（2026-10-14）：**重排**（`#castPanel`）也改由本仓这份接管
+    /* B2-⑤（）：**重排**（`#castPanel`）也改由本仓这份接管
        它干的事 = **搬节点**：把 `#castFields` 的子节点（标签 / 三个数字框 / 时辰 / 摘要）整批搬进新建的
        `<div id="castPanel">`，再把 panel 插到 `.cbar` 里 `.cmain` 的**下一个位置**。
        幂等闸是**共用的 `#castPanel` id** ⇒ 谁先建谁赢、后来者跳过 ⇒ 零改名（同光晕/脚注那一族）。
@@ -280,11 +280,11 @@ function useAskCore() {
       }, 16);
     }
 
-    /* B1-3（2026-10-13）：九数步进（−/+ 那对玻璃钮）也改由 React 这份接管
+    /* B1-3（）：九数步进（−/+ 那对玻璃钮）也改由 React 这份接管
        口子同 B1-1/B1-2：三个数字框 **静态**带封条 `data-nstep="1"`（见下面 JSX）⇒ legacy 的 `buildNumStep`
        扫到就 `continue`（它一字不改）；切片内两处改自用名（`data-nsx` 幂等标记 / `window.__autoObsX` 一次性闸）。
        ⚠ **必须轮询等 `#castPanel` 出现**：切片开头就是 `if (!#castPanel) return;`。
-         B2-⑤（2026-10-14）起，`#castPanel` **由本组件上面那段（`wireCastPanel`）建** —— 它排在前面 ⇒
+         B2-⑤（）起，`#castPanel` **由本组件上面那段（`wireCastPanel`）建** —— 它排在前面 ⇒
            正常情况下这一段第一次检查就能命中；下面的轮询只是兜底（万一 `.cbar` 迟到 / MO 不可用）。
          上限 100 次（≈5s）只是兜底，命中即 `clearInterval` ⇒ 不留常驻定时器。
        ⚠ 封条 + 自用标记 ⇒ **只有一个接线者（React）**：两边都建 wrap 会嵌套 ⇒ `.nwrap` 计数 6、
@@ -302,7 +302,7 @@ function useAskCore() {
       }, 50);
     }
 
-    /* B2-①（2026-10-13）：**键盘流**改由 React 接（源 = `38-script` L277–301 `wireKeys()`）。
+    /* B2-①（）：**键盘流**改由 React 接（源 = `38-script` L277–301 `wireKeys()`）。
        为什么必须换手法（不能像 B1 那样"盖封条让 legacy 跳过"）：`wireKeys` **一道闸都没有**，
        它只是"在页面初始化那一刻，把监听绑到当时存在的节点上"。而今天那批节点就是 **React 的**
        **两边都会响应回车 ⇒ 按一下起两次卦**。

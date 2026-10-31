@@ -458,7 +458,7 @@ html.sdb-lock{overflow:hidden}
 .mmenu button[aria-current="true"] .mm-n{color:var(--accent)}
 .mmenu .mm-n{margin-left:auto;flex:0 0 auto;font-size:10.5px;color:var(--dim2);letter-spacing:.04em}
 
-/* ============ 2026-10-08 质感改版：与问卦页统一（圆角卡 + 细边 + 悬停微升） ============ */
+/* ============ 质感改版：与问卦页统一（圆角卡 + 细边 + 悬停微升） ============ */
 /* 卦例列表：硬分割线 → 一张张圆角小卡（末条也必须保留边框，
    否则 a1c 上面那条 :last-child{border-bottom:none} 会让最后一张看起来缺角） */
 .case-row{border:1px solid var(--line);border-radius:var(--m-r-md,11px);
@@ -770,7 +770,7 @@ html[data-skin="dou"]{
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
 }
 
-/* 9. 黑白 —— 只有黑白灰，一个色相都不要（2026-10-08 口径：新增；默认皮肤） */
+/* 9. 黑白 —— 只有黑白灰，一个色相都不要（口径：新增；默认皮肤） */
 html[data-skin="bw"]{
   --bg:#f4f4f5; --surface:#ffffff; --surface2:#ececee; --ink:#0b0b0c;
   --dim:#3f3f46; --dim2:#6a6a72;
@@ -786,7 +786,7 @@ html[data-skin="bw"]{
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
 }
 
-/* 9b. 黑夜 —— 黑白的**深底版**（2026-10-10 口径：：删掉夜蓝/鎏金/终端/墨，补一个黑夜模式）。
+/* 9b. 黑夜 —— 黑白的**深底版**（口径：：删掉夜蓝/鎏金/终端/墨，补一个黑夜模式）。
    同一个灰阶体系反相：底 #131316、面 #1c1c21、字 #ededf1，吉/平/凶仍靠灰阶分（吉＝最亮）。 */
 html[data-skin="hei"]{
   --bg:#131316; --surface:#1c1c21; --surface2:#26262c; --ink:#ededf1;
@@ -847,7 +847,7 @@ html[data-skin] body{font-family:var(--font)}
 html[data-skin="bru"] .right>.pane,
 html[data-skin="bru"] .left .pane{border:2px solid #0d0d0d!important;background:var(--surface);
   box-shadow:5px 5px 0 #0d0d0d}
-/* 口径：（2026-10-08）：黑底白字的小节标题在手机上像「莫名其妙的大黑条」
+/* 口径：（）：黑底白字的小节标题在手机上像「莫名其妙的大黑条」
    （所问之事 / 使用纪律），改回卡通口径：白底 + 黑字 + 2px 黑线下沿。 */
 html[data-skin="bru"] .pane-h,html[data-skin="bru"] .evi-h{background:#fff!important;color:#0d0d0d!important;
   border-bottom:2px solid #0d0d0d;padding:10px 16px!important;font-weight:700}
@@ -1015,7 +1015,7 @@ html[data-skin="bru"] .ibt:hover{background:var(--accent)!important;color:#fff!i
 .datarow .m p{font-size:11.5px;color:var(--dim2);margin-top:4px;line-height:1.7}
 .datarow .n{font-size:12px;color:var(--dim2);letter-spacing:.06em}
 
-/* （用户要 app 内更新的下载进度条）：只用皮肤变量，九套皮肤与昼夜自动跟着走。
+/* ：只用皮肤变量，九套皮肤与昼夜自动跟着走。
    3px 细线 + 方角 + 无阴影，与 .sbtn / .datarow 同一口径（别加圆角、发光、渐变）。 */
 .updbar{display:flex;align-items:center;gap:10px;width:100%;margin-top:9px}
 .updbar .updtrack{flex:1;height:3px;background:var(--line2);overflow:hidden}
@@ -1023,7 +1023,7 @@ html[data-skin="bru"] .ibt:hover{background:var(--accent)!important;color:#fff!i
 .updbar .updpct{font-size:11px;letter-spacing:.06em;color:var(--dim2);min-width:40px;text-align:right;
   font-variant-numeric:tabular-nums}
 
-/* （用户要）：启动查到新版本时，右下角那一条小提示。
+/* ：启动查到新版本时，右下角那一条小提示。
    只用皮肤变量；方角、细边、无渐变 —— 与 .sbtn / .datarow 同口径。 */
 .updtip{position:fixed;right:22px;bottom:22px;z-index:70;min-width:224px;padding:14px 16px;
   background:var(--bg);border:1px solid var(--line2);box-shadow:0 8px 28px rgba(0,0,0,.16)}
@@ -1055,7 +1055,7 @@ html[data-skin="bru"] .ibt:hover{background:var(--accent)!important;color:#fff!i
 .onb .tip{font-size:11.5px;color:var(--dim2);line-height:1.8;margin-top:16px}
 
 
-/* ---------- 图文配置引导（在 .onb 之上加一层结构；2026-10-08 质感改版） ---------- */
+/* ---------- 图文配置引导（在 .onb 之上加一层结构；质感改版） ---------- */
 .onb .card{max-height:calc(100vh - 48px);overflow-y:auto;overscroll-behavior:contain;
   padding:24px 30px 24px}
 .onb .gtop{display:flex;align-items:center;margin-bottom:10px}
@@ -1163,7 +1163,7 @@ body{letter-spacing:.01em}
 .left .pane-h #modeHint{font-size:10.5px;color:var(--accent);letter-spacing:.18em;
   border:1px solid var(--accent-line);border-radius:999px;padding:2px 11px}
 
-/* 起卦卡 v2（2026-10-08 口径：：版式对齐 DeepSeek）——
+/* 起卦卡 v2（口径：：版式对齐 DeepSeek）——
    一句话居中 + 一个大框；选择器（起卦方式 / 事类 / 详情）缩成小片住在框里左下角
    （DeepSeek 的「深度思考 / 智能搜索」那个位），提交箭头住框里右下角；
    点「详情」时数字出现在框下面（#castPanel，那一格位置固定，点开也纹丝不动）。
@@ -1283,7 +1283,7 @@ select{padding-right:36px;background-size:6px 6px,6px 6px;
 .doc-copy:hover{color:var(--accent);background:var(--accent-bg);opacity:1}
 .doc-copy.ok{color:var(--accent);opacity:1}
 .doc-copy.no{color:var(--bad,#b3261e);opacity:1}
-/* 断辞空态改醒目卡（用户「想个办法醒目一点」） */
+/* 断辞空态改醒目卡 */
 .pane.llm .doc:empty::before{display:block;margin:2px 0;padding:13px 16px;
   border:1px dashed var(--accent-line);border-radius:10px;background:var(--accent-bg);
   color:var(--ink);font-size:13.5px;line-height:2.05}
@@ -1587,7 +1587,7 @@ html[data-skin="xuan"]{
 /* ---------- 二、纸纹底 + 色调晕（玻璃背后要有货可透） ---------- */
 /* 重色调晕：参考图（图四）的玻璃之所以"透得出来"，是因为背后是
    大块柔和的色彩；干纸纹单打独斗撑不起玻璃感。玫瑰 + 沙金 + 淡墨三层。 */
-/* 2026-10-07：加密壳给 html,body 写死了 background:#f5f3ee ⇒ 内容矮时
+/* 加密壳给 html,body 写死了 background:#f5f3ee ⇒ 内容矮时
    body 盒外露出壳底色，页面下半截颜色断层。根元素也铺同一套纹理（画布
    永远铺满），body 再跟着铺一层，任何高度都不断层。 */
 html[data-skin="xuan"],
@@ -1739,7 +1739,7 @@ html[data-skin="xuan"] .seg button[aria-pressed="true"]{background:rgba(255,255,
 
 /* ---------- 一、分步骨架（单列居中，一步一屏呼吸） ---------- */
 /* 底部留白收短：原来 150px 让起卦按钮显得悬在半空 */
-/* 桌面留白自适应（2026-10-07 现象：「全屏只有空白、内容不跟着变」）：
+/* 桌面留白自适应（现象：「全屏只有空白、内容不跟着变」）：
    880 是下限，窗口再宽就按 78vw 长，最多 1320 —— 全屏时内容跟着长，不再只留白 */
 html[data-step] .wrap{max-width:clamp(880px,78vw,1320px);padding:24px 44px 56px}
 html[data-step] .top-in{max-width:clamp(880px,78vw,1320px)}
@@ -1955,8 +1955,8 @@ html[data-step] .cbar{padding-bottom:0}
 /* 手机端：顶栏不吸顶（口径：「标题不用跟着悬浮」），跟着内容滚上去 */
 
 
-/* ===== 口径：（2026-10-09）：菜单与顶栏控件不许透明（无条件，宽窄屏都生效）=====
-   ① 皮肤菜单必须是实底。d 里本来就定了实底（用户早说过「点开皮肤栏为什么是透明的，不要这样」），
+/* ===== 口径：（）：菜单与顶栏控件不许透明（无条件，宽窄屏都生效）=====
+   ① 皮肤菜单必须是实底。d 里本来就定了实底，
       是 e 的玻璃组（.cmain,#castPanel,…,skinmenu 那一串）又把它拖回半透明 —— 这里彻底摘出来。
       鼠标一放上去就闪，一半原因也是它自己带 backdrop-filter：hover 时那层半透明要重算。 */
 .skinmenu{background:var(--surface) !important;
@@ -2126,7 +2126,7 @@ html[data-step] .dpft button:hover{background:var(--accent-bg)}
     color-mix(in srgb, var(--bg) 93%, var(--ink)) 100%);
   transition:opacity .5s var(--m-glide),visibility .5s var(--m-glide)}
 /* 落卦之后不要再走马灯：应用算宫逻辑照跑（结果都亮），但不播任何过渡/动画。
-   （2026-10-09 用户两次点名：第一版只压了定时器，光珠的 CSS transition 还在滑。） */
+    */
 #walk.calm,#walk.calm *{animation:none!important;transition:none!important}
 /* 口径：：掌诀盘圆心不要数字，只留「天 · 地 · 人」；三宫上的天/地/人标记要看得见。 */
 .walk.ring .wcore b{display:none!important}
@@ -2156,7 +2156,7 @@ html[data-step] .dpft button:hover{background:var(--accent-bg)}
   background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--ink) 30%,transparent))}
 #xlrSplash .sl-dot{display:block;width:4px;height:4px;border-radius:50%;
   background:color-mix(in srgb,var(--ink) 26%,transparent)}
-/* 二改（用户甩参照图：「其实我想要的是这种液态的太极」）：
+/* 二改：
    珠壳撤了 —— 参照图里没有「玻璃球」，太极自己带一圈水波环 + 接触阴影。
    留壳会变成「玻璃里再套一层玻璃」，两套高光互相打架、反而糊。
    所以 .sl-orb 现在只是一块**透明的台面**（给飞行/旋转动画用的容器），
@@ -2583,7 +2583,7 @@ html[data-step] .recap{padding:16px 22px 0;border-bottom:1px solid var(--line)}
    （那是浏览器默认的 :focus 轮廓，之前一直没关，他截图里那圈虚线就是它）。 */
 .cbar .go:focus,.cbar .go:focus-visible{outline:none}
 
-/* ================= 提交四拍（用户口述）=================
+/* ================= 提交四拍=================
    念起 0~120ms  → 气动 120~400ms → 成象 400~950ms → 落卦 950~1400ms
    全部是纯视觉：不进算法、不挡点击（pointer-events:none）。 */
 .cbar .go{position:relative;overflow:hidden;
@@ -2697,7 +2697,7 @@ html[data-theme="dark"] .cbar .go[disabled]:hover{
 #castMini{display:none!important}
 
 /* ============================================================
-   结果页重排（用户给了参考稿：浅底 + 大圆角白卡 + 细边柔影，靠“大留白 + 层级”做高级感）
+   结果页重排
    骨架：标题栏（黑短竖条 + 标题 + 右侧小字 + 1px 细线）
         → 问事信息区（三行「标签：值」：问事 / 卦 / 时间）
         → 胶囊行（落宫 · 五行 · 体用 · 事类，一排等重）
@@ -2706,7 +2706,7 @@ html[data-theme="dark"] .cbar .go[disabled]:hover{
    ⚠ 必须写在 modern_e（最后一份 CSS）；modern_b 里那条
      `.pane.gua>div:not(#walk):not(.walk-cap){padding:…!important}` 要用 !important 顶掉。
    ============================================================ */
-/* 贰号页（卦象卡）不再动：返回上一版（2026-10-09 口径：：重排只做叁号断辞页）。
+/* 贰号页（卦象卡）不再动：返回上一版（口径：：重排只做叁号断辞页）。
    曾经误加过 `#guaCard{display:flex}` —— id 选择器权重高于应用按步骤隐藏卡片的规则，
       导致点「看断辞」时贰不消失、叁的内容被顶到它下面。这段教训留在注释里。 */
 #guaCard .gc-head{display:flex;align-items:center;gap:11px;padding:16px 22px !important;
@@ -2748,12 +2748,12 @@ html[data-theme="dark"] .cbar .go[disabled]:hover{
    括号里的补充说明（吉凶·宫名、依据括注）降成灰阶小字，不抢眼。
    --jyc 由每套皮肤自己给一色（skins.css）：色相取该皮肤 --accent 的 180°（补色），
    明度按各自的卡片底调到可读（浅底压深 / 深底提亮，对比度 ≈ 5:1，正文级 AA）。
-   ⚠ 黑白 / 黑夜两套本身无色相（用户定的「一个色相都不要」）⇒ 补色会转回它自己，
+   ⚠ 黑白 / 黑夜两套本身无色相⇒ 补色会转回它自己，
    这两套保持无色相：判定词仍走该皮肤最重的墨（浅）/ 最亮的白（深）。
    两个出口：①本机速断 —— 整张断辞就一行，它是首块，立成大字；
-     ②模型解卦 —— 【结论】小标题底下那句话，**不放大、只上补色 + 加粗**（用户要的是颜色一致）。
+     ②模型解卦 —— 【结论】小标题底下那句话，**不放大、只上补色 + 加粗**。
      `.jy` 是渲染层（renderDoc）给结论块挂的类；不能只靠 `:first-child` 选它 ——
-     模型那条路上 <h4>【结论】</h4> 排在前面，结论块不是 first-child（2026-10-10 实测漏过）。 */
+     模型那条路上 <h4>【结论】</h4> 排在前面，结论块不是 first-child（实测漏过）。 */
 #llmPane #doc>div:first-child{font-family:var(--m-serif);font-size:44px;font-weight:700;
   line-height:1.18;letter-spacing:.03em;color:var(--jyc);margin:2px 0 6px}
 #llmPane #doc>div.jy{font-weight:700;color:var(--jyc)}
@@ -2843,7 +2843,7 @@ html[data-theme="dark"] .cbar .go[disabled]:hover{
 #cat option{background:var(--surface);color:var(--ink)}
 
 
-/* 真凶找到了（用户第三次追问「事类框对齐了吗」）——
+/* 真凶找到了——
    在应用宽度下实测：
      分段.f   y468-505  高37      ← 起卦方式那一格
      事类.f   y474-511  高37      ← 事类那一格：**整格下沉 6px**（顶差 6）
@@ -2852,13 +2852,13 @@ html[data-theme="dark"] .cbar .go[disabled]:hover{
    12÷2 = **6px**，于是"永远差一点、怎么调都不齐"。手机端它们分两行时这个间距是好的，
    但同一行里它就是毒药 ⇒ 只在窄屏保留，宽屏清零。 */
 #fCat{margin-top:0;margin-left:auto}
-/* （用户红框举证：把事类移到「事类右边那块空白」＝紧贴发送键左侧）——
+/* ——
    实测结构：.cbar(grid, 912px, x176-1088)
                 ├─ .cside(flex, 内容宽 x194-725)  ← 一排 .f（起卦方式 / 事类）
                 └─ .gobar(flex, x1026-1072)       ← 发送键
    .cside 只有内容宽 ⇒ 它与发送键之间空出 301px（就是用户红框那块）。
    ⇒ 让 .cside 铺满整行，配合 #fCat 的 margin-left:auto，事类就被顶到最右、紧贴发送键左边。
-   只加样式，不改 .cside/.gobar 的类名与层级（用户定过：这三个类名一个都不许动）。 */
+   只加样式，不改 .cside/.gobar 的类名与层级。 */
 .cbar>.cside{flex:1 1 auto;width:100%;min-width:0}
 
 /* ================= 手机版第二批：把这一排真的对齐 =================
@@ -2880,11 +2880,11 @@ html[data-theme="dark"] .cbar .go[disabled]:hover{
 #castToggle:focus,#castToggle:focus-visible{outline:none}
 .castsw{margin-left:8px}
 .seg button{font-size:13px !important;padding:0 15px}
-/* （用户：「你看下事类这个选项是否格格不入？！字体是不是也和同行的其他按钮也不一样？！」）
+/* 
    —— 是的，两处：①**底和边跟这一排不是一族**：分段是「浅灰填充 + 无边框」，事类是「白底 + 1px 灰边」；
    ②**框内的三角被推到最右边**（框 150px 宽，字靠左、三角靠右，中间空出 1.5~2 倍字宽的空白）。
    ⇒ 改：换成和分段同一个填充色、去掉边框、宽度按内容自适应、三角收到文字右边 12px 处。
-   又一轮（用户：「为什么这个选择的框就无法与起卦方式的框水平对齐呢？」）——
+   又一轮——
    量出来的数：起卦方式的容器是 **37px 高**（29px 按钮 + 上下各 3px 内距），
    事类我设成了 **35px** ⇒ 并排看永远差 2px，怎么调都"没齐"。统一到 37。 */
 #cat,#h1,#h2{height:37px;line-height:35px;font-size:13px;font-weight:400;color:var(--dim);
@@ -2998,7 +2998,7 @@ html.sl-anim .wrap{opacity:0 !important}
 
 
 /* ============================================================================
-   五之十七、手机端「液态玻璃」：照 `_sketch/手机版-主题稿.html` 的配方落地（2026-10-10）
+   五之十七、手机端「液态玻璃」：照 `_sketch/手机版-主题稿.html` 的配方落地（）
    口径：「主题的液态玻璃质感，和稿3的视觉效果看起来还差一大截」
              ＋「有些主题好像不太适配这个玻璃风格」。
 
@@ -3019,7 +3019,7 @@ html.sl-anim .wrap{opacity:0 !important}
 
 
 /* ============================================================================
-   五之十八、深色主题的开屏页（2026-10-10 现象：：「字看不清、高光有点乱来、按钮过于凸起」）
+   五之十八、深色主题的开屏页（现象：：「字看不清、高光有点乱来、按钮过于凸起」）
    三处根因，都不是"再加点装饰"能解决的：
      ① 副标题 / 箴言 / 三行说明 / 「点击进入」用的是 `color-mix(ink 38%~46%, bg)`——
         意思就是"把字往底色里化一半"。浅底上只是"淡"，**深底上等于没有**（字和底同族、同明度）。
@@ -3061,7 +3061,7 @@ html[data-theme="dark"] #xlrSplash .sl-axis{background:color-mix(in srgb,var(--i
 html[data-theme="dark"] #xlrSplash .sl-axis-t::before,
 html[data-theme="dark"] #xlrSplash .sl-axis-b::before{background:color-mix(in srgb,var(--ink) 32%,transparent)}
 /* ============================================================================
-   五之十九、结论里「判定词 / 括号」的配色（2026-10-10 口径：）
+   五之十九、结论里「判定词 / 括号」的配色（口径：）
    用户：「给结论的地方，像这种会/不会，能/不能的，能不能用主题色的补色；
           然后括号里的内容颜色变淡一点，不要显眼；模型解卦后这部分会重新生成字，
           结论部分的颜色也要是主题色的补色。」
@@ -3079,7 +3079,7 @@ html[data-theme="dark"] #xlrSplash .sl-axis-b::before{background:color-mix(in sr
 
 
 /* ============================================================================
-   五之二十、滑动切页的"方向滑切"（2026-10-10 用户二改：「页与页之间的滑动切换效果没做出来」）
+   五之二十、滑动切页的"方向滑切"
    · 拖动跟手：.swipe-follow（在手机块里）用 --swx/--swo 临时接管 transform/opacity；
    · 提交那一刻给 html 挂 data-swipedir，把 app 自己的 .v-in（淡入上移）换成
      "新页从滑动方向滑进来"：往左滑 ⇒ 新页从右边进来；往右滑 ⇒ 从左边。
@@ -3121,7 +3121,7 @@ html[data-swipedir="r"] .v-in{animation:vSlideInR .46s cubic-bezier(.22,1,.36,1)
    别降回 80。 */
 .setscreen{z-index:600 !important}
 /* ============================================================================
-   N 块（2026-10-17 · 用户「开始代号N，主要是补过渡效果，所有皮肤都得补」）
+   N 块（· 用户「开始代号N，主要是补过渡效果，所有皮肤都得补」）
    精确扫描（runtime getComputedStyle）后，真正「有状态变化但一条 transition 都没给」的公共件。
    只补状态过渡，.16s / --m-ease（legacy 指针态口径）。
    不碰已有过渡的件（.btn/.sbtn/.stab/.x 等走复合规则本就有 .34s）。

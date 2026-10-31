@@ -1,6 +1,6 @@
 /* mcpBridge.js —— 桌面 App 里的「小智 · MCP」桥。
  *
- * 2026-10-30 重写：工具表与算法全部搬到 `@xlr/shared-judgment` 的 mcp-tools.js（内核），
+ * 重写：工具表与算法全部搬到 `@xlr/shared-judgment` 的 mcp-tools.js（内核），
  * 这里只剩「怎么连、怎么重连、日志怎么给设置页看」——也就是一条传输。
  * 同一份内核的另一批出口在仓根 `mcp/`：stdio（本地客户端）、HTTP（通用/远程）、
  * 小智 WS（就是这个文件的 Node 版）。改工具只需改内核，三个出口自动同步。
@@ -20,7 +20,7 @@ export { MCP_TOOLS };
 const CFG_KEY = 'xlr-mcp';
 const LOG_MAX = 200;
 const BACKOFF = [1, 2, 4, 8, 15, 30, 60];
-/* 开机自动连接的上限：试到这个次数还没连上就不再请求（用户手动点「连接」才会重新开始） */
+/* 开机自动连接的上限：试到这个次数还没连上就不再请求 */
 const BOOT_MAX_ATTEMPTS = 3;
 /* 在线保持这么久之后才断 ⇒ 当作「正常在用」，断线重连不受 3 次上限约束 */
 const STABLE_ONLINE_MS = 5000;

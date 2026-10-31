@@ -6,7 +6,7 @@
  *   ③ 以后任何人自己接的客户端
  * 判据只存在一份的口径不变：工具执行全部落在 cast/buildContext/plainAll/sections 上。
  *
- * 会话（2026-10-30）：每次起卦发一个 `gid`，后续 jie / shilei / duanci 带上它就不再重算，
+ * 会话（）：每次起卦发一个 `gid`，后续 jie / shilei / duanci 带上它就不再重算，
  * 解决「跨了时辰再问，同一个卦变成了另一个卦」的老毛病。store 由调用方注入，默认内存版。
  *
  * 本文件不许碰 DOM、不许碰 localStorage、不许用 Node 专有 API（浏览器与 Node 都要能跑）。
