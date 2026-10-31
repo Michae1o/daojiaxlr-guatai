@@ -1,117 +1,145 @@
 # 道家小六壬 · 卦台
 
-一个在自己电脑上用的小六壬工具：按下时间、或者报几个数，就把三宫排出来，给出六宫断辞、
-体用、应期和事类速断。全部在本机算完，不联网、不上传、不需要注册。
+一个在自己电脑上用的小六壬工具。按下时间、或者报几个数，把三宫排出来，给出六宫断辞、体用、应期和事类速断。
 
-要不要接大模型由你决定：不接就是纯本机速断；接了（任何 OpenAI / Anthropic 兼容的接口）可以让
-模型照同一套判据把话说顺。**不接也完全能用。**
-
-源码开源，判据是明文，随便改。
+**起卦、排盘、断卦依据全在本机算**，不联网也能用；接不接大模型由你决定，不接就是纯本机速断。
+源码全开放，判据是明文，想怎么改就怎么改 —— 见 [`README-判据.md`](README-判据.md)。
 
 ---
 
-## 直接下载
+## 目录
 
-不想自己编译的，去 [Releases](../../releases/latest) 拿现成的：
-
-| 平台 | 文件 | 怎么装 |
-|---|---|---|
-| Windows | `guatai-…-windows.zip` | 解压到任意目录，双击 `道家小六壬·卦台.exe` |
-
-包是**用本仓库的源码直接编译出来的**，没有别处塞进来的东西。介意的话可以自己编，见下面的「编译」。
-
-> Windows 首次打开可能弹「Windows 已保护你的电脑」——点「更多信息 → 仍要运行」。
-> 这是因为没买代码签名证书，任何个人开发的软件都这样。
+- [能做什么](#能做什么)
+- [界面](#界面)
+- [技术栈](#技术栈)
+- [跑起来](#跑起来)
+- [判据在哪、怎么改](#判据在哪怎么改)
+- [这个仓里有什么](#这个仓里有什么)
+- [什么不在这个仓里](#什么不在这个仓里)
+- [常见问题](#常见问题)
+- [内容与免责](#内容与免责)
+- [许可](#许可)
 
 ## 能做什么
 
-- **起卦**：时间取数、月日时三宫、报数、单宫取象、多选一；报 0 按 10 计。
-- **排盘**：六神掌诀走位、天宫 / 地宫 / 人宫（落宫）定位、太极点转换。
-- **断卦**：宫义、生克关系、三易、体用（体＝落宫，用＝起卦时辰）、应期取数。
-- **事类速断**：婚姻、孕产、财运、工作、疾病、失物、行人、天气、官司、考试。
-- **卦例本**：把起过的卦存下来，事后填应验，回头校准自己。
-- **十套皮肤 + 明暗主题**。
-- **全程本机**：起卦、排盘、断辞都在本地算，模型那一环完全可选。
+| | |
+|---|---|
+| **起卦** | 时间取数、月日时三宫、报数（0 按 10 计）、单宫取象、多选一；起卦前可填所问之事 |
+| **排盘** | 六神掌诀走位、天宫 / 地宫 / 人宫（落宫）定位、太极点转换 |
+| **断卦** | 宫义、生克、三易、体用（体＝落宫，用＝起卦时辰）、应期取数，每条判据带出处 |
+| **事类速断** | 婚姻、孕产、财运、工作、疾病、失物、行人、天气、官司、考试…本机直接出 |
+| **卦例本** | 起过的卦自动存档，事后填应验、复盘、进回收站；可导出 / 导入带走 |
+| **接模型** | 任何 OpenAI / Anthropic 兼容接口：OpenAI、DeepSeek、智谱、月之暗面、硅基流动、火山方舟、通义、MiniMax、Gemini，或本机 Ollama；预设一键切换 |
+| **MCP** | 把判据做成工具挂给小智一类客户端：起卦、查典、解卦，由本机算完再回话 |
+| **皮肤** | 十套：黑白、黑夜、梦幻、宣纸、青瓷、豆沙、卡通、敦煌、莫高窟、铜古；明暗随皮肤走 |
+| **更新** | 装的是桌面版时，设置页可检查更新（可选，不填地址就不联网） |
 
 ## 界面
 
-**起卦 · 三宫排盘**
+| 起卦 | 断卦 |
+|---|---|
+| ![起卦](docs/images/desktop-cast.png) | ![断卦](docs/images/desktop-divination.png) |
 
-![起卦](docs/images/desktop-cast.png)
-
-**断卦结果 · 六宫类象与应期**
-
-![断卦](docs/images/desktop-divination.png)
-
-**卦例本 · 记录与应验**
-
-![卦例本](docs/images/desktop-records.png)
-
-**皮肤**
-
-![皮肤](docs/images/desktop-skins.png)
+| 卦例本 | 皮肤 |
+|---|---|
+| ![卦例本](docs/images/desktop-records.png) | ![皮肤](docs/images/desktop-skins.png) |
 
 ## 技术栈
 
-| 端 | 技术栈 |
+| 层 | 用什么 |
 |---|---|
-| 桌面（Windows / macOS） | React 19 · Vite 6 · Tauri 2 |
-| 判据 | 纯 JS 共享包，界面层 `import` 它 |
+| 前端 | React 19、Vite 6、Tailwind 4、GSAP / Motion |
+| 外壳 | Tauri 2（Rust），Windows 走 WebView2，macOS 走 WKWebView |
+| 判据 | 纯 ES 模块（`apps/shared-judgment`），界面层 import，不含框架依赖 |
+| 产物 | 前端用 `vite-plugin-singlefile` 打成单文件 HTML，再由 `protect.py` 上壳 |
 
-## 编译
+## 跑起来
 
-环境：Node 18+ · Rust（`cargo`）；Windows 还要 MSVC Build Tools。
+### 只想编译成品
+
+需要 **Node 18+** 和 **Rust（cargo）**；Windows 另需 MSVC Build Tools。
 
 ```bash
-npm install                     # 仓库根目录，一次就够
+npm install                      # 仓库根目录，一次
 
-# 桌面端
 cd apps/desktop-shell
 npx --yes @tauri-apps/cli@^2 build
-# → src-tauri/target/release/xiaoliuren.exe
 ```
 
-编完是个单文件 exe（WebView2 加载器已经静态链进去），双击就能开。早期版本 Tauri 会额外生成一个
-`WebView2Loader.dll`，如果你的构建产物旁边有它，一起带着就行。
+产物：`apps/desktop-shell/src-tauri/target/release/xiaoliuren.exe`（单文件，双击即用）。
+macOS 用 `bash mac/build-desktop.sh`，细节见 [`mac/README-MAC.md`](mac/README-MAC.md)。
 
-前端改完怎么重新打进产物、每个目录干什么，写在 [BUILD.md](BUILD.md)。
+> 双击没反应，八成是系统缺 WebView2 运行时（Win11 自带，Win10 到微软官网装一次即可）。
+
+### 想改前端
+
+```bash
+npm install
+cd apps/desktop-web
+npm run dev                       # 浏览器里调界面，热更新
+```
+
+改完怎么重新打进加密壳、怎么出 exe：[`BUILD.md`](BUILD.md)。
 
 ## 判据在哪、怎么改
 
-判据全在 `apps/shared-judgment/`，改一处就生效。
+判据只有一份，在 `apps/shared-judgment/`：
 
 ```
-corpus/00…08.md          九份体系文档（人读的真源，约 23 万字）
+corpus/00…08.md          九份体系文档（人读的真源）
       ↓ node tools/gen-corpus.mjs
 src/corpus.js            打包成代码读的形式
+      ├─ src/judgment.js     六宫固定层 / 通用判据 / 应期 / 事类
       ├─ src/prompt.js       解卦用的系统提示词
-      ├─ src/judgment.js     六宫固定层 / 通用判据 / 应期 / 十类事类
       └─ src/asks.js         本机速断的按问法素材
 ```
 
-想换一套判据、或者把某几条改成你自己的理解：直接改 `corpus/` 里的 Markdown，再跑一次
-`node tools/gen-corpus.mjs` 就行，没有别的地方要同步。判据来源与口径见 [README-判据.md](README-判据.md)。
+改 `corpus/*.md` → 跑一次 `node tools/gen-corpus.mjs` → 重新编前端。没有别的地方要同步。
+语料里每一处引文都带材料名与行号，判据来源与分级见 [`README-判据.md`](README-判据.md)。
 
-## 目录
+## 这个仓里有什么
 
 | 目录 | 内容 |
 |---|---|
-| `apps/desktop-web/` | 桌面前端（React + Tailwind） |
-| `apps/desktop-shell/` | Tauri 2 壳工程与加密后的前端壳 |
-| `apps/shared-judgment/` | 判据与语料 |
-| `apps/desktop-shell/pkg/` | Windows 启动器（检查 WebView2、缺了自动装） |
-| `apps/*/build/` | 打包用的加密脚本 |
-| `tools/` | 组装器、语料打包 |
-| `mac/` | macOS 构建脚本 |
-| `docs/images/` | 上面那些截图 |
+| `apps/desktop-web/` | 桌面前端：`src/` 界面、`skins/` 皮肤、`styles/` 样式、`legacy/` 历史模块 |
+| `apps/shared-judgment/` | 起卦 / 排盘 / 六宫 / 断辞 / 提示词 / 九份语料 |
+| `apps/desktop-shell/` | Tauri 2 壳；`web/index.html` 是入库的加密壳，`pkg/` 是 Windows 启动器 |
+| `apps/desktop-web/build/` | 上壳链：`protect.py`（加密）、`prep_tauri_web.py`（生成壳） |
+| `tools/` | 组装器、文档入口生成、语料打包 |
+| `mac/` | macOS 构建脚本与说明 |
+| `docs/images/` | README 里这几张截图 |
 
-## 说明
+## 什么不在这个仓里
 
-- 判据体系出自邵一尘先生的「道家小六壬」，应用内保留署名。
-- 属中华传统民俗文化内容，仅供娱乐参考，不作决策依据。
-- 仓库里不含签名物料、密钥与构建产物；`.gitignore` 已挡住。
+- **安卓端**：手机上那一版是另一套原生实现，源码不随本仓发布；本仓只含桌面端。
+- 官网、部署脚本、更新清单服务端。
+- 密钥、签名物料、任何人的账号与环境配置。
+- 构建产物（`dist/`、`target/`、加密后的 exe）与早期版本快照。
+
+## 常见问题
+
+**「Windows 已保护你的电脑」怎么办？**
+点「更多信息 → 仍要运行」。没买代码签名证书的个人软件都这样。
+
+**能把 exe 单独拷走吗？**
+可以，单文件就是全部。但壳里的前端是加密的，改了源码要重新编才会生效。
+
+**数据存在哪？换电脑能带走吗？**
+存在应用自己的本地存储里。设置页有导出 / 导入，换机器拷一份就行；更新版本不会清掉卦例。
+
+**不填 Key 能用吗？**
+能。起卦、排盘、本机速断都不需要联网，模型只是把断辞说顺。
+
+**手机上能用吗？**
+本仓没有手机端。桌面网页版手机浏览器也能开，但那是桌面布局。
+
+更多问题（Key 报错、拉模型列表、解到一半停住、接着问…）在应用内 **设置 → 关于 → 常见问题** 里有 18 条。
+
+## 内容与免责
+
+- 判据体系出自邵一尘先生所传的「道家小六壬」（卜法卷），应用内与语料中保留讲者署名与分级。
+- 属中华传统民俗文化内容，**仅供学习与参考，不作预测、承诺或任何专业意见**，重大决定请自己做。
 
 ## 许可
 
-本仓按 [Apache License 2.0](LICENSE) 授权：可以自由使用、修改、分发、商用，
-保留版权声明与许可副本即可；不提供任何担保。
+[Apache License 2.0](LICENSE)：可自由使用、修改、分发、商用，保留版权声明与许可副本即可，不提供担保。
