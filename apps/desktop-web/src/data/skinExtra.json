@@ -1,0 +1,10 @@
+{
+  "_note": "本仓自有的『追加皮肤』表 —— 不属于 legacy 源（legacy 是『原样搬运』的对象，不能往里加东西）。",
+  "_why": "皮肤表在产物里有**两份**：src/data/skinsCore.js（ES 模块，面板/设置页读它）与 src/data/skinPrepaint.js（经典脚本，首屏预绘）。新皮肤必须同时进两份，否则首屏预绘不认它 ⇒ 开屏会先按默认画一下再跳（变更记录 刚消掉的那个闪）。⇒ 两个切片器读本文件（一处定义、两处引用）。",
+  "_order": "追加块会被插在 SKINS 声明之后、`var cur = null;`（cur-init）之前 —— 源里 cur 的合法性判定要扫全 SKINS，晚于它 push 会让用户上次选的皮肤被判未知、回落 bw。",
+  "_schema": "k=皮肤键（写进 html[data-skin]）· n=面板上显示的名字 · t=面板上的小注 · bg/ac=面板色样里的底色与强调色",
+  "_state": "2026-10-14：第一版实现（v3.1）被用户判「相差甚远」⇒ 已整块删除（commit 35dff61）；同日傍晚用用户提供的素材包（out-ref/铜古主题参考资料/zhou_bronze_theme_assets_png_svg.zip）重做 v4 —— 样式落在 apps/desktop-web/src/skins/tonggu/（tonggu.css + patterns/ui/tex），由 src/tailwind.css 一行 @import 引入。",
+  "skins": [
+    { "k": "tonggu", "n": "铜古", "t": "浅 · 西周青铜", "bg": "#E9E6DF", "ac": "#33402F" }
+  ]
+}

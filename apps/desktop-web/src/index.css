@@ -1,0 +1,7 @@
+@import "tailwindcss";
+/* 早前的版本实际渲染用的 CSS，原样搬运（变更记录；由 tools/port-legacy-css.mjs 生成 legacy.css）
+   顺序很重要：Tailwind 先声明各层，legacy 的内容追加进同一个 components 层。 */
+@import "./styles/legacy.css";
+
+/* 以下只放「新栈自己」的兜底，别在这里写视觉复刻 —— 视觉一律以 legacy.css 为准。 */
+html, body, #root { min-height: 100%; }

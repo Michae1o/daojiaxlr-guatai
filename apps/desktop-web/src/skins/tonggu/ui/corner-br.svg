@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="48 48 48 48">
+  <defs>
+    <linearGradient id="bronze" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c5a66c"/>
+      <stop offset=".24" stop-color="#6e785c"/>
+      <stop offset=".52" stop-color="#303b30"/>
+      <stop offset=".78" stop-color="#8d7549"/>
+      <stop offset="1" stop-color="#d0b77e"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d2b77a"/>
+      <stop offset=".22" stop-color="#59634b"/>
+      <stop offset=".72" stop-color="#313a2f"/>
+      <stop offset="1" stop-color="#b49456"/>
+    </linearGradient>
+  </defs>
+  
+<g transform="translate(100 100) scale(-1 -1)"><g fill="none" stroke="url(#bronze)" stroke-width="2" stroke-linejoin="round">
+ <path d="M5 48 V5 H48 M13 39 V13 H39"/>
+ <path d="M18 7 C18 20 29 20 29 32 C29 39 36 40 44 40"/>
+ <path d="M8 18 H18 M8 26 H14"/>
+</g>
+</svg>

@@ -1,0 +1,183 @@
+
+@import "tailwindcss/theme.css" layer(theme) prefix(xlr);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* 铜古皮肤模块（2026-10-14 v4）：**独立文件**，只在 `html[data-skin="tonggu"]` 下生效。
+   放在这里（未分层）⇒ 与 legacy 的未分层规则同层，靠「选择器更具体 + 涂装属性 !important」取胜；
+   模块自己的结构 = 变量 → 可复用类（.tg-cast/.tg-frame/…）→ 末尾一节才映射到 legacy 选择器。 */
+@import "./skins/tonggu/tonggu.css";
+
+
+@import "./styles/skin-backdrop.css";
+
+
+.castsw, #castToggle.castsw,
+.castsw:hover, .castsw:focus, .castsw:focus-visible, .castsw:active,
+.castsw[aria-expanded="true"],
+#castToggle.castsw:hover, #castToggle.castsw:focus, #castToggle.castsw:focus-visible,
+#castToggle.castsw:active, #castToggle.castsw[aria-expanded="true"] {
+  background: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+
+.cbar .gobar { position: relative !important; }
+.cbar .gobar .err {
+  position: absolute !important;
+  right: 0;
+  bottom: calc(100% + 6px);
+  margin: 0;
+  width: min(320px, 52vw);
+  max-width: min(320px, 52vw) !important;
+  text-align: right !important;
+}
+
+
+label.chk[for="optXiang"] { display: none !important; }
+
+
+
+#llmPane:has(+ .askbox:not(.off)) { margin-bottom: 0; }
+
+.askbox { margin: 0; width: 100%; }
+
+#right > #askBox { padding: 14px 18px; border-radius: var(--m-r-lg); }
+.ask-list:empty { display: none; }          /* 还没问过 ⇒ 不占位，输入行直接贴顶 */
+
+
+#btnAskMore { position: relative; overflow: visible;
+  transition: width .36s var(--m-glide), border-radius .36s var(--m-glide), padding .36s var(--m-glide),
+              background-color .36s var(--m-glide); }
+#btnAskMore .lbl { transition: opacity .2s var(--m-glide); }
+
+#btnAskMore.asking { width: 48px; min-width: 48px; height: 48px; padding: 0; border-radius: 50%;
+  
+  background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
+#btnAskMore.asking .lbl { opacity: 0; }
+#btnAskMore .sl-orb { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
+  margin: -22px 0 0 -22px; opacity: 0; transform: scale(.28) rotate(-40deg); pointer-events: none;
+  animation: none;                              /* 开屏那条 slOrb 入场（从上方落）在这里不重放 */
+  transition: opacity .26s var(--m-glide), transform .46s var(--m-glide); }
+#btnAskMore.asking .sl-orb { opacity: 1; transform: scale(1) rotate(0deg); }
+
+#btnAskMore .sl-orb { will-change: transform; backface-visibility: hidden; }
+#btnAskMore.asking .sl-taiji { will-change: transform; backface-visibility: hidden; transform: translateZ(0); }
+#btnAskMore.asking .sl-taiji { animation: askSpin 3.6s linear infinite; }
+
+@keyframes askSpin { from { transform: translateZ(0) rotate(0deg); } to { transform: translateZ(0) rotate(360deg); } }
+
+
+@media (min-width: 561px) { #sdb .sdb-set { display: none !important; } }
+#btnAskMore.asking .sl-taiji .tjHi { animation-duration: 11s; }
+/* （）位图版（`askTaijiImg.js`）：位图没有内部动效 ⇒ 只能靠外层带动。
+   `.atk-breath` 承接「呼吸」，`.atk-img` 定尺寸；`.asking` 时整块仍由上面那条 `askSpin` 慢转。 */
+#btnAskMore .atk-breath { position: absolute; left: 0; top: 0; width: 44px; height: 44px; display: block; }
+#btnAskMore .atk-img { width: 44px; height: 44px; display: block; }
+#btnAskMore.asking .atk-breath { animation: atkBreath 7.2s ease-in-out infinite alternate; }
+@keyframes atkBreath { from { transform: scale(1); } to { transform: scale(1.045); } }
+/* 太极放大到 44 ⇒ 这一行整体抬到 **48 行高**（输入框与按钮文字态一起）。
+   ⚠ 特异性：`#right > #askBox .ask-line #btnAskMore` 是 (3,1,0)，压过 `#btnAskMore.asking` 的 (1,1,0)
+   ⇒ 必须补一条 `.asking` 覆盖，否则「在转」时按钮会被挤到**第二行**（手机端实测踩到过）。 */
+#right > #askBox .ask-line input,
+#right > #askBox .ask-line #btnAskMore { height: 48px; }
+#right > #askBox .ask-line #btnAskMore { min-width: 92px; }
+#right > #askBox .ask-line #btnAskMore.asking { min-width: 48px; }
+@media (prefers-reduced-motion: reduce) {
+  #btnAskMore.asking .sl-taiji,
+  #btnAskMore.asking .atk-breath { animation: none; }
+}
+.ask-list:not(:empty) { margin-bottom: 8px; }
+.askbox.off { display: none !important; }
+.ask-h { font-size: 11.5px; color: var(--dim2, #888); margin-bottom: 7px; line-height: 1.6; }
+.ask-h b { color: var(--accent, #9c3b28); font-size: 13px; margin-right: 6px; }
+.ask-list { margin-top: 2px; }
+.ask-item { border-top: 1px solid var(--line2, rgba(128,128,128,.18)); padding: 8px 0 2px; }
+.ask-item:first-child { border-top: 0; }
+.ask-q { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.ask-q::before { content: "问 · "; font-weight: 400; color: var(--dim2, #999); }
+.ask-a { font-size: 13px; line-height: 1.75; }
+.ask-line { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0; align-items: center; }
+.ask-line input { flex: 1 1 200px; min-width: 0; padding: 7px 10px;
+  border: 1px solid var(--line2, rgba(128,128,128,.35)); border-radius: 8px;
+  background: transparent; color: inherit; font: inherit; font-size: 13px; }
+.ask-line input:focus { outline: none; border-color: var(--accent, #9c3b28); }
+.ask-note { font-size: 11.5px; color: var(--dim2, #999); margin-top: 6px; min-height: 15px; line-height: 1.6; }
+
+.ask-tip { font-size: 11.5px; color: var(--dim2, #999); letter-spacing: .04em; margin-top: 7px; line-height: 1.6; }
+
+.about .ab-h { font-size: 13px; letter-spacing: .08em; margin: 26px 0 10px; }
+.about .ab-list { margin: 0; padding-left: 1.2em; }
+.about .ab-list li { margin: 0 0 9px; line-height: 1.9; }
+.ask-note b { color: var(--accent, #9c3b28); }
+/* 记录抽屉里那条「接着问」（同族，一并补回） */
+.cr-askbox { padding: 8px 10px 2px; border-top: 1px dashed var(--line2, rgba(128,128,128,.28)); margin-top: 8px; }
+.cr-askbox .ask-item { padding: 6px 0 2px; }
+.cr-askbox .ask-q { font-size: 12.5px; }
+.cr-askbox .ask-a { font-size: 12.5px; line-height: 1.65; }
+.cr-askbox .ask-line input { font-size: 12.5px; padding: 6px 8px; flex-basis: 150px; }
+
+
+@media (prefers-reduced-motion: reduce) {
+  html #xlrSplash { display: flex !important; }
+  /* 续（与手机端同一段）：开屏自己的入场/退场是一次性动画，不归 reduce 管 ——
+     逐条还原 legacy 原文，别处一概不动。特异性 1,0,1 + !important 压过
+     `@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}`。 */
+  html #xlrSplash { transition: opacity .5s var(--m-glide), visibility .5s var(--m-glide) !important; }
+  html #xlrSplash .sl-orb { animation: slOrb .95s var(--m-glide) both !important; }
+  html #xlrSplash .sl-title { animation: slUp .72s var(--m-glide) .12s both !important; }
+  html #xlrSplash .sl-sub { animation: slUp .7s var(--m-glide) .2s both !important; }
+  html #xlrSplash .sl-sep { animation: slUp .7s var(--m-glide) .26s both !important; }
+  html #xlrSplash .sl-motto { animation: slUp .7s var(--m-glide) .32s both !important; }
+  html #xlrSplash .sl-notes { animation: slUp .7s var(--m-glide) .44s both !important; }
+  html #xlrSplash .sl-go { animation: slUp .7s var(--m-glide) .5s both, slBreath 4.2s ease-in-out 1.6s infinite !important; }
+  html #xlrSplash .sl-hint { animation: slUp .7s var(--m-glide) .54s both !important; }
+  html.slgo .wrap { animation: slWrap .86s var(--m-glide) .6s both !important; }
+}
+
+
+
+
+.sdb-foot .btn.wide{min-height:38px !important;font-size:13.5px !important;padding:0 16px !important;border-radius:12px !important;
+  display:inline-flex !important;align-items:center !important;justify-content:center !important;line-height:1 !important}
+.sdb-foot .btn.wide[disabled]{min-height:38px !important}
+
+.sdb-foot [data-clear][data-armed]{color:color-mix(in srgb, #9c3b28 72%, var(--ink)) !important;
+  border-color:color-mix(in srgb, #9c3b28 44%, transparent) !important;
+  background:color-mix(in srgb, #9c3b28 14%, transparent) !important}
+/* ③ 回收站 · 多选工具条（多选 / 全选 / 删除 / 还原 / 完成） */
+.tr-tools{display:flex;gap:8px;padding:10px 12px 2px}
+.tr-tools .btn{flex:1;min-height:34px;font-size:12.5px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;line-height:1}
+/* ④ 圆形选框：未选＝细描边空心；选中＝主题色渐变填满 + 对勾 */
+.msbox{width:18px;height:18px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;
+  border:1.5px solid var(--line2);background:transparent;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .16s var(--m-glide),border-color .16s var(--m-glide)}
+.msbox[aria-checked="true"]{border-color:transparent;
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb, var(--accent) 58%, var(--ink)))}
+.msbox[aria-checked="true"]::after{content:"";width:8px;height:4px;margin-top:-2px;
+  border-left:2px solid var(--on-accent,#fffefa);border-bottom:2px solid var(--on-accent,#fffefa);
+  transform:rotate(-45deg)}
+.tr-row.ms{cursor:pointer}
+.tr-row.ms:hover{background:var(--surface2)}
+/* ⑤ 多选态下，行里的「还原/彻底删」单条按钮让位给工具条（少一处误点） */
+.trash.ms-on .tr-row .btn{display:none}
+
+
+html[data-skin="xuan"] textarea:focus,
+html[data-skin="xuan"] input:focus,
+html[data-skin="xuan"] select:focus { background-color: transparent !important; }
+
+
+html[data-skin="xuan"] #q:not(:focus) {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-skin="xuan"] #q:focus {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}

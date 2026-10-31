@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60">
+  <defs>
+    <linearGradient id="bronze" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c5a66c"/>
+      <stop offset=".24" stop-color="#6e785c"/>
+      <stop offset=".52" stop-color="#303b30"/>
+      <stop offset=".78" stop-color="#8d7549"/>
+      <stop offset="1" stop-color="#d0b77e"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d2b77a"/>
+      <stop offset=".22" stop-color="#59634b"/>
+      <stop offset=".72" stop-color="#313a2f"/>
+      <stop offset="1" stop-color="#b49456"/>
+    </linearGradient>
+  </defs>
+  
+<rect x="3" y="3" width="194" height="54" rx="13" fill="#e5dfcf" stroke="#c6b17e" stroke-width="1.4"/>
+<rect x="7" y="7" width="186" height="46" rx="10" fill="#dfe2d2" stroke="#667456" stroke-width="2"/>
+<path d="M18 13 H182" stroke="#fff9e9" stroke-width="1.2"/>
+<path d="M17 46 H183" stroke="#9ba28a" stroke-width="1"/>
+<path d="M176 17 L181 22 L190 12" fill="none" stroke="#4c6046" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg>

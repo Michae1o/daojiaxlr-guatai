@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="40" viewBox="0 0 200 40">
+  <defs>
+    <linearGradient id="bronze" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c5a66c"/>
+      <stop offset=".24" stop-color="#6e785c"/>
+      <stop offset=".52" stop-color="#303b30"/>
+      <stop offset=".78" stop-color="#8d7549"/>
+      <stop offset="1" stop-color="#d0b77e"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d2b77a"/>
+      <stop offset=".22" stop-color="#59634b"/>
+      <stop offset=".72" stop-color="#313a2f"/>
+      <stop offset="1" stop-color="#b49456"/>
+    </linearGradient>
+  </defs>
+  
+<g fill="none" stroke="url(#bronze)" stroke-width="1.8">
+ <path d="M2 24 H34 C40 24 40 8 50 8 C60 8 60 24 66 24 H134 C140 24 140 8 150 8 C160 8 160 24 166 24 H198"/>
+ <path d="M2 30 H198" stroke="#8e7a50" stroke-width=".8" opacity=".55"/>
+ <path d="M92 27 L100 18 L108 27 L100 36 Z" fill="#66745b" stroke="#c5a66c"/>
+ <circle cx="50" cy="8" r="2" fill="#c5a66c"/><circle cx="150" cy="8" r="2" fill="#c5a66c"/>
+</g>
+</svg>

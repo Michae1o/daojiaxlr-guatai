@@ -1,0 +1,104 @@
+/* llmEndpoint.js —— 「设置里填的那几格」换算成「真正要发出去的请求」：全仓只此一处。
+ *
+ * 两种换算：
+ *  ① 地址：用户填的地址原样使用（没有中转、没有兜底地址）。
+ *  ② Anthropic 协议：地址里带 `/anthropic` 的（智谱的 /api/anthropic、真 Anthropic），
+ *     请求/响应形状与 OpenAI 不同：x-api-key 头、max_tokens 必填、正文在 content[].text、
+ *     流式是 content_block_delta。这里统一兜住，调用方不用各写一份。
+ */
+
+/* 桌面 exe（Tauri）里才有 window.__TAURI__（tauri.conf.json 的 withGlobalTauri = true）；
+   网页版里没有 —— 只影响几处界面按钮显不显示。 */
+export var IS_TAURI = (typeof window !== 'undefined') && !!window.__TAURI__;
+
+/* 地址原样返回（保留这个函数是给调用方一个统一入口，别再各写一份 trimEnd） */
+export function resolveBase(base) {
+  return String(base || '');
+}
+
+export function isAnth(base) { return /\/anthropic(\/|$)/i.test(String(base || '')); }
+
+/* 返回值形如 { url, proxy, anth, base, s } —— 与早期版本 apiURL() 的 { url, proxy, s } 兼容 */
+export function endpoint(s) {
+  s = s || {};
+  if (s.wire === 'proxy') {
+    return { url: String(s.proxy || '').replace(/\/+$/, '') + '/proxy', proxy: true, anth: false, base: s.base, s: s };
+  }
+  var base = resolveBase(s.base);
+  var anth = isAnth(base);
+  return {
+    url: base.replace(/\/+$/, '') + (anth ? '/v1/messages' : '/chat/completions'),
+    proxy: false, anth: anth, base: base, s: s
+  };
+}
+
+export function headers(s, ep) {
+  var h = { 'Content-Type': 'application/json' };
+  if (ep && ep.proxy) return h;                       /* 本地中转：key 在 JSON 正文里，不放头 */
+  if (ep && ep.anth) {
+    /* Anthropic 那套认 x-api-key；智谱的 /api/anthropic 两种都认 ⇒ 都带上，撞不着 */
+    h['x-api-key'] = String(s.key || '');
+    h['Authorization'] = 'Bearer ' + s.key;
+    h['anthropic-version'] = '2023-06-01';
+    return h;
+  }
+  h['Authorization'] = 'Bearer ' + s.key;
+  return h;
+}
+
+/* msgs 是 OpenAI 形状的 [{role, content}]；Anthropic 那条把 system 拆出来、补 max_tokens。 */
+export function payload(s, msgs, stream, maxTokens) {
+  msgs = msgs || [];
+  var anth = isAnth(resolveBase(s && s.base));
+  var p;
+  if (anth) {
+    var sys = '', mm = [];
+    msgs.forEach(function (m) {
+      if (!m) return;
+      if (m.role === 'system') sys += (sys ? '\n\n' : '') + String(m.content == null ? '' : m.content);
+      else mm.push({ role: m.role, content: m.content });
+    });
+    p = { model: s.model, messages: mm, stream: !!stream, max_tokens: maxTokens || 4096 };
+    if (sys) p.system = sys;
+    var t = Number(s.temp);
+    p.temperature = isNaN(t) ? 0.5 : Math.min(1, Math.max(0, t));   /* Anthropic 只收 0–1 */
+  } else {
+    p = { model: s.model, messages: msgs, temperature: s.temp, stream: !!stream };
+    /* ⚠ OpenAI 那套**不加** max_tokens：早期版本就没加，而各家上限不一（Kimi 8k 那种写大了直接报错） */
+  }
+  if (s && s.wire === 'proxy') return { base: s.base, key: s.key, payload: p };
+  return p;
+}
+
+/* 流式：从一行 SSE 的 JSON 里取增量。OpenAI = choices[0].delta.content；Anthropic = content_block_delta */
+export function deltaOf(j) {
+  if (!j) return '';
+  var c = j.choices && j.choices[0];
+  if (c && c.delta && typeof c.delta.content === 'string') return c.delta.content;
+  if (j.delta && typeof j.delta.text === 'string') return j.delta.text;
+  return '';
+}
+
+/* 非流式：OpenAI = choices[0].message.content；Anthropic = content[].text */
+export function textOf(j) {
+  if (!j) return '';
+  var c = j.choices && j.choices[0];
+  if (c && c.message && typeof c.message.content === 'string') return c.message.content;
+  if (Array.isArray(j.content)) {
+    var t = '';
+    j.content.forEach(function (b) {
+      if (b && typeof b.text === 'string' && (!b.type || b.type === 'text')) t += b.text;
+    });
+    return t;
+  }
+  return '';
+}
+
+/* 错误正文：两家形状不同，提示时给一句人能读的 */
+export function errOf(j) {
+  if (!j) return '';
+  if (j.error && typeof j.error === 'string') return j.error;
+  if (j.error && j.error.message) return j.error.message;
+  if (j.msg) return String(j.msg);
+  return '';
+}

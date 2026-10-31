@@ -1,0 +1,1004 @@
+
+
+/* ---------- 一、变量：纸/墨/青铜色阶 + 纹样与材质引用（一处定义） ---------- */
+html[data-skin="tonggu"] {
+  /* 纸与墨（设计稿 `古韵青铜小六壬卦台界面.png` 取像素：页面 ≈ #E5E1DB · 卡面 ≈ #EBE8E2 · 主文字 ≈ #2E322A） */
+  --bg: #E9E6DF;
+  --surface: #F4F1EA;
+  --surface2: #E7E1D2;
+  --ink: #2B2F28;
+  --dim: #5E6359;
+  --dim2: #8B8C7F;
+  --line: rgba(105, 116, 88, .28);
+  --line2: rgba(105, 116, 88, .46);
+  --accent: #33402F;
+  --on-accent: #E8DCC0;
+  --accent-bg: rgba(110, 120, 92, .14);
+  --accent-bg2: rgba(110, 120, 92, .22);
+  --accent-line: #B49A63;
+  --jyc: #7E5F2C;
+  --ok: #3F6B52; --warn: #7D6120; --bad: #8F3325;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+
+  /* 青铜色阶 —— **照素材包**（stroke 渐变 #c5a66c→#6e785c→#303b30→#8d7549→#d0b77e ／
+     edge 渐变 #d2b77a→#59634b→#313a2f→#b49456 ／ 面板外线 #697458 · 内金线 #b49a63） */
+  --tg-gold: #C5A66C;
+  --tg-gold-hi: #D0B77E;
+  --tg-gold-lt: #E2D2A4;
+  --tg-gold-dk: #8D7549;
+  --tg-green: #6E785C;
+  --tg-deep: #303B30;
+  --tg-deep2: #1D281F;
+  --tg-line-a: #697458;
+  --tg-line-b: #B49A63;
+
+  /* 铸件：素材包 edge 渐变的四停（上亮金 → 青铜绿 → 深青铜 → 下古铜）＋ 金属颗粒 */
+  --tg-cast-bg: url("./tex/button.jpg"), linear-gradient(180deg, #D2B77A 0%, #59634B 22%, #313A2F 72%, #B49456 100%);
+  --tg-cast-size: 128px 128px, 100% 100%;
+  --tg-cast-blend: soft-light, normal;
+  --tg-cast-off-bg: url("./tex/button.jpg"), linear-gradient(180deg, #B9A87F 0%, #4E5743 24%, #2A3229 76%, #8E7748 100%);
+  --tg-cast-hi-bg: url("./tex/button.jpg"), linear-gradient(180deg, #E3CE97 0%, #66725A 22%, #3A4436 72%, #C4A265 100%);
+  --tg-cast-border: 1px solid #1F2823;
+  --tg-cast-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .75),
+    inset 0 -1px 0 rgba(29, 40, 31, .70),
+    inset 0 0 0 1px rgba(16, 22, 17, .55),
+    0 2px 5px rgba(44, 43, 31, .18);
+  --tg-cast-ts: 0 1px 0 rgba(0, 0, 0, .35);
+
+  /* 纸面 */
+  --tg-paper-bg: url("./tex/paper.jpg");
+  --tg-card-tex: url("./tex/paper-tile.png");
+  --tg-patina-tex: url("./tex/patina.png");
+  --tg-oxidize-tex: url("./tex/oxidize.png");
+  --tg-metal-tex: url("./tex/metal.jpg");
+
+  /* 纹样（低透明度版铺底 ／ 角饰四支 ／ 徽记两侧装饰线 ／ 分隔线 ／ 徽记） */
+  --tg-pat-yunlei: url("./patterns/yunlei-faint.svg");
+  --tg-pat-kuilong: url("./patterns/kuilong-faint.svg");
+  --tg-pat-taotie: url("./patterns/taotie-faint.svg");
+  --tg-orn-tl: url("./ui/corner-tl.svg");
+  --tg-orn-tr: url("./ui/corner-tr.svg");
+  --tg-orn-bl: url("./ui/corner-bl.svg");
+  --tg-orn-br: url("./ui/corner-br.svg");
+  --tg-orn-rule: url("./ui/top-rule.svg");
+  --tg-orn-divider: url("./ui/divider.svg");
+  --tg-orn-medallion: url("./ui/medallion.svg");
+
+  /* 四角角饰（4 支各 48×48，显示 52px）· 位置 8px 内缩 */
+  --tg-corner-bg: var(--tg-orn-tl), var(--tg-orn-tr), var(--tg-orn-bl), var(--tg-orn-br);
+  --tg-corner-size: 52px 52px, 52px 52px, 52px 52px, 52px 52px;
+  --tg-corner-pos: 8px 8px, calc(100% - 60px) 8px, 8px calc(100% - 60px), calc(100% - 60px) calc(100% - 60px);
+
+  /* ── v5：首屏成套 PNG（烟灰青铜 v1.0 @2x）。相对路径 ⇒ vite-singlefile 内联成 data URI（产物仍零外链） */
+  --tg2-on-dark: #EEE1BE;               
+  --tg2-canvas: url("./png/backgrounds/canvas@2x.webp");
+  --tg2-panel: url("./png/panels/question-panel@2x.webp");
+  --tg2-track: url("./png/panels/segment-track@2x.png");
+  --tg2-pill-n: url("./png/buttons/header-pill/normal@2x.png");
+  --tg2-pill-h: url("./png/buttons/header-pill/hover@2x.png");
+  --tg2-pill-p: url("./png/buttons/header-pill/pressed@2x.png");
+  --tg2-tab-n: url("./png/buttons/mode-tab/normal@2x.png");
+  --tg2-tab-h: url("./png/buttons/mode-tab/hover@2x.png");
+  --tg2-tab-p: url("./png/buttons/mode-tab/pressed@2x.png");
+  --tg2-tab-s: url("./png/buttons/mode-tab/selected@2x.png");
+  --tg2-dd-n: url("./png/buttons/dropdown/normal@2x.png");
+  --tg2-dd-h: url("./png/buttons/dropdown/hover@2x.png");
+  --tg2-dd-p: url("./png/buttons/dropdown/pressed@2x.png");
+  --tg2-rs-n: url("./png/buttons/round-small/normal@2x.png");
+  --tg2-rs-h: url("./png/buttons/round-small/hover@2x.png");
+  --tg2-rs-p: url("./png/buttons/round-small/pressed@2x.png");
+  --tg2-ra-n: url("./png/buttons/round-action/normal@2x.png");
+  --tg2-ra-h: url("./png/buttons/round-action/hover@2x.png");
+  --tg2-ra-p: url("./png/buttons/round-action/pressed@2x.png");
+  --tg2-pat-right: url("./png/decor/background-right@2x-o58.webp");
+  --tg2-pat-bl: url("./png/decor/background-bottom-left@2x-o40.webp");
+  --tg2-hero: url("./png/decor/hero-divider@2x.png");
+  --tg2-foot: url("./png/decor/footer-divider@2x.png");
+  --tg2-title-l: url("./png/decor/title-divider-left@2x.png");
+  --tg2-title-r: url("./png/decor/title-divider-right@2x.png");
+  --tg2-seal-base: url("./png/logo/seal-base@2x.png");
+  --tg2-seal-mark: url("./png/logo/seal-mark@2x.png");
+  /* 粗粝颗粒（feTurbulence 噪点，overlay 用）——铸件按钮 / 青铜板面板共用一份。 */
+  --tg2-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  
+  --tg2-cast-bg: var(--tg2-grain), linear-gradient(180deg, #5A634F 0%, #40483E 30%, #2F372E 60%, #2A3129 82%, #3A4238 100%);
+  --tg2-cast-size: 120px 120px, 100% 100%;
+  --tg2-cast-blend: overlay, normal;
+  
+}
+
+
+html[data-skin="tonggu"] {
+  --tg-t-fast: .16s;
+  --tg-t: .24s;
+  --tg-t-slow: .42s;
+  --tg-e: var(--m-glide, cubic-bezier(.34, .72, .22, 1));
+  --tg-e2: var(--m-damp, cubic-bezier(.16, 1, .3, 1));
+}
+
+/* ================= 二、可复用类（新组件用这些；legacy 绑定在第三节） ================= */
+
+/* .tg-paper —— 页面底：暖纸 + 极淡纹样（只出现在页面四缘，中央被一层纸色渐变盖住） */
+html[data-skin="tonggu"] .tg-paper {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(120% 66% at 50% -6%, rgba(255, 253, 246, .78), rgba(255, 253, 246, 0) 70%),
+    radial-gradient(78% 62% at 50% 46%, rgba(233, 230, 223, .96) 0 46%, rgba(233, 230, 223, 0) 78%),
+    var(--tg-pat-taotie), var(--tg-pat-kuilong), var(--tg-pat-yunlei), var(--tg-paper-bg);
+  background-size: 100% 100%, 100% 100%, 460px 460px, 320px 320px, 150px 150px, 256px 256px;
+  background-position: 0 0, 0 0, -140px -110px, calc(100% + 60px) calc(100% + 40px), 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+  background-blend-mode: normal, normal, normal, normal, normal, normal;
+}
+
+/* .tg-cast —— 铸件（顶栏药丸 / 提交键 / 选中块 / 徽记 / 主按钮 共用一份） */
+html[data-skin="tonggu"] .tg-cast {
+  background-image: var(--tg-cast-bg) !important;
+  background-size: var(--tg-cast-size) !important;
+  background-blend-mode: var(--tg-cast-blend) !important;
+  border: var(--tg-cast-border) !important;
+  box-shadow: var(--tg-cast-shadow) !important;
+  color: var(--tg-gold-lt) !important;
+  text-shadow: var(--tg-cast-ts);
+}
+
+/* .tg-frame —— 青铜边框面板：外暗绿线 + 内金线 + 四角角饰 + 纸面 + 极淡锈斑 */
+html[data-skin="tonggu"] .tg-frame {
+  background-color: #F2ECDD !important;
+  background-image: var(--tg-corner-bg), var(--tg-patina-tex), var(--tg-card-tex), linear-gradient(180deg, #F7F3E7 0%, #EFE7D6 100%) !important;
+  background-size: var(--tg-corner-size), 256px 256px, 192px 192px, 100% 100% !important;
+  background-position: var(--tg-corner-pos), 0 0, 0 0, 0 0 !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-blend-mode: normal, normal, normal, normal, soft-light, normal, normal !important;
+  border: 1px solid var(--tg-line-a) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--tg-line-b),
+    inset 0 0 0 2px rgba(255, 250, 240, .55),
+    inset 0 0 0 3px rgba(48, 59, 48, .20),
+    0 14px 30px -24px rgba(44, 43, 31, .55) !important;
+}
+
+/* .tg-groove —— 凹槽（未选中的分段 / 二级面） */
+html[data-skin="tonggu"] .tg-groove {
+  background-image: linear-gradient(180deg, #EEE8D9 0%, #E7E1D2 100%) !important;
+  border: 1px solid #C9B991 !important;
+  box-shadow: inset 0 0 0 1px rgba(200, 185, 143, .80), inset 0 1px 0 #FFFAF0 !important;
+}
+
+/* .tg-input —— 内嵌纸面（设计稿里输入区不是白板，是同卡色纸面 + 左侧一竖道刻线） */
+html[data-skin="tonggu"] .tg-input {
+  background-color: rgba(252, 250, 244, .42) !important;
+  border-color: rgba(105, 116, 88, .30) !important;
+  color: var(--ink) !important;
+  box-shadow: inset 2px 0 0 rgba(105, 116, 88, .45), inset 0 1px 3px rgba(44, 43, 31, .06) !important;
+}
+
+
+
+/* ---- 3.1 页面底 = 素材包整屏底（backgrounds/canvas@2x，不透明画布 1498×1050 逻辑） ----
+   · 视口 1280×900（1.4222）与画布（1.4267）只差 4‰ ⇒ cover 几乎不裁；窄档 800 会裁两侧装饰，中央主体不丢。
+   · attachment:fixed ⇒ 定位区＝视口（别的屏变高时画布不跟着拉伸）。 */
+html[data-skin="tonggu"] body {
+  background-color: #B9BCB0;                       /* 画布主色兜底（解码前露一下） */
+  
+  background-image: var(--tg2-pat-right), var(--tg2-pat-bl), var(--tg2-canvas);
+  background-size: 12vw 68.6vh, 41.4vw 30.5vh, cover;
+  background-position: calc(100% + 45px) -5.7vh, -10vw calc(100% + 45px), 50% 50%;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed;
+  background-blend-mode: normal;
+}
+/* 两块纹样已并入 3.1 的 body 背景图层（见上面那段注释：伪元素走不通）——设计稿几何：
+   右缘竖纹 180×720 @1498×1050（op .58）· 左下角纹 620×320 @-150,786（op .40）。 */
+
+/* ---- 3.2 顶栏 ---- */
+html[data-skin="tonggu"] .top.stuck {
+  background: linear-gradient(180deg, rgba(206, 210, 198, .94), rgba(196, 200, 188, .90));
+  border-bottom-color: transparent;
+  box-shadow: 0 12px 26px -24px rgba(29, 40, 31, .55);
+}
+html[data-skin="tonggu"] .brand { color: var(--ink); }
+html[data-skin="tonggu"] .brand i { color: var(--tg-line-b); }
+
+/* 标题两侧装饰线（素材包 decor/title-divider-{left,right}）——只上宽档：
+   窄档（≤820）顶栏是紧凑布局，设计稿里也没这两截。 */
+@media (min-width: 821px) {
+  html[data-skin="tonggu"] .brand { position: relative; }
+  html[data-skin="tonggu"] .brand::before,
+  html[data-skin="tonggu"] .brand::after {
+    content: ""; position: absolute; top: 50%; height: 11px; transform: translateY(-50%);
+    background-repeat: no-repeat; background-size: 100% 100%; pointer-events: none;
+  }
+  html[data-skin="tonggu"] .brand::before { right: calc(100% + 7px); width: 98px; background-image: var(--tg2-title-l); }
+  html[data-skin="tonggu"] .brand::after { left: calc(100% + 7px); width: 60px; background-image: var(--tg2-title-r); }
+}
+
+
+html[data-skin="tonggu"] .tbtn {
+  position: relative; isolation: isolate;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--tg2-on-dark) !important;
+  text-shadow: var(--tg-cast-ts);
+}
+html[data-skin="tonggu"] .tbtn::before {
+  content: ""; position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; z-index: -1;
+  border: 1px solid transparent;                   /* 只给 border-image 一块地方；总尺寸恒等于元素 */
+  border-image: var(--tg2-pill-n) 63 64 63 64 fill stretch;
+  border-image-width: 49.2% 24.2%;
+  
+  border-image-outset: 6px 6px 7px;
+}
+/* hover / pressed 走**交叉淡入**（原先是 border-image-source 直接换图 ⇒ 中途一帧硬跳）：
+   ::before 留常态、::after 叠 hover；按下时把 ::before 换成 pressed、同时让 ::after 淡出
+   ⇒ 观感是 hover → pressed 的平滑过渡，而两层都只过渡 opacity（可插值）。 */
+html[data-skin="tonggu"] .tbtn::after {
+  content: ""; position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; z-index: -1;
+  border: 1px solid transparent;
+  border-image: var(--tg2-pill-h) 63 64 63 64 fill stretch;
+  border-image-width: 49.2% 24.2%;
+  border-image-outset: 6px 6px 7px;
+  opacity: 0;
+  transition: opacity var(--tg-t-fast) var(--tg-e);
+}
+html[data-skin="tonggu"] .tbtn:hover::after { opacity: 1; }
+html[data-skin="tonggu"] .tbtn:active::before { border-image-source: var(--tg2-pill-p); }
+html[data-skin="tonggu"] .tbtn:active::after { opacity: 0; }
+
+/* 圆钮（换皮肤 / 日夜）= 素材包 buttons/round-small（1:1 直接当背景，四态换图）
+   ⚠ 这块的面是**深青铜**（面板取样 ≈ (52,60,53)）⇒ 图标走**浅铜**，不是深墨；
+     素材包预览里这两枚圆钮挂的也正是 icons/light/*。图标是内联 SVG，吃 currentColor。 */
+html[data-skin="tonggu"] .ibt {
+  position: relative; isolation: isolate;      /* 给下面两个贴图层开一个层叠上下文（几何不动） */
+  background-color: transparent !important;
+  background-image: var(--tg2-rs-n) !important;
+  background-size: 100% 100% !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--tg2-on-dark) !important;
+}
+/* 两枚圆钮的 hover / pressed 也走交叉淡入：::before = hover 图，::after = pressed 图
+   ⇒ 常态（元素自身背景）→ hover → pressed 全程是 opacity 过渡。 */
+html[data-skin="tonggu"] .ibt::before,
+html[data-skin="tonggu"] .ibt::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background-position: 0 0; background-repeat: no-repeat; background-size: 100% 100%;
+  opacity: 0;
+  transition: opacity var(--tg-t-fast) var(--tg-e);
+}
+html[data-skin="tonggu"] .ibt::before { background-image: var(--tg2-rs-h); }
+html[data-skin="tonggu"] .ibt::after { background-image: var(--tg2-rs-p); }
+html[data-skin="tonggu"] .ibt:hover::before { opacity: 1; }
+html[data-skin="tonggu"] .ibt:hover { color: #F6EFD6 !important; }
+html[data-skin="tonggu"] .ibt:active::before { opacity: 0; }
+html[data-skin="tonggu"] .ibt:active::after { opacity: 1; }
+
+html[data-skin="tonggu"] .ibt svg { width: 13px !important; height: 13px !important; }
+
+
+
+
+
+html[data-skin="tonggu"] .right > .pane {
+  background-color: #AEAC9E !important;
+  background-image: var(--tg-corner-bg), var(--tg2-grain), var(--tg-patina-tex), linear-gradient(180deg, #BDBCAC 0%, #B0AE9F 52%, #A9A799 100%) !important;
+  background-size: var(--tg-corner-size), 120px 120px, 256px 256px, 100% 100% !important;
+  background-position: var(--tg-corner-pos), 0 0, 0 0, 0 0 !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat, no-repeat !important;
+  background-blend-mode: normal, normal, normal, normal, overlay, soft-light, normal !important;
+  border: 1px solid #1F2823 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .45),
+    inset 0 -1px 0 rgba(12, 16, 12, .55),
+    inset 0 0 0 1px rgba(16, 22, 17, .50),
+    0 14px 30px -24px rgba(44, 43, 31, .55) !important;
+}
+/* ---- 3.3c 左栏主卡 = 素材包 panels/question-panel（2432×740 @2x），九宫格 ----
+   ⚠ 画面挂在 `.cmain`（毛玻璃那层）上，`.pane` 让空 —— 两处都画不行：
+     · `.pane` 比 `.cmain` 大 1px（184,285/912×267 vs 185,286/910×265）⇒ 两份画面会在 1px 错位上出双线；
+     · `.cmain` 的 backdrop-filter(blur 19px) 只糊**它背后**的东西 ⇒ 画在 `.pane` 上会被糊平，画在它自己身上才是清晰的。
+   ⚠ border-image-outset：本仓首屏内容离卡边只有 ~20px（`#q` 在 +20,+18），而素材的框厚 48/39 逻辑 px
+     ⇒ 不把画面推到元素外面，框线会压在输入框底下。outset 25/63 ⇒ 画面区 = 910+126 × 265+50 = 1036×315
+     ＝设计稿里那块面板（1039×316），内容整好落在框内（左边距 41px）。**元素自身几何一个像素不动。** */
+html[data-skin="tonggu"] .left .pane {
+  background: none !important;
+  border: 1px solid transparent !important;   
+  box-shadow: none !important;
+}
+html[data-skin="tonggu"] .left .pane > .cbar > .cmain {
+  position: relative; isolation: isolate;
+  background: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-skin="tonggu"] .left .pane > .cbar > .cmain::before {
+  content: ""; position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; z-index: -1;
+  border: 1px solid transparent;
+  /* 切片 = manifest 的 nineSlicePx「左96 上78 右96 下78」⇒ CSS 顺序 上 右 下 左 = 78 96 78 96 */
+  border-image: var(--tg2-panel) 78 96 78 96 fill stretch;
+  border-image-width: 33px 41px;                   /* 框厚 = 素材逻辑 39×48 × 视口缩放 0.855 */
+  
+  border-image-outset: 25px 63px 42px;
+}
+/* 面板标题（问卦 / 依据）：纸面 + 下缘一道铜金分隔 */
+html[data-skin="tonggu"] .pane-h,
+html[data-skin="tonggu"] .evi-h {
+  background-color: #F1ECDF !important;
+  background-image: linear-gradient(180deg, #F4EFE2, #E9E2D2) !important;
+  background-size: 100% 100% !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
+  color: var(--ink) !important;
+  border-bottom: 1px solid var(--tg-line-b) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85), inset 0 -1px 0 rgba(48, 59, 48, .18) !important;
+}
+html[data-skin="tonggu"] .pane-h .sp { color: var(--dim2); }
+html[data-skin="tonggu"] .pane-b { background: transparent; }
+
+/* ---- 3.4 输入控件：内嵌纸面（左一竖道刻线）+ 聚焦铜金环 ---- */
+html[data-skin="tonggu"] textarea,
+html[data-skin="tonggu"] input[type=text],
+html[data-skin="tonggu"] input[type=password],
+html[data-skin="tonggu"] input[type=number],
+html[data-skin="tonggu"] select {
+  background-color: #FCFAF4 !important;
+  border-color: rgba(105, 116, 88, .45) !important;
+  color: var(--ink) !important;
+  box-shadow: inset 0 1px 3px rgba(44, 43, 31, .08), inset 0 0 0 1px rgba(197, 166, 108, .40) !important;
+}
+html[data-skin="tonggu"] textarea::placeholder,
+html[data-skin="tonggu"] input::placeholder { color: #9A9585; }
+html[data-skin="tonggu"] textarea:focus,
+html[data-skin="tonggu"] input:focus,
+html[data-skin="tonggu"] select:focus {
+  border-color: var(--tg-gold) !important;
+  box-shadow: inset 0 1px 3px rgba(44, 43, 31, .08), 0 0 0 3px rgba(197, 166, 108, .22) !important;
+}
+
+html[data-skin="tonggu"] #q,
+html[data-skin="tonggu"] #bg {
+  background-color: rgba(197, 192, 179, .70) !important;
+  border-color: rgba(105, 116, 88, .34) !important;
+  padding: 10px 13px !important;
+  box-shadow: inset 0 1px 2px rgba(44, 43, 31, .07), inset 2px 0 0 rgba(105, 116, 88, .40), inset 0 0 0 1px rgba(197, 166, 108, .18) !important;
+}
+html[data-skin="tonggu"] #q:focus,
+html[data-skin="tonggu"] #bg:focus {
+  border-color: var(--tg-gold) !important;
+  box-shadow: inset 2px 0 0 rgba(105, 116, 88, .60), inset 0 0 0 1px rgba(197, 166, 108, .65), 0 0 0 3px rgba(197, 166, 108, .18) !important;
+}
+html[data-skin="tonggu"] .nsb {
+  background-image: linear-gradient(180deg, #FBF7EE, #EDE6D7) !important;
+  border-color: rgba(105, 116, 88, .45) !important;
+  color: #4A4232 !important;
+  box-shadow: inset 0 1px 0 #FFFFFF, inset 0 0 0 1px rgba(197, 166, 108, .50) !important;
+}
+html[data-skin="tonggu"] .nsb:hover { border-color: var(--tg-gold) !important; color: var(--ink) !important; }
+html[data-skin="tonggu"] .nwrap,
+html[data-skin="tonggu"] .dtw { background-color: transparent !important; border-color: rgba(105, 116, 88, .35) !important; }
+
+html[data-skin="tonggu"] .dtw input,
+html[data-skin="tonggu"] #castPanel .nwrap input {
+  background-color: #A6A496 !important;
+  border: 1px solid #1F2823 !important;
+  border-radius: 10px !important;
+  box-shadow: inset 0 1px 3px rgba(12, 16, 12, .45) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-skin="tonggu"] #castPanel.auto .nwrap,
+html[data-skin="tonggu"] #castPanel.auto .row input {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html[data-skin="tonggu"] #castPanel.auto .row input:focus {
+  border: 1px solid #1F2823 !important;
+  background-color: #A6A496 !important;
+  box-shadow: inset 0 1px 3px rgba(12, 16, 12, .45) !important;
+}
+
+
+html[data-skin="tonggu"] #castPanel {
+  background-color: #AEAC9E !important;
+  background-image: var(--tg2-grain), linear-gradient(180deg, #BDBCAC 0%, #B0AE9F 52%, #A9A799 100%) !important;
+  background-size: 120px 120px, 100% 100% !important;
+  background-position: 0 0, 0 0 !important;
+  background-repeat: repeat, no-repeat !important;
+  background-blend-mode: overlay, normal !important;
+  border: 1px solid #1F2823 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .45),
+    inset 0 -1px 0 rgba(12, 16, 12, .55),
+    inset 0 0 0 1px rgba(16, 22, 17, .50),
+    0 6px 14px -10px rgba(44, 43, 31, .45) !important;
+}
+
+/* ---- 3.5 起卦方式（分段）= 素材包 panels/segment-track（凹槽轨道）+ buttons/mode-tab（标签四态） ----
+   轨道：源 1000×140，切片 28 74 28 74（上右下左）；百分比＝切片÷源 ⇒ 两档视口都站得住。
+   选中态＝那颗滑动 `.spill`（`position:absolute;z-index:0`，按钮是 z-index:1 ⇒ 文字在药丸之上）。 */
+html[data-skin="tonggu"] .seg {
+  position: relative; isolation: isolate;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 1px solid transparent !important;   /* 同上：宽度必须留住（.seg 原来带 1px） */
+  box-shadow: none !important;
+}
+html[data-skin="tonggu"] .seg::before {
+  content: ""; position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; z-index: -1;
+  border: 1px solid transparent;
+  border-image: var(--tg2-track) 28 74 28 74 fill stretch;
+  border-image-width: 20% 7.4%;
+}
+html[data-skin="tonggu"] .seg button {
+  position: relative; isolation: isolate;          /* 贴图层要一个层叠上下文（几何不动） */
+  background-color: transparent !important;
+  color: var(--ink) !important;                    /* 轨道是浅铜面 ⇒ 未选中＝深墨字 */
+}
+
+html[data-skin="tonggu"] .seg button::before,
+html[data-skin="tonggu"] .seg button::after {
+  content: ""; position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--tg-t-fast) var(--tg-e);
+}
+html[data-skin="tonggu"] .seg button::before { background-color: rgba(48, 59, 48, .10); }
+html[data-skin="tonggu"] .seg button::after { background-color: rgba(48, 59, 48, .18); }
+html[data-skin="tonggu"] .seg button:hover { background-color: transparent !important; color: var(--ink) !important; }
+html[data-skin="tonggu"] .seg button:hover::before { opacity: 1; }
+html[data-skin="tonggu"] .seg button:active::before { opacity: 0; }
+html[data-skin="tonggu"] .seg button:active::after { opacity: 1; }
+html[data-skin="tonggu"] .seg button[aria-pressed="true"] { color: var(--tg2-on-dark) !important; text-shadow: var(--tg-cast-ts); }
+html[data-skin="tonggu"] .seg .spill {
+  background-color: transparent !important;
+  background-image: var(--tg2-tab-s) !important;
+  background-size: 100% 100% !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+/* 「详情」(`#castToggle` / `.castsw`)：本包没给它单独的面 ⇒ 借 mode-tab 的常态，看起来像第 4 个标签 */
+/* ⚠ 必须抬到 id 级：legacy 有条 `#castToggle.castsw{background:initial !important}`（id+class ⇒ (1,1,0)）
+   专门把「详情」的玻璃底清掉，普通 class 级选择器压不回来。 */
+
+
+html[data-skin="tonggu"] body #castToggle.castsw {
+  font-family: inherit !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  background-size: auto !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+}
+html[data-skin="tonggu"] body #castToggle.castsw:hover,
+html[data-skin="tonggu"] body #castToggle.castsw[aria-expanded="true"] {
+  background-image: none !important;
+  color: #6E5326 !important;                     /* 展开/悬停＝深铜色（纯文字状态，几何不动） */
+}
+
+/* ---- 3.6 起卦圆钮 = 素材包 buttons/round-action（四态，1:1 直接当背景；箭头是内联 SVG，吃 currentColor） ----
+   ⚠ 素材包四态是 normal/hover/pressed/selected，圆钮这里只有前三个用得上（没有「选中」语义）。 */
+html[data-skin="tonggu"] .go {
+  position: relative; isolation: isolate;      /* 同上：给贴图层开层叠上下文（几何不动） */
+  background-color: transparent !important;
+  background-image: var(--tg2-ra-n) !important;
+  background-size: 100% 100% !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--tg2-on-dark) !important;
+  text-shadow: var(--tg-cast-ts);
+}
+
+html[data-skin="tonggu"] .go::before,
+html[data-skin="tonggu"] .go::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background-position: 0 0; background-repeat: no-repeat; background-size: 100% 100%;
+  opacity: 0;
+  transition: opacity var(--tg-t-fast) var(--tg-e);
+}
+html[data-skin="tonggu"] .go::before { background-image: var(--tg2-ra-h); }
+html[data-skin="tonggu"] .go::after { background-image: var(--tg2-ra-p); }
+html[data-skin="tonggu"] .go:hover::before { opacity: 1; }
+html[data-skin="tonggu"] .go:hover { color: #F6EFD6 !important; }
+html[data-skin="tonggu"] .go:active::before { opacity: 0; }
+html[data-skin="tonggu"] .go:active::after { opacity: 1; }
+/* T 实测抓到：`.go` 初始是**禁用**的（没写问题），而 `.go:disabled` 与 `.go:hover`
+   同权重、`disabled` 在后 ⇒ 禁用时贴图不跟着 hover 变。本项目的叠层不受那条影响，会**在禁用态上
+   冒出 hover 反馈** ⇒ 这里显式把两层压掉（`.go` 的禁用观感只由 `.go:disabled` 那条决定）。 */
+html[data-skin="tonggu"] .go[disabled]::before,
+html[data-skin="tonggu"] .go:disabled::before,
+html[data-skin="tonggu"] .go[disabled]::after,
+html[data-skin="tonggu"] .go:disabled::after { opacity: 0 !important; }
+/* 禁用态：图仍是 ra-p，但进出禁用改由 opacity / filter 过渡（这两个可插值）。 */
+html[data-skin="tonggu"] .go[disabled],
+html[data-skin="tonggu"] .go:disabled {
+  opacity: 1 !important;
+  background-image: var(--tg2-ra-p) !important;
+  border-color: transparent !important;
+  color: rgba(238, 225, 190, .62) !important;
+  box-shadow: none !important;
+  filter: saturate(.55) brightness(.94);
+  cursor: default !important;
+  transition: filter var(--tg-t) var(--tg-e), opacity var(--tg-t) var(--tg-e);
+}
+
+/* ---- 3.7 事类 / 时辰下拉（原生 select；旧规则 id 级 + !important ⇒ 加一层 body） ---- */
+html[data-skin="tonggu"] body #h1,
+html[data-skin="tonggu"] body #h2 {
+  background-color: #F6F1E4 !important;
+  color: #3A3327 !important;
+  box-shadow: inset 0 0 0 1px #B49A63, inset 0 1px 0 #FFFAF0, inset 0 -1px 0 rgba(105, 116, 88, .28) !important;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0.6 0.8 L4.5 5 L8.4 0.8' fill='none' stroke='%238D7549' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #FBF7EC, #EFE8D8) !important;
+  background-repeat: no-repeat, no-repeat !important;
+  background-position: calc(100% - 12px) 50%, 0 0 !important;
+  background-size: 9px 6px, 100% 100% !important;
+}
+html[data-skin="tonggu"] body #h1:hover,
+html[data-skin="tonggu"] body #h2:hover {
+  box-shadow: inset 0 0 0 1px var(--tg-gold), inset 0 1px 0 #FFFAF0 !important;
+}
+html[data-skin="tonggu"] body #h1:focus,
+html[data-skin="tonggu"] body #h2:focus {
+  box-shadow: inset 0 0 0 1px var(--tg-gold), 0 0 0 3px rgba(197, 166, 108, .20) !important;
+}
+html[data-skin="tonggu"] body #cat option { background: #F6F1E4; color: var(--ink); }
+
+/* ---- 3.7b 事类下拉 = 素材包 buttons/dropdown（九宫格画在**包裹层** `#fCat` 上） ----
+   ⚠ 画面不能画在 `#cat` 自己身上：`<select>` 在 Chromium 里**不生成伪元素**；而 border-image 又必须配
+     border-width，那会把 select 的内容盒挤进去。`#fCat` 与 `#cat` 是**同一个盒**（880,499 137×37）⇒
+     画在包裹层的 ::before 上、select 让空，两者正好重合。箭头也一并从 `#cat` 的背景挪到 `#fCat::after`。 */
+
+html[data-skin="tonggu"] body #fCat { position: relative; isolation: isolate; }
+html[data-skin="tonggu"] body #fCat::before {
+  content: ""; position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; z-index: -1;
+  border: 1px solid #1F2823;
+  border-radius: 999px;
+  background-color: #B0AE9F;
+  background-image: var(--tg2-grain), linear-gradient(180deg, #BDBCAC 0%, #B0AE9F 52%, #A9A799 100%);
+  background-size: 120px 120px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  background-position: 0 0, 0 0;
+  background-blend-mode: overlay, normal;
+  box-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .45),
+    inset 0 -1px 0 rgba(12, 16, 12, .55),
+    inset 0 0 0 1px rgba(16, 22, 17, .50);
+}
+/* hover / focus-within：金属面变暗（不是换图，是叠一层暗罩） */
+html[data-skin="tonggu"] body #fCat::after {
+  content: ""; position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; z-index: -1;
+  border-radius: 999px;
+  background-color: rgba(16, 22, 17, .18);
+  opacity: 0;
+  transition: opacity var(--tg-t-fast) var(--tg-e);
+}
+html[data-skin="tonggu"] body #fCat:hover::after,
+html[data-skin="tonggu"] body #fCat:focus-within::after { opacity: 1; }
+html[data-skin="tonggu"] body #cat {
+  background-color: transparent !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0.6 0.8 L4.5 5 L8.4 0.8' fill='none' stroke='%2316231F' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: calc(100% - 12px) 50% !important;
+  background-size: 9px 6px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;                /* 别把底下那张下拉面板图糊掉 */
+  color: #16231F !important;                       /* 素材包：浅铜面上的文字 = 深墨 */
+}
+
+/* ---- 3.8 自绘弹层（事类下拉选项 / 日期）：粗粝浅青铜板 + 金属厚重边框（） ---- */
+html[data-skin="tonggu"] .glsel,
+html[data-skin="tonggu"] .dppop {
+  background-color: #AEAC9E !important;
+  background-image: var(--tg2-grain), var(--tg-pat-yunlei), linear-gradient(180deg, #BDBCAC 0%, #B0AE9F 52%, #A9A799 100%) !important;
+  background-size: 120px 120px, 110px 110px, 100% 100% !important;
+  background-position: 0 0, 0 0, 0 0 !important;
+  background-repeat: repeat, repeat, no-repeat !important;
+  background-blend-mode: overlay, normal, normal !important;
+  border: 1px solid #1F2823 !important;
+  box-shadow: inset 0 1px 0 rgba(226, 201, 140, .45), inset 0 -1px 0 rgba(12, 16, 12, .55), inset 0 0 0 1px rgba(16, 22, 17, .50), 0 18px 34px -20px rgba(44, 43, 31, .55) !important;
+}
+html[data-skin="tonggu"] .glsel button { color: #3A3327 !important; }
+html[data-skin="tonggu"] .glsel button[data-hi="1"],
+html[data-skin="tonggu"] .dppop button:hover { background: rgba(110, 120, 92, .16) !important; color: var(--ink) !important; }
+html[data-skin="tonggu"] .dppop b,
+html[data-skin="tonggu"] .dppop strong { color: var(--ink) !important; }
+
+/* ---- 3.9 表单按钮 / 设置页：暖白 → 粗粝浅青铜板 + 金属厚重边框（） ---- */
+html[data-skin="tonggu"] .sbtn,
+html[data-skin="tonggu"] .btn,
+html[data-skin="tonggu"] .bk {
+  background-color: #B0AE9F !important;
+  background-image: var(--tg2-grain), linear-gradient(180deg, #BDBCAC 0%, #B0AE9F 52%, #A9A799 100%) !important;
+  background-size: 120px 120px, 100% 100% !important;
+  background-position: 0 0, 0 0 !important;
+  background-repeat: repeat, no-repeat !important;
+  background-blend-mode: overlay, normal !important;
+  border: 1px solid #1F2823 !important;
+  color: #2E332A !important;
+  box-shadow: inset 0 1px 0 rgba(226, 201, 140, .45), inset 0 -1px 0 rgba(12, 16, 12, .55), inset 0 0 0 1px rgba(16, 22, 17, .50), 0 2px 6px -3px rgba(44, 43, 31, .35) !important;
+}
+html[data-skin="tonggu"] .sbtn:hover,
+html[data-skin="tonggu"] .btn:hover,
+html[data-skin="tonggu"] .bk:hover {
+  background-image: var(--tg2-grain), linear-gradient(180deg, #C6C4B6 0%, #B8B6A7 52%, #B0AE9F 100%) !important;
+  border-color: #1F2823 !important;
+}
+
+html[data-skin="tonggu"] .sbtn.pri,
+html[data-skin="tonggu"] .btn.pri {
+  background-color: transparent !important;
+  background-image: var(--tg2-cast-bg) !important;
+  background-size: var(--tg2-cast-size) !important;
+  background-position: 0 0, 0 0 !important;
+  background-repeat: repeat, no-repeat !important;
+  background-blend-mode: var(--tg2-cast-blend) !important;
+  border-color: #4B5844 !important;
+  color: var(--tg-gold-lt) !important;
+  text-shadow: var(--tg-cast-ts);
+  box-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .55),
+    inset 0 -1px 0 rgba(29, 40, 31, .70),
+    inset 0 0 0 1px rgba(16, 22, 17, .55),
+    0 6px 14px -12px rgba(44, 43, 31, .60) !important;
+}
+html[data-skin="tonggu"] .stab { color: var(--dim) !important; background: transparent !important; border-color: rgba(105, 116, 88, .38) !important; }
+html[data-skin="tonggu"] .stab.on {
+  color: var(--tg-gold-lt) !important;
+  background-image: linear-gradient(180deg, #59634B 0%, #313A2F 100%) !important;
+  border-color: #4B5844 !important;
+  box-shadow: inset 0 1px 0 rgba(226, 201, 140, .45), inset 0 0 0 1px rgba(197, 166, 108, .45) !important;
+}
+html[data-skin="tonggu"] .prov { background: #FBF7EE !important; border-color: rgba(105, 116, 88, .40) !important; }
+html[data-skin="tonggu"] .prov:hover { border-color: var(--tg-gold) !important; }
+html[data-skin="tonggu"] .prov.on { border-color: var(--tg-gold) !important; box-shadow: inset 0 0 0 1px var(--tg-gold) !important; }
+html[data-skin="tonggu"] .theme { border-color: rgba(105, 116, 88, .40) !important; color: var(--ink) !important; }
+html[data-skin="tonggu"] .theme:hover { border-color: var(--tg-gold) !important; }
+html[data-skin="tonggu"] .theme[aria-current="true"] { border-color: var(--tg-gold) !important; background: var(--accent-bg) !important; }
+html[data-skin="tonggu"] .setsec h3,
+html[data-skin="tonggu"] .setscreen h3 { color: var(--ink) !important; }
+html[data-skin="tonggu"] .x { color: var(--dim) !important; }
+html[data-skin="tonggu"] .x:hover { color: var(--bad) !important; }
+
+
+html[data-skin="tonggu"] #sdb .sdb-p {
+  background-color: #AEAC9E !important;
+  background-image: var(--tg-orn-tr), var(--tg-orn-br), var(--tg2-grain), var(--tg-patina-tex), linear-gradient(180deg, #BDBCAC 0%, #B0AE9F 52%, #A9A799 100%) !important;
+  background-size: 44px 44px, 44px 44px, 120px 120px, 256px 256px, 100% 100% !important;
+  background-position: calc(100% - 6px) 6px, calc(100% - 6px) calc(100% - 6px), 0 0, 0 0, 0 0 !important;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat !important;
+  background-blend-mode: normal, normal, overlay, soft-light, normal !important;
+  box-shadow: inset 0 0 0 1px rgba(105, 116, 88, .45), inset -1px 0 0 rgba(105, 116, 88, .50), -24px 0 48px -30px rgba(44, 43, 31, .60) !important;
+}
+html[data-skin="tonggu"] aside.sdb-p .sdb-h,
+html[data-skin="tonggu"] aside.sdb-p .sdb-t,
+html[data-skin="tonggu"] aside.sdb-p .sdb-f { border-color: rgba(105, 116, 88, .30) !important; }
+html[data-skin="tonggu"] #sdbQ { background-color: #A6A496 !important; border: 1px solid #1F2823 !important; color: var(--ink) !important; box-shadow: inset 0 1px 3px rgba(12, 16, 12, .45) !important; }
+html[data-skin="tonggu"] .trash { background-color: #B5B3A4 !important; border: 1px solid #1F2823 !important; box-shadow: inset 0 1px 0 rgba(226, 201, 140, .35), inset 0 0 0 1px rgba(16, 22, 17, .50), 0 2px 6px -3px rgba(44, 43, 31, .35) !important; }
+html[data-skin="tonggu"] #sdbClose { color: var(--dim) !important; }
+html[data-skin="tonggu"] #sdbClose:hover { color: var(--bad) !important; }
+
+/* ---- 3.11 结果页 / 断辞 / 依据 ---- */
+html[data-skin="tonggu"] .pane.gua,
+html[data-skin="tonggu"] .gua-top,
+html[data-skin="tonggu"] .gd,
+html[data-skin="tonggu"] .blk,
+html[data-skin="tonggu"] .evi .blk { border-color: rgba(105, 116, 88, .32) !important; }
+html[data-skin="tonggu"] .pane.gua { background-color: transparent !important; }
+html[data-skin="tonggu"] .gua-top .g { color: var(--ink) !important; }
+html[data-skin="tonggu"] .tag { background: var(--accent-bg) !important; border-color: rgba(105, 116, 88, .38) !important; color: var(--dim) !important; }
+html[data-skin="tonggu"] .tag.a { border-color: var(--tg-gold) !important; color: #7A5530 !important; }
+/* ⚠ 2026-10-16（T ）：原来这里写的是 `#walk .wcell` / `#walk .cell` —— **运行时根本没有这两个类**
+   （实测：桌面端跑的是圆盘那套，格子类是 `.wc`）⇒ 两条死规则删掉，真规则见 原记录。 */
+html[data-skin="tonggu"] #walk .walk-orb { border-color: var(--tg-gold) !important; box-shadow: inset 0 0 0 1px rgba(197, 166, 108, .65), 0 3px 8px -4px rgba(44, 43, 31, .55) !important; }
+html[data-skin="tonggu"] #askBox,
+html[data-skin="tonggu"] #askBox .bar { border-color: rgba(105, 116, 88, .32) !important; }
+
+/* ---- 3.12 徽记（壹/贰/叁）：铸件 + 两侧装饰线（素材包 top-rule）+ 徽记纹压暗叠 ---- */
+
+html[data-skin="tonggu"] .vstep {
+  background-image: none;
+  opacity: 1;
+}
+html[data-skin="tonggu"] .vstep .vpill,
+html[data-skin="tonggu"] .vstep .vneck,
+html[data-skin="tonggu"] .vstep .vsrc {
+  background-image: var(--tg2-cast-bg) !important;
+  background-size: var(--tg2-cast-size) !important;
+  background-position: 0 0, 0 0 !important;
+  background-repeat: repeat, no-repeat !important;
+  background-blend-mode: var(--tg2-cast-blend) !important;
+  border: var(--tg-cast-border) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .55),
+    inset 0 -1px 0 rgba(29, 40, 31, .70),
+    inset 0 0 0 1px rgba(16, 22, 17, .55),
+    0 6px 14px -12px rgba(44, 43, 31, .65) !important;
+}
+
+html[data-skin="tonggu"] .vstep button i { border-color: rgba(105, 116, 88, .50) !important; color: var(--dim) !important; }
+html[data-skin="tonggu"] .vstep button[data-st="on"] { color: var(--tg-gold-lt) !important; }
+html[data-skin="tonggu"] .vstep button[data-st="on"] i {
+  background: rgba(29, 40, 31, .35) !important;
+  border-color: var(--tg-gold) !important;
+  color: var(--tg-gold-lt) !important;
+  box-shadow: 0 0 0 1px rgba(29, 40, 31, .45) !important;
+}
+html[data-skin="tonggu"] .vstep button[data-st="done"] i {
+  background: rgba(110, 120, 92, .18) !important;
+  border-color: var(--tg-gold-dk) !important;
+  color: #7A5530 !important;
+}
+
+/* ---- 3.13 大标题 / 脚注（分隔线 + 中央那枚几何 = 素材包 divider） ---- */
+html[data-skin="tonggu"] #greet {
+  font-family: var(--m-serif) !important;
+  color: var(--ink) !important;
+  letter-spacing: .06em;
+}
+html[data-skin="tonggu"] #greetSub { color: #5C6961 !important; }
+html[data-skin="tonggu"] .mfoot {
+  
+  border-top: 1px solid transparent !important;
+  background-image: var(--tg2-foot) !important;
+  background-size: 100% 21px !important;
+  background-position: 50% 0 !important;
+  background-repeat: no-repeat !important;
+}
+html[data-skin="tonggu"] .mfoot .mf-bar { color: #6F6A5A; }
+
+
+
+
+
+
+html[data-skin="tonggu"] .blank-band {
+  background-image: linear-gradient(180deg, #EFE9DA 0%, #E4DECF 100%) !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  border-bottom-color: var(--tg-line-b) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 -1px 0 rgba(48, 59, 48, .18) !important;
+}
+html[data-skin="tonggu"] .blank-band span { color: var(--ink) !important; }
+html[data-skin="tonggu"] .blank-band span + span { border-left-color: rgba(105, 116, 88, .30) !important; }
+html[data-skin="tonggu"] .blank-band span i { color: var(--tg-line-b) !important; }
+html[data-skin="tonggu"] .blank-body .k b { color: var(--ink) !important; }
+html[data-skin="tonggu"] .blank-body .r { color: var(--dim2) !important; }
+
+
+html[data-skin="tonggu"] #walk.ring .wc {
+  background-image: linear-gradient(180deg, rgba(255, 253, 247, .78), rgba(232, 226, 212, .66)) !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(105, 116, 88, .42),
+    inset 0 1px 0 rgba(255, 255, 255, .70),
+    inset 0 0 0 3px rgba(197, 166, 108, .18),
+    0 4px 10px -8px rgba(44, 43, 31, .55) !important;
+  color: var(--ink) !important;
+}
+/* 走过的格（lit）＝ 浅铜面；落宫（land）＝ 铜金双圈 + 暖芯 */
+html[data-skin="tonggu"] #walk.ring .wc.lit {
+  background-image: linear-gradient(180deg, rgba(110, 120, 92, .24), rgba(110, 120, 92, .13)) !important;
+}
+html[data-skin="tonggu"] #walk.ring .wc.land {
+  background-image: radial-gradient(circle at 50% 42%, rgba(197, 166, 108, .34), rgba(110, 120, 92, .20) 72%) !important;
+  box-shadow:
+    inset 0 0 0 2px var(--tg-gold),
+    inset 0 0 0 3px rgba(255, 250, 240, .55),
+    0 3px 8px -4px rgba(44, 43, 31, .50) !important;
+  color: var(--ink) !important;
+}
+
+html[data-skin="tonggu"] #walk.ring .wring { border-color: rgba(180, 154, 99, .48) !important; }
+/* 环绕那颗光点的晕：由冷灰改暖铜 */
+html[data-skin="tonggu"] #walk.ring .wdot {
+  background-image: radial-gradient(circle, rgba(180, 154, 99, .50) 0%, rgba(180, 154, 99, 0) 70%) !important;
+}
+html[data-skin="tonggu"] #walk .wg { color: var(--ink) !important; }
+html[data-skin="tonggu"] #walk .wm { color: var(--tg-gold-dk) !important; }
+html[data-skin="tonggu"] #walk .wcore { color: var(--dim) !important; }
+
+/* ---- 4.4 断卦页（结果卡 + 依据区 + 断辞区）—— 补铜线/纸面，字色随变量走 ----
+   卡本体（`#guaCard` / `.pane.gua`）已由 3.3b/3.11 涂过 ⇒ 这里只收拾里面的线与文字块。 */
+html[data-skin="tonggu"] .gua-top .g { color: var(--ink) !important; }
+html[data-skin="tonggu"] .gua-top .sh,
+html[data-skin="tonggu"] .gua-top .q { color: var(--dim2) !important; }
+html[data-skin="tonggu"] .blk-h2 { border-top-color: rgba(105, 116, 88, .34) !important; color: var(--ink) !important; }
+html[data-skin="tonggu"] .blk-h2:hover { background-color: rgba(110, 120, 92, .14) !important; color: #6E5326 !important; }
+html[data-skin="tonggu"] .blk-h2 .n { color: var(--tg-gold-dk) !important; }
+html[data-skin="tonggu"] .blk-h2 .caret { color: var(--tg-line-b) !important; }
+html[data-skin="tonggu"] .blk-b { border-top-color: rgba(105, 116, 88, .30) !important; }
+html[data-skin="tonggu"] .it .tx { color: var(--dim) !important; }
+html[data-skin="tonggu"] .it .tx b,
+html[data-skin="tonggu"] .it .tx strong { color: var(--ink) !important; }
+html[data-skin="tonggu"] .it .lb,
+html[data-skin="tonggu"] .it .src { color: var(--dim2) !important; }
+html[data-skin="tonggu"] .quote { border-left-color: var(--tg-line-b) !important; color: var(--dim) !important; }
+html[data-skin="tonggu"] .warn {
+  border-color: var(--tg-line-b) !important;
+  background-color: rgba(110, 120, 92, .12) !important;
+  color: var(--dim) !important;
+}
+html[data-skin="tonggu"] .warn b { color: #6E5326 !important; }
+html[data-skin="tonggu"] .srcline,
+html[data-skin="tonggu"] .stat { color: var(--dim2) !important; }
+/* 断辞区（`.doc`）：空态虚线框 + 正文面 —— **粗粝浅青铜板**（）
+   原先是 `#F4EFE2` 暖白纸 ＋ 纸纹 ⇒ 与卡片面（青铜板）不同族、发白。
+   现改：浅青铜面 `#B8B6A7` ＋ `--tg2-grain` 噪点（overlay，粗粝）＋ 青铜细线。 */
+html[data-skin="tonggu"] .doc {
+  border-color: rgba(105, 116, 88, .40) !important;
+  background-color: #B8B6A7 !important;
+  background-image: var(--tg2-grain) !important;
+  background-size: 120px 120px !important;
+  background-position: 0 0 !important;
+  background-repeat: repeat !important;
+  background-blend-mode: overlay !important;
+  color: var(--dim) !important;
+}
+html[data-skin="tonggu"] .doc:empty::before { color: var(--dim2) !important; }
+html[data-skin="tonggu"] .doc h4 { color: var(--ink) !important; }
+html[data-skin="tonggu"] .doc h4::before { color: var(--tg-line-b); }
+
+/* ================= 四之次：以下为其余三块的落点（见 next patch） ================= */
+
+
+html[data-skin="tonggu"] .prov,
+html[data-skin="tonggu"] .theme,
+html[data-skin="tonggu"] .stab,
+html[data-skin="tonggu"] .x,
+html[data-skin="tonggu"] #sdbClose,
+html[data-skin="tonggu"] .trash,
+html[data-skin="tonggu"] .dppop button {
+  transition: background-color var(--tg-t-fast) var(--tg-e),
+              border-color var(--tg-t-fast) var(--tg-e),
+              color var(--tg-t-fast) var(--tg-e),
+              box-shadow var(--tg-t-fast) var(--tg-e),
+              opacity var(--tg-t-fast) var(--tg-e);
+}
+
+html[data-skin="tonggu"] body #h1,
+html[data-skin="tonggu"] body #h2 {
+  transition: border-color .16s var(--tg-e), box-shadow var(--tg-t-fast) var(--tg-e), color var(--tg-t-fast) var(--tg-e);
+}
+
+
+
+/* ---- 5.1 铜古作用域内撤掉 legacy 毛玻璃（自家的面不需要它；也省一层合成） ---- */
+html[data-skin="tonggu"] .cmain,
+html[data-skin="tonggu"] .left .pane,
+html[data-skin="tonggu"] .right > .pane,
+html[data-skin="tonggu"] .pane.gua,
+html[data-skin="tonggu"] .pane.llm,
+html[data-skin="tonggu"] #castPanel,
+html[data-skin="tonggu"] aside.sdb-p,
+html[data-skin="tonggu"] .tag,
+html[data-skin="tonggu"] .stab,
+html[data-skin="tonggu"] .x,
+html[data-skin="tonggu"] .btn,
+html[data-skin="tonggu"] .sbtn,
+html[data-skin="tonggu"] .gx,
+html[data-skin="tonggu"] .bk,
+html[data-skin="tonggu"] .skinmenu button,
+html[data-skin="tonggu"] .skinmenu,
+html[data-skin="tonggu"] .top-in button,
+html[data-skin="tonggu"] .dlg button,
+html[data-skin="tonggu"] .sdb-p button {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+
+html[data-skin="tonggu"] .skinmenu {
+  background-color: #AEAC9E !important;
+  background-image: var(--tg2-grain), var(--tg-patina-tex), linear-gradient(180deg, #BDBCAC 0%, #B0AE9F 52%, #A9A799 100%) !important;
+  background-size: 120px 120px, 256px 256px, 100% 100% !important;
+  background-position: 0 0, 0 0, 0 0 !important;
+  background-repeat: repeat, repeat, no-repeat !important;
+  background-blend-mode: overlay, soft-light, normal !important;
+  border: 1px solid #1F2823 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .45),
+    inset 0 -1px 0 rgba(12, 16, 12, .55),
+    inset 0 0 0 1px rgba(16, 22, 17, .50),
+    0 10px 34px -14px rgba(30, 28, 20, .55) !important;
+}
+html[data-skin="tonggu"] .skinmenu button { background-color: transparent !important; }
+html[data-skin="tonggu"] .skinmenu button:hover { background-color: rgba(16, 22, 17, .06) !important; }
+html[data-skin="tonggu"] .skinmenu button[aria-current="true"] { background-color: rgba(110, 120, 92, .20) !important; box-shadow: inset 2px 0 0 rgba(197, 166, 108, .70) !important; }
+
+/* ---- 5.2 「看断辞 · 结果 →」＝ 铸件（与起卦圆钮 / 药丸同一族） ---- */
+html[data-skin="tonggu"] .vnext button {
+  background-color: transparent !important;
+  background-image: var(--tg2-cast-bg) !important;
+  background-size: var(--tg2-cast-size) !important;
+  background-position: 0 0, 0 0 !important;
+  background-repeat: repeat, no-repeat !important;
+  background-blend-mode: var(--tg2-cast-blend) !important;
+  border-color: #4B5844 !important;
+  color: var(--tg-gold-lt) !important;
+  text-shadow: var(--tg-cast-ts);
+  box-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .55),
+    inset 0 -1px 0 rgba(29, 40, 31, .70),
+    inset 0 0 0 1px rgba(16, 22, 17, .55),
+    0 10px 20px -16px rgba(44, 43, 31, .60) !important;
+}
+html[data-skin="tonggu"] .vnext button:hover { filter: brightness(1.06) !important; }
+html[data-skin="tonggu"] .vnext button:active { filter: brightness(.96) !important; }
+
+/* ---- 5.3 小标签 `.tag` ＝ 纸片（不透明纸面 ＋ 铜线；去掉 legacy 的**冷色**阴影 rgba(12,16,26)） ---- */
+html[data-skin="tonggu"] .tag {
+  background-color: #B8B6A7 !important;
+  background-image: none !important;
+  border-color: rgba(105, 116, 88, .45) !important;
+  color: var(--dim) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 1px 2px rgba(44, 43, 31, .10) !important;
+}
+html[data-skin="tonggu"] .tag.a {
+  background-color: #C2C0B0 !important;
+  border-color: var(--tg-gold) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 0 0 1px rgba(197, 166, 108, .30), 0 1px 3px rgba(44, 43, 31, .12) !important;
+}
+
+
+html[data-skin="tonggu"] .btn.sm,
+html[data-skin="tonggu"] .sdb-p .btn,
+html[data-skin="tonggu"] .stab {
+  border: 1px solid #1F2823 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(226, 201, 140, .40),
+    inset 0 -1px 0 rgba(12, 16, 12, .55),
+    inset 0 0 0 1px rgba(16, 22, 17, .50),
+    0 3px 8px -4px rgba(44, 43, 31, .40) !important;
+}
+/* ---- 5.5 复扫剩下的几处「冷色 / legacy 玻璃」——逐条收干净（（实测） 复扫到 0） ----
+   ① 抽屉面板的**边框色**还是 legacy 的 `--m-glass-line`（color-mix 出来的冷灰）；
+   ② 关闭「×」与设置屏两张卡（`#stCard` / `#stWiz`）还带着 legacy 的**冷色阴影** rgbrgba(12,16,26)/冷调玻璃影。 */
+html[data-skin="tonggu"] aside.sdb-p { border-color: rgba(105, 116, 88, .42) !important; }
+html[data-skin="tonggu"] #sdbClose,
+html[data-skin="tonggu"] .x { box-shadow: none !important; }
+html[data-skin="tonggu"] #stCard,
+html[data-skin="tonggu"] .stcard,
+html[data-skin="tonggu"] .steps,
+html[data-skin="tonggu"] #stWiz {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 2px 6px -4px rgba(44, 43, 31, .35) !important;
+}
+
+/* ---- 5.6 记录抽屉 / 卦例本的行（`.case-row` / `.tr-row`）：legacy 卡片形态带的是
+        **冷色**阴影 `rgba(20,22,28,.16)`（legacy `#sdbCases .case-row` 那条），是抽屉里最后一处
+        冷色残留 ⇒ 改暖影 + 铜线；hover 改「纸面变暗」（与取数方式胶囊同一语言，不是贴图）。 ---- */
+/* ⚠ legacy 有 `#sdbCases .case-row{background:var(--surface)!important}`（ID + shorthand），
+   光用 `.case-row` 压不住 background ⇒ 必须带 `#sdbCases`。面色统一到青铜板浅色。 */
+html[data-skin="tonggu"] #sdbCases .case-row {
+  background-color: #B3B1A2 !important;
+  background-image: var(--tg2-grain) !important;
+  background-size: 120px 120px !important;
+  background-position: 0 0 !important;
+  background-repeat: repeat !important;
+  background-blend-mode: overlay !important;
+  border-color: rgba(105, 116, 88, .42) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 2px 8px -5px rgba(44, 43, 31, .30) !important;
+}
+html[data-skin="tonggu"] #sdbCases .case-row:hover {
+  background-color: #A9A797 !important;
+}
+html[data-skin="tonggu"] .tr-row {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 2px 8px -5px rgba(44, 43, 31, .30) !important;
+  border-color: rgba(105, 116, 88, .42) !important;
+}
