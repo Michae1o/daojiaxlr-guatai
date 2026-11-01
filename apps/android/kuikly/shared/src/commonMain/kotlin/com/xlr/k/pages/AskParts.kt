@@ -52,7 +52,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 /* 壹页「所问之事」的可交互零件：起卦方式、补充背景、详情面板（九数 / 日期 / 时辰）、事类、选择弹层。
-   对位：apps/desktop-web/src/{components/AskPanel.jsx, data/askCore.js, data/castCore.js}
+   早先的实现对位：apps/mobile-web/src/{components/AskPanel.jsx, data/askCore.js, data/castCore.js}
    ⚠ 文案逐字照抄早先的实现（CAST_LB / miniFor / CAT_OPTS / 报错句），改字要先改那边。 */
 
 internal val CAT_OPTS: List<Pair<String, String>> = listOf(

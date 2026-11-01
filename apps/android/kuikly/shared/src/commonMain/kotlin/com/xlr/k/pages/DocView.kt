@@ -11,7 +11,7 @@ import com.tencent.kuikly.compose.ui.Modifier
 import com.tencent.kuikly.compose.ui.unit.dp
 import com.xlr.k.judge.tidyDuanci
 
-/* 断辞正文排版（apps/desktop-web/src/data/docRender.js ＋ styles/legacy.css #llmPane #doc 那几条）
+/* 断辞正文排版（旧 apps/mobile-web/src/data/docRender.js ＋ legacy.css #llmPane #doc 那几条）
    规则：先 tidyDuanci 清洗 → 按行拆：
      · 空行           ⇒ 段距 7px
      · 【xxx】余下文字 ⇒ 小节标题 h4（13/500/上 14 下 4）

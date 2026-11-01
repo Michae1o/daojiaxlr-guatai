@@ -8,7 +8,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-/* 宿主侧：app 内更新（逻辑同 apps/desktop-web/src/data/updateCore.js）
+/* 宿主侧：app 内更新（早先的实现 apps/mobile-web/src/data/updateCore.js + XlrUpdatePlugin.java）
    · 安卓这条路**只能**下 APK 交系统安装器覆盖装，做不到静默安装；
    · 比的是 versionCode（数字），不比版本名；
    · 清单是同一个：(你的站点)

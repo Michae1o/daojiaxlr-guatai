@@ -1,6 +1,6 @@
 package com.xlr.k.pages
 
-/* 配置引导的八步（apps/desktop-web/src/data/guideCore.js 的 GUIDE_STEPS，逐字搬）
+/* 配置引导的八步（旧 apps/mobile-web/src/data/guideCore.js 的 GUIDE_STEPS，逐字搬）
    · body 里 <b>…</b> 统一写成 **…**（RichText_ 认这个），<br> 写成 \n
    · go = true 的那一步，按钮是「去配置」（跳到设置→大模型，光标送去 Key 那一栏）
    · 配图（register/keynav/keynew/keyname/keycopy）已抽到 androidApp/src/main/assets/guide/，

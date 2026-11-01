@@ -7,7 +7,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-/* 卦例本（apps/desktop-web/src/data/recordsStore.js 的存储层，键名沿用 `xlr-cases`）
+/* 卦例本（旧 apps/mobile-web/src/data/recordsStore.js 的存储层，键名沿用 `xlr-cases`）
    一条记录＝一次起卦；模型解完把断辞写回同一条（早先那一版 `__recId` 那套）。
    ⚠ 数据是扁平字符串表，落盘走 judge/JsonLite.kt（导出就是合法 JSON，能看到早先那一版那套字段名）。 */
 

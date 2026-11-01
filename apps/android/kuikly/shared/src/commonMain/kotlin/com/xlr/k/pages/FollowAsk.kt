@@ -45,7 +45,7 @@ import com.xlr.k.judge.plainAll
 import kotlinx.coroutines.launch
 
 /* 叁页下面的「接着问」（旧 `#askBox`）
-   版式真源：apps/desktop-web/src/tailwind.css L165–274（早先那一版这套是 JS 注入的，之后由这里补回）
+   版式真源：apps/mobile-web/src/tailwind.css L165–274（早先那一版这套是 JS 注入的，变更记录 之后由这里补回）
      · 它是**单独一个模块**：`#right > #askBox{padding:14px 18px; border-radius:--m-r-lg}`，
        底/边/影跟断辞卡片同一套（带 `pane` 类），宽度和断辞卡片对齐
      · `.ask-item{border-top:1px solid --line2; padding:8px 0 2px}`，第一条不要这条线

@@ -41,7 +41,7 @@ import com.tencent.kuikly.compose.ui.unit.dp
 import com.tencent.kuikly.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-/* 设置（apps/desktop-web/src/components/SettingsScreen.jsx）
+/* 设置（旧 apps/mobile-web/src/components/SettingsScreen.jsx）
    早先那一版是一页式：左栏点哪一栏、右栏 scrollIntoView 滚到那一段。
    口径（第二次改）：**顶上横排几个栏位，点到哪个就切哪个**，
      要丝滑过渡，**不要总览页**。所以这里是「顶栏 tab + 内容切换」，六个栏各自一份内容。 */
