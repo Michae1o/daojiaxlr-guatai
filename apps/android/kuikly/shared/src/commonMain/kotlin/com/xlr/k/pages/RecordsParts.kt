@@ -157,7 +157,7 @@ internal fun RecordsOverlay() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0.07f, 0.06f, 0.05f, 0.10f * Session.recProg))
-                .tapNoIndication { RecDrawer.close(scope) }
+                .tapSwallow { RecDrawer.close(scope) }
         )
         Box(
             modifier = Modifier
@@ -168,14 +168,26 @@ internal fun RecordsOverlay() {
                 .graphicsLayer { translationX = -panelW * (1f - Session.recProg) }
                 .clip(RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp))
                 .glassMaterial(RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp), drawer = true)
-                /* ⚠ 面板自己吃掉空白处的点击：否则会**穿透到后面那层**（点了就关抽屉/跳回主界面） */
-                .tapNoIndication { menuId = "" }
+                /* ⚠ 面板自己吃掉空白处的点击：否则会**穿透到后面那层**（点了就关抽屉/跳回主界面）。
+                   用 tapSwallow 不用 tapNoIndication：后者按下会把整块压到 0.82（长按=整屏变透明）。 */
+                .tapSwallow { menuId = "" }
                 /* 左滑删除：手势挂在**面板**这层（行内那层收不到拖动，只到点击），
                    起手按 y 认最近的一行；松手 easeOutBack 弹到位 */
                 .pointerInput(Unit) {
                     var activeId = ""
+                    /* ：
+                       行的左滑先露「删除」（-delW 拉满）；继续左拉的超量算成「收抽屉」，
+                       直接写 Session.recProg 跟手（拖多少退多少），松手按进度吸附。
+                       起手不在任何一行（页签/空白）时，左滑同样收抽屉。 */
+                    var closeDx = 0f
+                    val driveClose: () -> Unit = {
+                        val w = if (panelW > 0f) panelW else 1f
+                        Session.recDragging = true
+                        Session.recProg = (1f - closeDx / w).coerceIn(0f, 1f)
+                    }
                     detectHorizontalDragGestures(
                         onDragStart = { off ->
+                            closeDx = 0f
                             val yy = off.y
                             val rowH = with(dens) { 64.dp.toPx() }
                             var best = ""
@@ -195,16 +207,56 @@ internal fun RecordsOverlay() {
                                     if (d < bestD) { bestD = d; best = id }
                                 }
                             }
-                            activeId = best
+                            /* 起手落在两行之间的空隙里就不算某一行，直接当「收抽屉」手势 */
+                            val near = best.isNotEmpty() && (rowY[best] ?: -1f) >= 0f &&
+                                kotlin.math.abs((rowY[best] ?: 0f) + rowH / 2f - yy) <= rowH * 0.75f
+                            activeId = if (near) best else ""
                             if (activeId != "") {
                                 if (swId != activeId) { swId = activeId; swDx = 0f }
                                 menuId = ""
                             }
                         },
-                        onDragEnd = { if (activeId != "") settleRow() },
-                        onDragCancel = { if (activeId != "") settleRow() },
+                        onDragEnd = {
+                            if (closeDx > 0f || Session.recProg < 0.999f) {
+                                Session.recDragging = false
+                                if (Session.recProg < 0.68f) {
+                                    swDx = 0f; swId = ""
+                                    RecDrawer.close(scope)
+                                } else {
+                                    RecDrawer.open(scope)
+                                    if (activeId != "") settleRow()
+                                }
+                            } else if (activeId != "") settleRow()
+                            activeId = ""
+                            closeDx = 0f
+                        },
+                        onDragCancel = {
+                            Session.recDragging = false
+                            if (Session.recProg < 0.999f) {
+                                if (Session.recProg < 0.68f) { swDx = 0f; swId = ""; RecDrawer.close(scope) }
+                                else RecDrawer.open(scope)
+                            }
+                            if (activeId != "") settleRow()
+                            activeId = ""
+                            closeDx = 0f
+                        },
                         onHorizontalDrag = { _, amount ->
-                            if (activeId != "") swDx = (swDx + amount).coerceIn(-delW, 0f)
+                            if (activeId != "") {
+                                val next = swDx + amount
+                                if (next < -delW) {
+                                    /* 删除已拉满：超出的部分驱动抽屉跟手退回 */
+                                    swDx = -delW
+                                    closeDx = (closeDx - (next + delW)).coerceAtLeast(0f)
+                                    driveClose()
+                                } else {
+                                    closeDx = 0f
+                                    swDx = next.coerceIn(-delW, 0f)
+                                }
+                            } else {
+                                /* 空白/页签/空隙起手：左滑直接收抽屉 */
+                                closeDx = (closeDx - amount).coerceAtLeast(0f)
+                                if (closeDx > 0f) driveClose()
+                            }
                         },
                     )
                 }
@@ -477,7 +529,7 @@ internal fun RecordsOverlay() {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .tapNoIndication { menuId = "" }
+                            .tapSwallow { menuId = "" }
                     )
                     Column(
                         modifier = Modifier

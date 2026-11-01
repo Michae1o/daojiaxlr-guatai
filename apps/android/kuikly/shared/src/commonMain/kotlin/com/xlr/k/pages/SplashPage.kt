@@ -196,7 +196,12 @@ internal fun SplashOverlay() {
        （他那九张图就是按各自底色画的，脱离底色会串味。） */
     val bg = Skin.def.bg
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()
+        /* ：
+           开屏整层吃掉点击。子控件（那枚圆钮）先命中、照旧可用；其余位置的点击落在这里被吞掉。
+           ⚠ 必须用 tapSwallow：tapNoIndication 的按下反馈会把整层压到 0.82（长按整屏变透明）。 */
+        .tapSwallow { }
+    ) {
         /* 只是「底色」这一层跟着 layerA 渐隐；飞的那块和文字各自管自己的透明度 */
         Box(
             modifier = Modifier

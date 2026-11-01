@@ -57,7 +57,7 @@ internal fun SkinMenuOverlay() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .tapNoIndication { Session.skinMenuOpen = false }
+                .tapSwallow { Session.skinMenuOpen = false }
         )
         /* 浮层本体：贴顶栏下沿、靠右 16dp、210dp 宽 */
         Column(

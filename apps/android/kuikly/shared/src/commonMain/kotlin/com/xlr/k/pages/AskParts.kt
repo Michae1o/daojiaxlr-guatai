@@ -82,6 +82,18 @@ private val CAST_LB = mapOf(
    ⚠ 必须走 rememberUpdatedState：`pointerInput(Unit)` 只建一次，直接捕 onTap 会**永远执行第一次
    那个 lambda**（闭包里读到的状态也是旧的）——踩到：设置顶栏 tab 点回「大模型」没反应，
    因为第一次组合时它是选中态、闭包里 `if (!on)` 一直是 false。 */
+/* ：
+   根因就是下面那个 tapNoIndication 的按下反馈（缩 0.965 + 压 0.82）——它本来是给"小按钮"用的，
+   挂到一整块面板/整层开屏上，按住的几百毫秒里整块都在变淡。
+   整层/整面板只吃点击、不做任何视觉反馈。 */
+@Composable
+internal fun Modifier.tapSwallow(onTap: () -> Unit = {}): Modifier {
+    val cur = rememberUpdatedState(onTap)
+    return this.pointerInput(Unit) {
+        detectTapGestures { cur.value() }
+    }
+}
+
 @Composable
 internal fun Modifier.tapNoIndication(onTap: () -> Unit): Modifier {
     /* 盘查：全仓 56 处按点击走的是这个 `tapNoIndication`（原本**一点按下反馈都没有**），
@@ -787,7 +799,7 @@ internal fun AskPicker() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0f, 0f, 0f, 0.34f * p.value))
-                .tapNoIndication { Session.picker = null }
+                .tapSwallow { Session.picker = null }
         )
         Column(
             modifier = Modifier

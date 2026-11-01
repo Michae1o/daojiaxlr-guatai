@@ -257,7 +257,7 @@ internal fun GuideOverlay() {
                     .fillMaxSize()
                     .graphicsLayer { alpha = za.value }
                     .background(Color(0f, 0f, 0f, 0.92f))
-                    .tapNoIndication { Session.guideZoom = null },
+                    .tapSwallow { Session.guideZoom = null },
                 contentAlignment = Alignment.Center,
             ) {
                 Image(

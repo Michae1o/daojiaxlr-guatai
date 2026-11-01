@@ -453,8 +453,8 @@ internal fun SetBtn(
         when {
             !enabled -> 0.06f
             primary -> 0f
-            press -> if (danger) 0.50f else 0.22f
-            else -> if (danger) 0.30f else 0.12f
+            press -> if (danger) 0.75f else 0.22f
+            else -> if (danger) 0.55f else 0.12f
         },
         tween(150, easing = KY_EASE_OUT)
     )
@@ -463,21 +463,31 @@ internal fun SetBtn(
     /* 卡通：实黑粗边（早先那一版 .go/.tbtn 都是 2px 黑边 + 800 字重），其它皮肤维持原来的淡描边 */
     val lineColor = if (bru) Skin.def.ink else Color(base.red, base.green, base.blue, lineA)
     val fillColor = if (bru) Color(base.red, base.green, base.blue, if (fillA > 0f) fillA else 0f) else Color(base.red, base.green, base.blue, fillA)
+    /* ：
+       保持玻璃面不动（他点名不许换实心），只把「主」这一档的**边与字**提到 accent：
+       1.2dp 的 accent 描边（0.55，按下 0.85）+ accent 字 → 深浅皮肤都自带对比。 */
+    val solidPrimary = primary && !bru
     Box(
         modifier = Modifier
             .height(if (small) 30.dp else 34.dp)
             .clip(shape)
             .then(
-                if (danger || bru) Modifier.background(fillColor).border(Skin.borderW, lineColor, shape)
-                else Modifier.glassMaterial(shape, control = true, primary = primary,
-                    pressed = if (press && enabled) 1f else 0f)
+                when {
+                    solidPrimary -> Modifier
+                        .glassMaterial(shape, control = true, primary = false,
+                            pressed = if (press && enabled) 1f else 0f)
+                        .border(1.2.dp, Skin.def.accent.copy(alpha = if (press && enabled) 0.85f else 0.55f), shape)
+                    danger || bru -> Modifier.background(fillColor).border(Skin.borderW, lineColor, shape)
+                    else -> Modifier.glassMaterial(shape, control = true, primary = false,
+                        pressed = if (press && enabled) 1f else 0f)
+                }
             )
             .tapPressable(onPress = { p -> press = p && enabled }, onTap = { if (enabled) onClick() })
             .padding(horizontal = if (small) 12.dp else 15.dp)
             .graphicsLayer {
                 scaleX = sc
                 scaleY = sc
-                alpha = if (enabled) 1f else 0.55f
+                alpha = if (enabled) 1f else 0.8f
             },
         contentAlignment = Alignment.Center,
     ) {
@@ -488,8 +498,8 @@ internal fun SetBtn(
             weight = if (bru) 700 else 500,
             letterSpacing = 0.4f,
             color = when {
-                !enabled -> KY_DIM2
-                primary -> KY_ON_ACCENT
+                !enabled -> KY_DIM
+                primary -> if (bru) Skin.def.onAccent else Skin.def.accent
                 danger -> KY_DANGER
                 else -> KY_DIM
             },
