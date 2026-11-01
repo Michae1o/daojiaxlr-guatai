@@ -129,7 +129,7 @@ internal fun JieContent(active: Boolean = true, onNewCast: () -> Unit = {}) {
     )
     val answer = Session.askAnswer
 
-    /* 定稿，照手机端早先那一版（apps/mobile-web/src/styles/legacy.css L4386 那套）：
+    /* 定稿，照 apps/desktop-web/src/styles/legacy.css L4386 那套：
        ① 卡片＝**一屏高的卡**：上限 = 可用高 − 底部「断卦依据」条（实测高度），不再无限长；
        ② 断辞**在卡片里自己滚**（早先那一版 `.llm-main{flex:1 1 auto;min-height:0;overflow-y:auto}`）；
        ③ 所问/卦·时（Recap）钉卡顶、两个按钮钉卡底（早先那一版 `flex:0 0 auto`）；
@@ -636,7 +636,7 @@ private fun EvGroup(b: com.xlr.k.judge.Block) {
    断辞的滚动条（用户：「不是进度条，而是滚动条，现在看着很卡顿。
    滚动条你都不会了？那种非线性的，丝滑的。」）
 
-   早先那一版真源：apps/mobile-web/src/data/phoneAnim.js → initScrollHint()
+   真源：旧版网页端的滚动提示（initScrollHint）
      · 3px 宽圆角墨条，颜色取 `--ink`（30%→19% 竖向渐变），跟九套皮肤走；
      · 拇指高 = 轨道 × (视口高 / 内容高)，最小 26px；位置 = 轨道 × 滚动进度；
      · 只在容器真能滚时出现；停手 900ms 淡出（CSS transition .26s ease）。

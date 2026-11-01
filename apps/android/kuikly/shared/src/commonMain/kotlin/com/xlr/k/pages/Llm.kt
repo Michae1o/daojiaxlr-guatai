@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-/* 模型解卦 · 配置与请求（早先的实现：apps/mobile-web/src/data/{settingsCore.js, llmEndpoint.js}）
+/* 模型解卦 · 配置与请求（对位：apps/desktop-web/src/data/{settingsCore.js, llmEndpoint.js}）
    ⚠ 文案（预设表 / 缺项提示）逐字照抄旧 settingsCore.js。
    网络与存储由宿主（androidApp/LlmHost.kt）注入，shared 侧不碰平台 API。 */
 
@@ -61,7 +61,7 @@ object Platform {
     /** 震动反馈：0 = 刻度（页间滑动时八卦名切换那一格），1 = 钝感（打开记录抽屉）。
      *  宿主没实现就静默跳过（别在这里判 typeof，直接 invoke 前判 null）。 */
     var haptic: ((Int) -> Unit)? = null
-    /** 是不是 lite 包（构建期 -PxlrLite=true）：不显示「断卦依据」、解卦用 SYS_LITE */
+    /** 兼容旧 lite 构型的开关：本仓恒为 false（一律显示「断卦依据」、解卦用完整提示词） */
     var lite: Boolean = false
     /** 写一个文件到「下载/道家小六壬/」，返回给用户看的路径（失败 null） */
     var saveFile: ((String, String) -> String?)? = null

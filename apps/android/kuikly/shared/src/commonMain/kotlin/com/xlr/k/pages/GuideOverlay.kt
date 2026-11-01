@@ -34,7 +34,7 @@ import com.tencent.kuikly.compose.ui.graphics.graphicsLayer
 import com.tencent.kuikly.compose.ui.platform.LocalDensity
 import com.tencent.kuikly.compose.ui.unit.dp
 
-/* 配置引导（旧 apps/mobile-web/src/data/guideCore.js 的 #onbLayer）
+/* 配置引导（apps/desktop-web/src/data/guideCore.js 的 #onbLayer）
    早先那一版样式（legacy.css L887-939）：
      .onb          铺满、底色 = --bg、居中、padding 24（小屏 16）
      .onb .card    max-width 680、1px --line2 边、底 = --surface、padding 24 30 24、内部可滚

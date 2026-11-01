@@ -3,8 +3,8 @@ package com.xlr.k.pages
 import com.xlr.k.judge.Rec
 
 /* 记录页的「复盘 / 准则 / 接着问」——对应早先那一版
-   apps/mobile-web/src/review/reviewCore.js（reviewCase / ruleBlock / reviewBlock / confirmRule）
-   与 components/Records.jsx 的 Detail（caseDetailHtml）。
+   apps/desktop-web/src/review/reviewCore.js（reviewCase / ruleBlock / reviewBlock / confirmRule）
+   与 apps/desktop-web/src/components/Records.jsx 的 Detail（caseDetailHtml）。
    ⚠ 语义逐条照旧：① 没接模型就不复盘，只提示，不编；② 复盘要出网，由模型指出错在哪一步；
    ③ 复盘结果只落在这一条记录上（rv/rvWhy/rvRule），**用户点「写入准则」才进准则表**。
 */

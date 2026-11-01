@@ -44,7 +44,7 @@ import com.xlr.k.judge.Rec
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toLocalDateTime
 
-/* 记录（旧 apps/mobile-web/src/components/Records.jsx + 参照图）
+/* 记录（apps/desktop-web/src/components/Records.jsx + 参照图）
    左侧抽屉：搜索框 → 页签「卦例 / 准则」→ 按天分组列表（日期 · 所问 · ⋮）→ 回收站胶囊 → 设置。
    · 点一条 = 打开**详情**（早先那一版 `Detail`：‹ 返回列表 / 所问 / 背景 / 起卦 / 当时的断辞 / 准不准·实际情况）
    · ⋮ = 贴行浮出菜单（早先那一版 sheetActs：看这一卦 / 应验 / 没应验 / 删）

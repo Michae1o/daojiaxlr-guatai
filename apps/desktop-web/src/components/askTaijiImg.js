@@ -5,7 +5,7 @@
  *   桌面端随后问「二选一是针对电脑版吗？」⇒ 答「不是，电脑版还是旧的共用开屏画稿（36px）」⇒
  *   ⇒ 桌面端也换成**同一枚徽章 ＋ 同一套尺寸（44 太极 / 48 按钮）**，与手机端对齐。
  *
- *   （`apps/desktop-web` 与 `apps/mobile-web` 互不引用），所以这里必须自带一份**逐字节相同**的 PNG
+ *   （两端前端互不引用），所以这里必须自带一份**逐字节相同**的 PNG
  *   （`assets/taiji-ask-144.png` = 31,511 B，sha256 `23f8439d1b7b057b…`，与手机端那份一致）。
  *
  * 来源与预处理（可复算 · （生成过程））：
@@ -26,7 +26,7 @@ import src from '../assets/taiji-ask-144.png';
    而打包器会把字符串常量按原样留在产物里 ⇒ 若写成 `'… src="' + src + '" …'`，
    产物里出现的是 `src="' + …`（后面不是 `data:`）⇒ 被误判成外部引用（实测：链 Step 7 FAIL `<img src= × 1`）。
    ⇒ 只在**桌面端**（这条闸只跑桌面端）写成下面这种「`src="data:image/png;base64,` 立即可见」的拼法。
-   （手机端 `apps/mobile-web/src/components/askTaijiImg.js` 用单串写法；它的链不跑这条闸。）*/
+   （手机端用单串写法；它的链不跑这条闸。）*/
 const PREFIX = 'data:image/png;base64,';
 const B64 = src.indexOf(PREFIX) === 0 ? src.slice(PREFIX.length) : src;
 

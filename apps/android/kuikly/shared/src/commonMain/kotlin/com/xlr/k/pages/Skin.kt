@@ -27,9 +27,9 @@ import com.tencent.kuikly.compose.ui.graphics.Color
 
 /* 皮肤九套 + 日夜（口径：：「皮肤九套，包括还有昼夜切换也得加」）
 
-   真源 = 手机端网页版 `apps/mobile-web/src/styles/legacy.css` L681-816 的
+   真源 = `apps/desktop-web/src/styles/legacy.css` L681-816 的
    `html[data-skin="…"]` 变量块，一套一套逐字抄过来；名字与副标题照
-   `apps/mobile-web/src/data/skinsCore.js` 的 SKINS 表。
+   `apps/desktop-web/src/data/skinsCore.js` 的 SKINS 表。
 
    日夜口径也照旧（`src/data/globals.js` 的 toggleDayNight）：
      · 早先那一版**不是**给每套皮肤做一份深色值，而是「切到夜＝切到深色那套皮肤」——

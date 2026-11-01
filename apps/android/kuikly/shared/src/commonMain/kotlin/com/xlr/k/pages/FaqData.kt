@@ -1,6 +1,6 @@
 package com.xlr.k.pages
 
-/* 常见问题（生成物，别手改）—— 逐字来自 apps/mobile-web/src/data/faq.js，
+/* 常见问题（生成物，别手改）—— 逐字来自 apps/desktop-web/src/data/faq.js，
    只取安卓端该显示的：p === 'and' 与 p === 'all'，顺序保持原表。
    生成脚本：apps\android/.tmp/spec/gen-faq.mjs */
 

@@ -8,7 +8,7 @@
      整文件 sha256[:16] = e3776efc1542eaae（214,523 B）· 块 `window.XLR_GUIDE_IMG = {` … `};`（214,269 字符）
      五串 data-URI 与源切片**逐字节相同**（生成器当场比，见 （生成过程））
    —— 两端 ——
-     桌面 `apps/desktop-web/src/data/guideImages.js` ＝ 手机 `apps/mobile-web/src/data/guideImages.js`
+     桌面 `apps/desktop-web/src/data/guideImages.js` ＝ 手机同源那份
      （原记录 两端前端不共用 ⇒ 各存一份，不新建共享层）
    —— 用法 ——
      import 即执行（早期实现 `34-script` 也是解析期赋值 `window.XLR_GUIDE_IMG`）：外壳顶层

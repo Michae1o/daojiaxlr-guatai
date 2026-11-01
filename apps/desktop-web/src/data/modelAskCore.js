@@ -160,7 +160,7 @@ function recAskHtml(r) {
 
 /* ============================================================================
  *
- * 来源（**逐字**）：上游 `apps/mobile-web/chunks/a10.html`（**进产物的那份**）
+ * 来源（**逐字**）：上游产物 `a10`（**进产物的那份**）
  *   plainCore L333–337 · followupUser L339–360 · streamAsk L362–387 · runFollowup L389–393 ·
  *   noModelAskHint L610–613 · threadMerge L616–624 · persistThread L626–635 · askMore L638–662 ·
  *   事件委托（click L755–769 / keydown L770–776）

@@ -40,7 +40,7 @@ import com.tencent.kuikly.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/* 开屏（手机版）。抄 apps/mobile-web/src/data/splashCore.js 的**手机那一支**
+/* 开屏（手机版）。抄 apps/desktop-web/src/data/splashCore.js 的**手机那一支**
    ＋ styles/legacy.css 的 #xlrSplash 一组规则（的口径）。
 
    ⚠ 别去画太极：明确「太极取消」，CSS 里 .sl-taiji / .sl-orbwrap 是
