@@ -191,12 +191,10 @@ internal fun SplashOverlay() {
         (1f - bezier(floatArrayOf(0.2f, 0.75f, 0.25f, 1f), (t - MS_MOTION).coerceAtLeast(0f) / 560f)).coerceIn(0f, 1f)
     val arrowA = if (!tapped) 1f else (1f - t / 220f).coerceIn(0f, 1f)
 
-    /* 早先那一版 --accent-bg = accent 的 7%：黑皮肤下 ≈ #E4E4E5 */
-    /* 统一黑底：开屏固定夜空黑，不再跟皮肤底色走 —— 星图是金线，只有黑底才读得出；
-       皮肤再换，开屏这一段都是同一个夜色。 */
-    val bgR = 0.047f
-    val bgG = 0.043f
-    val bgB = 0.035f
+    /* 用户为九套皮肤各画了一张星图（out-ref\星图各态）⇒ 开屏底色回到皮肤自己：
+       底色＝该皮肤的 bg，星图按 Skin.cur 取 splash-stars-<key>.png，文字/金线/圆钮全部走皮肤令牌。
+       （他那九张图就是按各自底色画的，脱离底色会串味。） */
+    val bg = Skin.def.bg
 
     Box(modifier = Modifier.fillMaxSize()) {
         /* 只是「底色」这一层跟着 layerA 渐隐；飞的那块和文字各自管自己的透明度 */
@@ -204,7 +202,7 @@ internal fun SplashOverlay() {
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { alpha = layerA }
-                .background(Color(bgR, bgG, bgB, 1f))
+                .background(bg)
         )
         /* 开屏的「画」：水墨晕染圆 + 香槟金细线与节点
            只在没点之前画（飞行动画期间每秒重绘上千笔会掉帧），随文字一起淡出 */
@@ -212,7 +210,12 @@ internal fun SplashOverlay() {
            我上一版把它挂在「t < 720ms」里 ⇒ 恰好盖住了整个起飞段，每帧都被这堆绘制拖住，动画看起来像在爬。
            ⇒ 改成**只在没点之前挂载**：点下去的瞬间它就撤掉（文字本来也在 150ms 后开始淡出，看不出断）。 */
         /* 背景星点：固定种子、静态，只作气氛；跟着底色一起淡出 */
-        StarField(alphaProvider = { layerA })
+        /* 背景星点：固定种子、静态，只作气氛；颜色跟皮肤（深色＝白点、浅色＝墨点），约两成用该皮肤的 accent 点睛 */
+        StarField(
+            alphaProvider = { layerA },
+            dot = if (Skin.dark) Color(1f, 1f, 1f) else Skin.def.ink,
+            accent = Skin.def.accent,
+        )
 
         if (!tapped) {
             SplashArt(alphaProvider = { textA })
@@ -226,13 +229,13 @@ internal fun SplashOverlay() {
                 modifier = Modifier
                     .width(1.dp)
                     .height(18.dp)
-                    .background(Color(0.86f, 0.73f, 0.47f, 0.22f))
+                    .background(KY_ACCENT_LINE)
                     .graphicsLayer { alpha = textA }
             )
             Box(
                 modifier = Modifier
                     .size(4.dp)
-                    .background(Color(0.86f, 0.73f, 0.47f, 0.55f), CircleShape)
+                    .background(KY_ACCENT, CircleShape)
                     .graphicsLayer { alpha = textA }
             )
             Text_(
@@ -241,7 +244,7 @@ internal fun SplashOverlay() {
                 lineHeight = 46f,
                 letterSpacing = 10.2f,
                 serif = true,
-                color = Color(0.95f, 0.93f, 0.88f),
+                color = KY_INK,
                 modifier = Modifier.padding(top = 18.dp).graphicsLayer { alpha = textA },
             )
             Text_(
@@ -250,7 +253,7 @@ internal fun SplashOverlay() {
                 lineHeight = 20f,
                 letterSpacing = 0.75f,
                 serif = true,
-                color = Color(0.74f, 0.70f, 0.62f),
+                color = KY_DIM2,
                 modifier = Modifier.padding(top = 11.dp).graphicsLayer { alpha = textA },
             )
             Box(
@@ -258,7 +261,7 @@ internal fun SplashOverlay() {
                     .padding(top = 18.dp)
                     .width(44.dp)
                     .height(1.dp)
-                    .background(Color(0.86f, 0.73f, 0.47f, 0.30f))
+                    .background(KY_ACCENT_LINE)
                     .graphicsLayer { alpha = textA }
             )
             Text_(
@@ -267,7 +270,7 @@ internal fun SplashOverlay() {
                 lineHeight = 26f,
                 letterSpacing = 2.6f,
                 serif = true,
-                color = Color(0.95f, 0.93f, 0.88f),
+                color = KY_INK,
                 modifier = Modifier.padding(top = 16.dp).graphicsLayer { alpha = textA },
             )
             Column(
@@ -284,7 +287,7 @@ internal fun SplashOverlay() {
                         fontSize = 12f,
                         lineHeight = 24f,
                         serif = true,
-                        color = Color(0.60f, 0.57f, 0.50f),
+                        color = KY_DIM2,
                         modifier = Modifier.graphicsLayer { alpha = textA },
                     )
                 }
@@ -343,7 +346,7 @@ internal fun SplashOverlay() {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    if (tapped) Color(0.85f, 0.68f, 0.38f) else veil(0f),
+                                    if (tapped) KY_ACCENT else veil(0f),
                                     CircleShape,
                                 )
                         )
@@ -373,7 +376,7 @@ internal fun SplashOverlay() {
                         )
                         if (arrowA > 0f) {
                             Box(modifier = Modifier.graphicsLayer { alpha = arrowA }) {
-                                ArrowGlyph(if (tapped) Color(1f, 1f, 1f) else KY_INK)
+                                ArrowGlyph(if (tapped) Skin.def.onAccent else KY_INK)
                             }
                         }
                     }
@@ -498,15 +501,14 @@ private fun SplashArt(alphaProvider: () -> Float) {
     val dens = LocalDensity.current.density
     val swPx = (if (Platform.screenW > 0) Platform.screenW else 1080).toFloat()
     val shPx = (if (Platform.screenH > 0) Platform.screenH else 2400).toFloat()
-    /* 开屏的「画」= 给的《金色北斗环绕二十八宿》（去字版）。
-       五次调整（按版面比例定，不再拍脑袋）：
-         · 整张必须完整露出 ⇒ 不能用「贴底出血」，改成「底边留 6% 屏高的安全边」
-         · 星图整块落在「点击进入」这条 CTA 线**之下**，不跟横线打架；
-         · 宽度收到 0.60 屏宽，让上沿刚好从 CTA 线下面开始，视觉重量压在下三分之一。 */
-    val artW = swPx * 0.60f
-    val artH = artW * 1672f / 941f
+    /* 开屏的「画」= 为每套皮肤各画的一张星图（out-ref\星图各态，1254×1254 方形、透明底）。
+       按 Skin.cur 取 splash-stars-<key>.png。九张图原来的内容占画布 83%~93% 不等（卡通最满、豆沙最空），
+       直接同尺寸摆出来大小会差一截 ⇒ 打包时已统一归一化：内容最长边 = 1130/1254、内容底边落在 1206/1254。
+       这里按「画布宽 = 0.74 屏宽、内容底边压到 0.90 屏高」摆，九套视觉大小/落点一致。 */
+    val artW = swPx * 0.74f
+    val artH = artW
     val leftPx = (swPx - artW) / 2f
-    val topPx = shPx - artH - shPx * 0.10f
+    val topPx = shPx * 0.90f - artW * (1206f / 1254f)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -514,7 +516,7 @@ private fun SplashArt(alphaProvider: () -> Float) {
             .graphicsLayer { alpha = alphaProvider() * 0.9f },
     ) {
         Image(
-            painter = com.tencent.kuikly.compose.coil3.rememberAsyncImagePainter("assets://splash-stars-plain.png"),
+            painter = com.tencent.kuikly.compose.coil3.rememberAsyncImagePainter("assets://splash-stars-${Skin.cur}.png"),
             contentDescription = null,
             modifier = Modifier
                 .offset(x = (leftPx / dens).dp, y = (topPx / dens).dp)
@@ -527,7 +529,7 @@ private fun SplashArt(alphaProvider: () -> Float) {
    白为主、约两成香槟金；透明度压得很低，只铺气氛，不跟文字抢。
    跟着底色一起淡出（alphaProvider 传 layerA）。 */
 @Composable
-private fun StarField(alphaProvider: () -> Float) {
+private fun StarField(alphaProvider: () -> Float, dot: Color, accent: Color) {
     Canvas(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = alphaProvider() }) {
         var s = 0x5EED20261031L
         repeat(150) {
@@ -540,9 +542,9 @@ private fun StarField(alphaProvider: () -> Float) {
             val radius = 0.5f + t * 1.2f
             val alpha = 0.07f + t * 0.28f
             if (t > 0.82f) {
-                drawCircle(Color(0.86f, 0.73f, 0.47f, alpha), radius, Offset(x, y))
+                drawCircle(accent.copy(alpha = alpha), radius, Offset(x, y))
             } else {
-                drawCircle(Color(1f, 1f, 1f, alpha * 0.75f), radius, Offset(x, y))
+                drawCircle(dot.copy(alpha = alpha * 0.75f), radius, Offset(x, y))
             }
         }
     }
