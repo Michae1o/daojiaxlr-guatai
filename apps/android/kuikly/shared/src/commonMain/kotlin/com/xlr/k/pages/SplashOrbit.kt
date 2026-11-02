@@ -3,12 +3,12 @@ package com.xlr.k.pages
 /* SplashOrbit.kt —— 开屏「二十八宿环绕北斗」的运行时（安卓）
  *
  * 素材与数据由 apps/android/tools/gen-splash-orbit.py 生成（见 SplashOrbitData.kt），
- * 口径来自预览「外参考/星图各态/九套环绕动画/轻浮动无宿间连线」：
+ * 当前素材来自「外参考/星图各态/朋友星宿九套适配」：
  *   · 轨道 = 各自原图拟合出来的**倾斜椭圆**；相位按**弧长**走 —— 按角度走会忽快忽慢，
  *     椭圆上等角度 ≠ 等距离，所以先建弧长表再反查参数角
- *   · 宿组只做平移（原像素，不重画不调色）；宿间连线与残留线头已经从素材中移除
+ *   · 宿组从朋友提供的透明图提取，离线按九套皮肤调色、随轨道倾斜；运行时只做平移
  *   · 每宿按原图 ID 错开起伏，幅度 8–11 原图像素，周期 3–6 秒
- *   · 北斗不动，画在最上层
+ *   · 北斗保留原素材，整体轻浮动，画在最上层
  *   · 24 秒一圈，匀速。这里**必须线性**：项目里「动画一律非线性」指的是进出场过渡，
  *     环绕是持续自转，套缓动会变成一顿一顿地转
  *   · 九套原始内容占比不同（1046~1162 宽不等）⇒ 按静止内容 bbox 归一化：
@@ -193,6 +193,27 @@ private fun SplashOrbitContent(set: OrbitSet, alphaProvider: () -> Float) {
                         val ang = path.angleAt(base + path.total * progress)
                         translationX = (path.xOf(ang) - scx) * k
                         translationY = (path.yOf(ang) - scy + orbitBob(id, progress)) * k
+                    },
+            )
+            // Separate star-point light layer follows exactly the same orbit.
+            // Slow, staggered pulses share the 24s clock and join without a jump.
+            val lightWave = (1f + sin(progress * TWO_PI * (4 + id % 3) + id * 2.3999632f)) * 0.5f
+            val sparkle = if (set.key == "hei" || set.key == "mg") {
+                0.45f + 0.55f * lightWave * lightWave * lightWave
+            } else {
+                0.12f + 0.88f * lightWave * lightWave * lightWave
+            }
+            Image(
+                painter = rememberAsyncImagePainter("assets://splash-orbit/${set.key}/f${pad2(gi + 1)}.png"),
+                contentDescription = null,
+                modifier = Modifier
+                    .offset(x = (xPx / dens).dp, y = (yPx / dens).dp)
+                    .size((wPx / dens).dp, (hPx / dens).dp)
+                    .graphicsLayer {
+                        val ang = path.angleAt(base + path.total * progress)
+                        translationX = (path.xOf(ang) - scx) * k
+                        translationY = (path.yOf(ang) - scy + orbitBob(id, progress)) * k
+                        alpha = sparkle
                     },
             )
         }
