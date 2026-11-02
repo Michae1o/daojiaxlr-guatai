@@ -455,6 +455,12 @@ internal fun AskCard(onCast: () -> Unit) {
                 BasicTextField(
                     value = Session.q,
                     onValueChange = { Session.q = it },
+                    /* ：
+                       Kuikly 的 BasicTextField 是**原生 EditText 叠在画布上**，它不吃上层的 pointerInput ——
+                       开屏那层 tapSwallow 即使吃掉了点击，原生输入框照样获焦弹键盘（实测：开屏淡出到
+                       alpha≈0 的那 1.6 秒里点输入框位置，logcat 有 XLR_SPLASH_EAT，键盘也开了）。
+                       开屏期间直接把它禁掉：点击不再聚焦，splashOn 变 false 后自动恢复。 */
+                    enabled = !Session.splashOn,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(fieldH.dp)
