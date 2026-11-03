@@ -484,7 +484,7 @@ internal fun AskCard(onCast: () -> Unit) {
                 Spacer(modifier = Modifier.width(8.dp))
                 GoButton({ dismissIme(); onCast() }, Session.q.isNotBlank())
             }
-            /* 报数：三个数直接在卡里报（2026-10-30 用户：为写三个数去撑开详情太占地方）。
+            /* 报数：三个数直接在卡里报。
                只在报数模式出现，高度 44dp（8 间距 + 30 控件 + 6 垫底），跟别处一样缓动开合。
                ★ 用户同日：「一旦展开详情，这个小格子就隐藏」——详情里的三个步进才是完整版，
                  两个同时出现会重复 ⇒ 报数 且 详情展开时收起便捷格。 */

@@ -1,8 +1,8 @@
-/* askCore.js —— 由脚本生成（S3b/批 A）
+/* askCore.js —— 由脚本生成（）
    来源：apps/desktop-web/src/legacy/parts/18-script.txt（「壹·问卦页」那一段）
    生成：node tools/extract-ask-core.mjs
    规矩：**原样搬运** —— 下面每一段都是从源文件**逐字节搬运**搬过来的原文；工具每次运行都会
-        逐字核对「产物文本 == 源切片」。改行为要改 legacy 源再重跑本工具（S3b 删段后本文件升为真源）。
+        逐字核对「产物文本 == 源切片」。改行为要改 legacy 源再重跑本工具（本文件为真源）。
    ⛔ 判据域函数（clockNums / numVals 的算式 / numsFilled）**不在这里**：一律 import 自 @xlr/shared-judgment
       （内部约定 原记录 + 链第 1 步 R4 守门人）；本文件只给 DOM 取值的薄包装。
    ⚠ 提取出来的正文引用 `h1/h2/mNum/mTime/mClock` 这几个自由变量（源里是全局）⇒ 由 bind() 注入。

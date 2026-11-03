@@ -41,7 +41,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /* 开屏（手机版）。抄 apps/mobile-web/src/data/splashCore.js 的**手机那一支**
-   ＋ styles/legacy.css 的 #xlrSplash 一组规则（2026-10-09 之后的口径）。
+   ＋ styles/legacy.css 的 #xlrSplash 一组规则。
 
    ⚠ 别去画太极：明确「太极取消」，CSS 里 .sl-taiji / .sl-orbwrap 是
      display:none !important（legacy.css L3336-3337）。现在开屏＝竖轴 + 标题 + 副题 + 分隔线 +
@@ -191,7 +191,7 @@ internal fun SplashOverlay() {
         (1f - bezier(floatArrayOf(0.2f, 0.75f, 0.25f, 1f), (t - MS_MOTION).coerceAtLeast(0f) / 560f)).coerceIn(0f, 1f)
     val arrowA = if (!tapped) 1f else (1f - t / 220f).coerceIn(0f, 1f)
 
-    /* 2026-11-01 用户为九套皮肤各画了一张星图（out-ref\星图各态）⇒ 开屏底色回到皮肤自己：
+    /* 九套皮肤各有一张星图 ⇒ 开屏底色回到皮肤自己：
        底色＝该皮肤的 bg，星图按 Skin.cur 取 splash-stars-<key>.png，文字/金线/圆钮全部走皮肤令牌。
        （他那九张图就是按各自底色画的，脱离底色会串味。） */
     val bg = Skin.def.bg
@@ -209,7 +209,7 @@ internal fun SplashOverlay() {
                 .graphicsLayer { alpha = layerA }
                 .background(bg)
         )
-        /* 开屏的「画」：水墨晕染圆 + 香槟金细线与节点（2026-10-29 用户给了参考图）
+        /* 开屏的「画」：水墨晕染圆 + 香槟金细线与节点
            只在没点之前画（飞行动画期间每秒重绘上千笔会掉帧），随文字一起淡出 */
         /* ⚠ 2026-10-29 现象：「点击后飞起来极其慢、像卡住」：这幅水墨每帧上千笔（160 弧 + 900 点 + 200 笔触），
            我上一版把它挂在「t < 720ms」里 ⇒ 恰好盖住了整个起飞段，每帧都被这堆绘制拖住，动画看起来像在爬。
@@ -222,7 +222,7 @@ internal fun SplashOverlay() {
             accent = Skin.def.accent,
         )
 
-        /* 开屏的「画」：二十八宿沿倾斜椭圆环绕北斗（2026-11-01 用户做了九套环绕动画，接这里）
+        /* 开屏的「画」：二十八宿沿倾斜椭圆环绕北斗
            只在没点之前挂载 —— 点下去整层卸载（飞行动画期间每秒重绘几十笔会掉帧，与旧星图同一口径） */
         if (!tapped) {
             SplashOrbit(alphaProvider = { textA })

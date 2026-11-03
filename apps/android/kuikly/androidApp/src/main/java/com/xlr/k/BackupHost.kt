@@ -16,7 +16,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
 
-/* 卸载 / 重装的数据兜底（2026-11-03 用户：朋友重装之后卦例没了，而且每次更新都要重配 API Key）。
+/* 卸载 / 重装的数据兜底。
 
    根因不是"更新会清数据"：卦例本、准则、API Key、模型预设全都住在同一份
    SharedPreferences（`xlr-k-llm.xml`）里，只有「卸载」或「清除数据」才会整目录消失。

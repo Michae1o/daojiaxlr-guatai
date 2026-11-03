@@ -40,7 +40,7 @@ object Platform {
      *  ⚠ 不能靠宿主的内边距留白 —— 那块不属于页面，会露出窗口底色（白条，2026-10-30 抓到）。 */
     var anchorPadDp: Float by androidx.compose.runtime.mutableStateOf(0f)
     /** 同上的**开关版**：点加号那一刻同步置 true。
-     *  ⚠ 底部留白不能用 anchorPadDp 动画后的值判断 —— 那一帧还是 0，卡片会先坠一下（2026-10-30 现象：的）。 */
+     *  ⚠ 底部留白不能用 anchorPadDp 动画后的值判断 —— 那一帧还是 0，卡片会先坠一下。 */
     var anchorOn: Boolean by androidx.compose.runtime.mutableStateOf(false)
     /** 由 Compose 每帧直接写给宿主的底部内边距（px）：详情展开时三个动作必须同一个时钟推进，
      *  否则原生的 ValueAnimator 和 Compose 动画各走各的，中间会错开几帧＝卡片掉过头再回弹（果冻）。
@@ -48,10 +48,10 @@ object Platform {
     var padDriven: Boolean = false
     var setImePadPx: ((Int) -> Unit)? = null
     /** 点加号那一刻记下的键盘高度（px）。⚠ 不能每帧去读 imePadPx —— 键盘一收它就被写成 0，
-     *  驱动循环会按 0 推内边距，卡片直接坠到底（2026-10-30 用户第二张图）。 */
+     *  驱动循环会按 0 推内边距，卡片直接坠到底。 */
     var anchorKbPx: Int = 0
     /** 把页面底色同步给宿主窗口：底部内边距让出来的那块必须跟页面同色，
-     *  否则动画中途会露出白色（Activity 窗口底色）——2026-10-30 用户看到的那条白带。 */
+     *  否则动画中途会露出白色（Activity 窗口底色）。 */
     var setPageBg: ((Float, Float, Float) -> Unit)? = null
     /** 系统返回键（宿主 onBackPressed 里调）：返回 true = 共享层已经消化掉，别退 Activity。
      *  次序见 RootPage 的 handleBack：浮层 → 设置 → 记录抽屉 → 三页（两次退出）。 */
@@ -223,7 +223,7 @@ internal object LlmStore {
         return ""
     }
 
-    /** 旧 missing()：逐字照抄（2026-10-28 补了「本地中转」那一支） */
+    /** 旧 missing()：逐字照抄 */
     fun missing(c: LlmCfg): String {
         if (c.base.isEmpty()) return "还没选服务商，接口地址是空的。"
         if (c.model.isEmpty()) return "还没挑模型。"

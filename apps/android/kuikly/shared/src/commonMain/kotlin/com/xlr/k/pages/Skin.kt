@@ -25,7 +25,7 @@ import com.tencent.kuikly.compose.ui.graphics.drawscope.DrawScope
 import com.tencent.kuikly.compose.ui.unit.dp
 import com.tencent.kuikly.compose.ui.graphics.Color
 
-/* 皮肤九套 + 日夜（2026-10-29 口径：：「皮肤九套，包括还有昼夜切换也得加」）
+/* 皮肤九套 + 日夜
 
    真源 = 手机端网页版 `apps/mobile-web/src/styles/legacy.css` L681-816 的
    `html[data-skin="…"]` 变量块，一套一套逐字抄过来；名字与副标题照
@@ -269,8 +269,7 @@ internal fun veil(a: Float): Color =
 /** 卡片 / 胶囊的描边：浅色皮肤是淡淡一道墨，深色皮肤是淡淡一道白（早期版本 --line2） */
 internal val KY_CARD_LINE: Color get() = Skin.def.line2
 
-/* ---------- 皮肤「造型」三件（2026-10-29 用户：「卡通这个皮肤和黑白没啥区别了…原本想的是
-   那种粗线条、橙色点缀的手绘风格」）----------
+/* ---------- 皮肤「造型」三件----------
    早期版本卡通(bru)在 legacy.css L842-871 另有一整套「系统级加强」：
      卡片 2px 实黑边 + 5px 5px 0 硬阴影、主按钮 2px 黑边 + 朱红底 + 800 字重、
      输入框 2px 黑边、顶栏压成黑板 + 朱砂底线。
@@ -401,7 +400,7 @@ private fun mixc(a: Color, b: Color, t: Float): Color = Color(
     a.alpha + (b.alpha - a.alpha) * t,
 )
 
-/* 皮肤小样（2026-10-29 ）
+/* 皮肤小样
 
    早期版本菜单那颗是 12px 的纯色方块（.skinmenu .sw）+ 一个纯色小点，干、呆、跟界面没关系。
    这里改成一张**迷你卡**：底色 → 里面一张卡（surface）→ 底下一条强调色小条（就是主按钮的颜色），

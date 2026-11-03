@@ -24,7 +24,7 @@ internal object Session {
     /** 「报数」那一格的中心（dp，相对取数方式那条药丸的左缘）：报数便捷格要对着它的中轴排。
      *  由 ModeSeg 量出来写这里（：「放到卡片正中间，以报数那两个字为中心轴的正下方」）。 */
     var numAxisRelDp by mutableStateOf(0f)
-    /** 详情是不是「用户自己点开的」（2026-10-29 用户：切回时间取数/月日时 要自动收回，除非手动点开过） */
+    /** 详情是不是「用户自己点开的」 */
     var detailManual by mutableStateOf(false)
 
     /* 三个数（旧 #n1/#n2/#n3 的 value）；手改过就 numManual=true，不再被时钟覆盖 */

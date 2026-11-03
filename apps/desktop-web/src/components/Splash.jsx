@@ -1,13 +1,13 @@
 /* Splash.jsx —— 开屏组件
  *
- * S1a（已完成）：先以**同源 markup** 渲染（`splashMarkup.js` + dangerouslySetInnerHTML），保证像素一致、把整条链打通。
- * S1b（进行中）：在**同一判据（轻量比对 ≤0.01% 且 maxΔ≤32）**保护下逐段转成真 JSX。
- *   口径与步骤见 `开发计划`「S1b 范围与验收」与执行记录 `docs/s1b-log.md`。
+ * 先以**同源 markup** 渲染（`splashMarkup.js` + dangerouslySetInnerHTML），保证像素一致、把整条链打通。
+ * 在**同一判据（轻量比对 ≤0.01% 且 maxΔ≤32）**保护下逐段转成真 JSX。
+ *   口径与步骤见 `开发计划`「范围与验收」与执行记录 `历史记录`。
  *
- * ---- 当前进度：S1b **已完成**（3 步走完，脚手架已清除）----
+ * ---- 当前进度：已完成（3 步走完，脚手架已清除）----
  * 为什么第 1 步是"骨架"而不是口径里的 G1 defs：React 里一个元素**不能同时**用 children 与
  *   dangerouslySetInnerHTML ⇒ 想把任何一段字符串换成 JSX 元素，**它的祖先骨架必须先写成 JSX**
- *   （见 docs/s1b-log.md 原记录；步骤切分已定为 3 步）。
+ *   （步骤切分已定为 3 步）。
  * 已做（每步都过两把尺子：结构逐节点比对 + 轻量像素交叉比对）：
  *   第 1 步（骨架）—— `#xlrSplash` 以下的外层骨架（span/div/b/button 与全部文本）写成真 JSX，
  *     属性、class、顺序、文本逐字照抄；
@@ -16,12 +16,12 @@
  *   第 3 步（图形）—— 图形与路径（3 ellipse + 14 circle + 12 path + 1 g）由 `SplashShapes.jsx` 渲染；
  *     **宿主元素已全部清除**。
  * 判据①②（React 完全接管）：静态 0 处 `dangerouslySetInnerHTML`；运行时开屏子树 **0 次**字符串注入；
- *   `#xlrSplash` 子树节点数 = **109**（与 legacy 逐字一致）。详见 docs/s1b-log.md 原记录。
+ *   `#xlrSplash` 子树节点数 = **109**（与 legacy 逐字一致）。
  * 规矩（口径：）：**等价翻译，不是重画** —— 不许顺手改样式、改结构、改命名、改顺序；
  *   只换"挂载方式"。
  *
  * 行为归属（不变）：退场/珠子飞走仍由 legacy 逻辑驱动 —— legacy 的 `out()` / `killSplash()` 用
- *   `getElementById('xlrSplash')`，作用到的就是本组件渲染的节点（见 shell/main.jsx 的 S1a 段）。
+ *   `getElementById('xlrSplash')`，作用到的就是本组件渲染的节点（见 shell/main.jsx 的  段）。
  */
 import { SkinsCore } from '../data/skinsCore.js';
 import SplashDefs from './SplashDefs.jsx';
