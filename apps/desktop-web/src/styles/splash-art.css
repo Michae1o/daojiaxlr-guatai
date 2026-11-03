@@ -1,0 +1,74 @@
+/* splash-art.css —— 开屏「画」：二十八宿环绕北斗（从安卓端移植）
+ *
+ * 单独一份文件（不进 legacy.css）：组装器按固定长度把 legacy.css 切成 5 块内联，
+ * 往里塞大段内容会被截断 ⇒ 构建报 "Missing opening {"。
+ * 这里用 <link> 挂进 doc 入口（tools/make-doc-entry.mjs），交给 vite 正常打包。
+ *
+ * 原来那九张静态星图（#xlrSplash::after + 九条 data URI）撤掉，
+ * 换成安卓端 2.261102.2 的「二十四宿沿倾斜椭圆环绕北斗」动效：
+ *   · 舞台盒子（位置/大小/透明度）**原样沿用旧静态星图那一套**，所以构图一个像素没动
+ *   · 贴图类名 so-<皮肤>-s01… 在 splash-orbit-tiles.css（生成物）；运行时在 SplashOrbit.jsx
+ *   · 画布 1254×1254 按舞台宽等比缩放；九套内容 bbox 在运行时归一化到旧图同一视觉大小
+ */
+
+/* 开屏版式（按用户给的参考图重排）：左星图、右文字。
+   · 左：星图占左边一大块，出血到左/上边外；只当背景，压到 .55 不抢字
+   · 右：太极珠 → 标题 → 副标题 → 箴言 → 短线 → 三行提示 → 圆钮 → 点击进入，整列垂直居中
+   用 html #xlrSplash 提特异性，压过 legacy 那套单栏居中。 */
+html #xlrSplash{
+  display:flex; align-items:center; justify-content:flex-end;
+  padding:0 clamp(24px, 6vw, 120px) 0 0;
+  overflow:hidden;
+}
+/* 星图舞台：**与旧的 ::after 同一组数**（left:-8% / top:50% / 66vw / 0.55 透明度）。
+   旧的静态背景已撤，星图内容现在由 React 的 .sl-orbit 画在这块盒子里。 */
+html #xlrSplash .sl-orbit{
+  position:absolute; left:-8%; top:50%;
+  width:min(66vw, 94vh); aspect-ratio:1/1;
+  translate:0 -50%;
+  opacity:.55; pointer-events:none; z-index:0;
+}
+/* 1254 画布：整块按舞台宽等比缩放（运行时写 transform），里面的坐标一律用画布单位 */
+html #xlrSplash .sl-orbit-cv,
+html #xlrSplash .sl-orbit-map{
+  position:absolute; left:0; top:0;
+  width:1254px; height:1254px;
+  transform-origin:0 0;
+}
+/* 一片宿组 / 一片星芒 / 北斗：位置尺寸是静态的，只有 transform 每帧变（不触发布局） */
+html #xlrSplash .sl-o{
+  position:absolute; display:block;
+  background-repeat:no-repeat; background-size:100% 100%;
+  will-change:transform; pointer-events:none;
+}
+html #xlrSplash .sl-o-f{will-change:transform,opacity}
+
+html #xlrSplash .sl-in{
+  position:relative; z-index:2; margin:0; padding:0;
+  max-width:min(560px, 40vw); align-items:center; text-align:center;
+}
+/* 参考图里珠子上方只有一小截轴与一点，没有贯穿全屏那根，也不要下面那根 */
+html #xlrSplash .sl-axis{display:none}
+html #xlrSplash .sl-title{font-size:clamp(40px, 4.6vw, 66px); margin-top:30px;
+  letter-spacing:.32em; text-indent:.32em}
+html #xlrSplash .sl-sub{font-size:clamp(15px, 1.25vw, 21px); margin-top:22px}
+html #xlrSplash .sl-sep{margin:30px 0 26px; width:62px}
+html #xlrSplash .sl-motto{font-size:clamp(18px, 1.55vw, 26px); margin-top:26px; letter-spacing:.2em}
+html #xlrSplash .sl-notes{font-size:clamp(14px, 1.2vw, 20px); line-height:2.35; margin-top:30px}
+html #xlrSplash .sl-go{width:clamp(58px, 4.8vw, 78px); height:clamp(58px, 4.8vw, 78px); margin-top:40px}
+html #xlrSplash .sl-hint{margin-top:22px; font-size:clamp(12.5px, 1vw, 16px)}
+html #xlrSplash .sl-hint span{width:clamp(28px, 2.4vw, 44px)}
+
+/* 窄窗口退回单栏：文字居中，星图铺满当背景 */
+@media (max-width:900px){
+  html #xlrSplash{justify-content:center; padding:0}
+  html #xlrSplash .sl-orbit{left:50%; top:0; translate:-50% 0; width:120vw; opacity:.35}
+  html #xlrSplash .sl-in{max-width:560px}
+}
+
+/* 降级：窗口很矮时允许滚动 */
+@media (max-height:700px){ html #xlrSplash{overflow:auto; align-items:flex-start} }
+/* 背景星点：整层铺满、不吃点击（缺这条会变成 flex 子项，把文字挤到右边并吞掉点击——实测踩到） */
+#xlrSplash .sl-field{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#xlrSplash .sl-in{position:relative;z-index:2}
+

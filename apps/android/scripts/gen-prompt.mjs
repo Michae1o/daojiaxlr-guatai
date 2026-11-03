@@ -1,6 +1,5 @@
 // 生成 PromptData.kt —— 系统提示词逐字来自 apps/shared-judgment/src/prompt.js（唯一真源）。
 // 用法： node scripts/gen-prompt.mjs
-// 用法： node scripts/gen-prompt.mjs
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'

@@ -1,9 +1,10 @@
-/* apps/desktop-web/src/data/splashCore.js —— 机械生成的搬运用副本
+/* apps/desktop-web/src/data/splashCore.js —— 机械生成，请改动后重新构建
+ * 生成器：tools/extract-splash.mjs（重跑得同一份）
  *
  * 内容 = 早期实现 `38-script.txt` L1305–1786 那整个 `buildSplash()` 的**逐字切片**
  *   （482 行 / 28,895 字符 /），**声明差异唯一 1 处**（见下）。
  *
- * 为什么在本仓（ 砍段前置）：早期实现那 14 个内联脚本一不在，`#xlrSplash` 就**根本不存在** ——
+ * 为什么在本仓（变更记录 砍段前置）：早期实现那 14 个内联脚本一不在，`#xlrSplash` 就**根本不存在** ——
  *   `shell/main.jsx` 的 `mountSplash()` 只是**桥接**（轮询等早期实现那张节点再接管）⇒ 等不到就放弃 ⇒
  *   本仓引导层 `Guide.maybeWelcome()`（源 `36-script` L436，守卫逐字是
  *   `if (window.__xlrSplashOn || document.getElementById('xlrSplash')) return;`）条件成立 ⇒
@@ -12,6 +13,7 @@
  * 声明差异（唯一 1 处）：在源里那行 `if (goBtn) goBtn.addEventListener('click', …)` **之前**插入
  *   一行，把内层的 `out` / `killSplash` 交到装配层（`OUT` / `KILL`）。位置与手法 = 组装期
  *   变更记录 那次注入（`tools/assemble-desktop.mjs` 的 `EXPOSE_ANCHOR`），只是搬进本仓 ——
+ *   咬断早期实现之后，React 那份开屏的退场动作仍要有人给。逆回去逐字节可验（工具核对③）。
  * ⚠ 切片**自包含**：`narrowW` / `slBusy` / `outPhone` / `out` / `killSplash` / `gone` /
  *   `goBtn` / `t0` 全部声明在函数内部 ⇒ 自由变量只有 `document` / `window`（零绑定）。
  * ⚠ 它与 React 那份开屏（`components/Splash.jsx`）的分工**照旧不变**：可见的那棵树仍是 React 的；
@@ -29,7 +31,7 @@ var OUT = null, KILL = null;
     if (document.getElementById('xlrSplash')) return;
     var reduce = false;
     try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e2) { }
-    /*
+    /* 声明差异②（手机端同款修复，口径：「我的手机版开屏动画呢？怎么不见了？而且还tm给我自动跳过开屏」）
        源里这行是 `if (reduce) return;` —— 系统一开「减弱动态效果」（Windows「动画效果」关掉同理）
        就**整屏不建**开屏 ⇒ 底下首启引导当场盖上来 ＝「开屏被自动跳过」。
        正确语义：**reduce = 不播动画，页面还在。** 动画本身由 legacy 的
@@ -47,7 +49,7 @@ var OUT = null, KILL = null;
     d.id = 'xlrSplash';
     /* 开屏层在场期间挂上 sl-on：用来压住底下的首次配置引导（开屏背景半透明，不压会透出来） */
     try { document.documentElement.classList.add('sl-on'); } catch (eS0) { }
-    /*
+    /* 用户给了风格稿（玻璃阴阳珠 + 发丝线 + 极简留白）：按稿重排开屏，
        并且**用动画把开屏和主页面接起来** —— 那颗珠子飞向该在的位置、缩成第一步「壹」的圆。 */
     d.innerHTML =
       '<span class="sl-axis sl-axis-t" aria-hidden="true"></span>' +
@@ -55,8 +57,8 @@ var OUT = null, KILL = null;
         '<div class="sl-orbwrap">' +
           '<span class="sl-line"></span><span class="sl-dot"></span>' +
           '<span class="sl-orb">' +
-            /*
-               参照图＝**3D 渲染的液态太极**，不是早前的版本的「扁平玻璃」——
+            /* 二改：
+               参照图＝**3D 渲染的液态太极**，不是我上一版的「扁平玻璃」——
                ① 浅瓣＝清水/胶质（乳白、半透，边缘略沉做出厚度）；
                ② 深瓣＝液态金属/墨（中心最沉、往边缘提亮，右下外缘一道**月牙棱光**）；
                ③ 外面一圈**半透明水波环**（不闭合、有断口＝水花），不是实线圆；
@@ -65,7 +67,7 @@ var OUT = null, KILL = null;
                ⑥ 左上方向性受光 + S 交界一条液面亮棱（往深瓣里推 4 单位，两侧都暗才读得出）；
                ⑦ 外围那层玻璃珠壳**撤了**（参照图里球壳不存在，太极自己带水波环）——
                   珠壳留着会变成「玻璃里再套一层玻璃」，糊。
-               */
+               仍然是零彩色（跟用户定的开屏稿一致），不用位图，全是矢量。 */
             '<svg class="sl-taiji" viewBox="0 0 120 120" aria-hidden="true">' +
               '<defs>' +
                 '<linearGradient id="tjYang" x1="24%" y1="2%" x2="78%" y2="98%">' +
@@ -144,7 +146,7 @@ var OUT = null, KILL = null;
               '<path class="tjD" d="M60 7.5 A52 52 0 0 1 60 111.5 A26 26 0 0 1 60 59.5 A26 26 0 0 0 60 7.5 Z" fill="url(#tjYin)"/>' +
               /* 二改补丁：**外轮廓细圈**。48px 实尺下浅瓣是白、底色是米白，
                  白对米白 ≈ 没有边界 ⇒ 整颗被读成「浮着一块深色月牙」。给整颗描一道
-                 */
+                 极细的中性灰边（1× 下约 0.6px），轮廓才立得住。别加粗成实线描边。 */
               '<circle class="tjRim" cx="60" cy="59.5" r="51.4" fill="none" stroke="rgba(52,60,70,.26)" stroke-width="1.5"/>' +
               /* ④ 深瓣外缘的月牙棱光（亮的那段压在正右下，两端淡出）＋ 两道环状反光条
                  （= 液态金属的「环境反射」，很淡；只画在深瓣内部） */
@@ -166,7 +168,7 @@ var OUT = null, KILL = null;
                  （浅瓣本身已经 240+），推进暗瓣、两侧都是暗的才读得出是一「条」线。 */
               '<path class="tjSeam" transform="translate(4 0)" d="M60 111.5 A26 26 0 0 1 60 59.5 A26 26 0 0 0 60 7.5" fill="none" stroke="rgba(255,255,255,.30)" stroke-width="4.4" stroke-linecap="round"/>' +
               /* 亮棱的**硬芯**：一条 1.6 单位（1× 下约 0.8px）的亮芯 + 外面那圈晕，
-                 */
+                 才读成「一道反光」；只画一条中等宽度＝一条灰糊带（评审点名过）。 */
               '<path class="tjSeamCore" transform="translate(4 0)" d="M60 111.5 A26 26 0 0 1 60 59.5 A26 26 0 0 0 60 7.5" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="1.6" stroke-linecap="round"/>' +
               /* ⑦ 左上方向性受光（整组极缓慢漂移 ⇒ 液面在动，不是印上去的一张图） */
               '<g class="tjHi">' +
@@ -197,13 +199,14 @@ var OUT = null, KILL = null;
     document.body.appendChild(d);
     var t0 = Date.now(), gone = false;
     var goBtn = d.querySelector('.sl-go');
-    /*
+    /* 平台判定（口径：「手机就是手机，电脑就是电脑，关屏幕大小什么事」）
        —— 宽度不是平台，两条线各自由构建期常量标明：手机端 `__XLR_PLATFORM__='phone'`、
+       桌面端 `'desktop'`（见 ../platform.js 的 IS_PHONE）。这里不留任何 innerWidth /
        matchMedia 回退：模拟器 WebView 实测 innerWidth=760（viewport 写的是 390 也没吃到），
        一靠宽度就会把手机端判成"宽屏"⇒ 3 秒自动退场 + 珠子飞向「壹」，手机版下落弹跳动效等于没发生。 */
     function narrowW() { return IS_PHONE; }
 
-    /*
+    /* 手机版开屏转场（照用户给的六阶段规格逐条落地）：
        A 0-180ms   蓄力：先轻微下压(scale 1.07/.93) → 迅速向上弹起，带缩放，有明确加速度（不匀速）
        B 180-380ms 上升：到最高点速度渐慢 → 开始下落，轨迹平滑；背景开始极轻微变亮（tinted 淡入）
        C 380-600ms 自由下落：向**视口底部**加速；带极轻微纵向形变（不能变明显椭圆）
@@ -245,11 +248,11 @@ var OUT = null, KILL = null;
       }
 
       html.classList.add('sl-anim', 'sl-nogo');
-      /*
+      /* 用户要的"两步"：从点下的第一刻起就把**卡里的内容**和**页面的其它东西**都压着（不是等到形变时才压，
          否则页面浮现的那一瞬会看到卡里的字闪一下再消失）。第一拍只让"球→空对话框"完成，
          第二拍(1330ms)放卡里的字/选项/发送键，最后(1820ms)才放顶栏与问候语。 */
       html.classList.add('sl-cinew', 'sl-late');
-      /* */
+      /* 球展开期间连真卡的壳一起压住：屏幕上只能看到"球→方框"这一个东西（口径：） */
       html.classList.add('sl-shell');
       goBtn.classList.add('ink', 'fly');                      /* ① 变成当前主题色 */
       /* ⚠ 不摘出开屏层：摘到 body 会让 `#xlrSplash .sl-go.fly` 失配、掉回文档流（曾跑到屏幕左下角） */
@@ -302,7 +305,7 @@ var OUT = null, KILL = null;
 
       /* ── E→F：反弹最高点即形变起跑线；同一个元素边上升边展开，落位到输入卡 ── */
       setTimeout(function () {
-        /*
+        /* 口径：：「小球变成方形之后淡出了，然后出现主页面 —— 我要的是它变成主页面那个对话框！」
            根因：球的底色被我设成了 transparent（变成一个**空壳方框**），而真卡此时还被 sl-anim 压着，
            于是看起来是「空框淡出 → 卡再出现」两块东西。
            改法：从这一刻起就让**真卡在球底下**浮现（撤 sl-anim）、开屏层的主题色底同时渐隐；
@@ -312,7 +315,7 @@ var OUT = null, KILL = null;
         d.classList.add('tintout');
         anims.forEach(function (a) { try { a.cancel(); } catch (eC) { } });
         /* 落位前**重新量一次真卡**：它的位置会随主界面浮现而挪（实测 top 537 → 547，因为窄屏问候语
-           这时才折成两行）⇒ 不重量就会差十来个像素，那就不是"按设计稿还原"了。 */
+           这时才折成两行）⇒ 不重量就会差十来个像素，那就不是"像素级复刻"了。 */
         if (card) {
           var r2 = card.getBoundingClientRect();
           if (r2 && r2.width > 0) {
@@ -327,7 +330,7 @@ var OUT = null, KILL = null;
         void goBtn.offsetWidth;                              /* 先钉住这一帧，再开过渡 */
         var d2 = 620;
         /* ⚠ 背景/边框的过渡**不能加 delay**：一给延迟，球就会"尺寸已经长成卡的方框、颜色还是主题色实心"
-           */
+           —— 深色主题下就是一块实心黑框。让它边展开边褪成玻璃。 */
         goBtn.style.transition = 'width ' + d2 + 'ms cubic-bezier(.2,.75,.25,1),'
           + 'height ' + d2 + 'ms cubic-bezier(.2,.75,.25,1),'
           + 'border-radius ' + d2 + 'ms cubic-bezier(.4,.05,.2,1),'
@@ -338,23 +341,23 @@ var OUT = null, KILL = null;
         goBtn.style.height = H + 'px';
         goBtn.style.borderRadius = '24px';
         goBtn.style.transform = 'translate(' + (dx - ex) + 'px,' + (dy - ey) + 'px)';
-        /*
+        /* 像素级复刻（口径：）：把球的外观切成**真卡那套玻璃** —— 边/面/毛玻璃/阴影/方向性高光
            全在 .glass 里，值是从 html[data-step="q"] .cbar 的规则里逐项抄的。
            于是球展开出来就是一张**空对话框**（壳与真卡一模一样、里面还没有字与选项），
            而不是一块主题色实心方块。第二拍再往框里填内容。 */
         goBtn.classList.remove('ink');
         goBtn.classList.add('glass');
         goBtn.style.color = 'transparent';
-        /* */
+        /* 箭头不在这里消失 —— 交给 860ms 那个"剥离"过程带走 */
         var sv = goBtn.querySelector('svg');
         if (sv) { sv.style.transition = 'transform .28s ease,opacity .28s ease'; }
       }, 720);
 
-      /*
+      /* 用户要的新效果：变形途中，从大球里**自然剥离出一个小球** —— 它飞出去定格在卡内右下角
          那枚提交按钮的位置（带箭头的圆形按钮）。于是"箭头最后才出现"这件事，就由这个过程本身完成：
          大球里的箭头跟着小球飞走，最后落成提交键。 */
       var seed = null;
-      /*
+      /* 口径（最终版）：**在方框展开的过程中**按钮小球就淡入并开始向右滑，
          而且速度不能比方框展开快；**方框完全展开（1340ms）时，按钮滑到位、其他元素也浮现到位** —— 三者同时到位。
          时间全部倒推自 T = 1340ms（= 球展开完成的时刻，720+620）：
            · 按钮：860 起步、滑 480ms ⇒ 1340 到位（平均 0.29px/ms，比方框展开的 0.45px/ms 慢 ⇒ 不会比它快）
@@ -379,6 +382,7 @@ var OUT = null, KILL = null;
         var mx = Math.round(dotAbs.left - bx);            /* 向右移动的距离 */
         var my = Math.round(dotAbs.top - by);
         /* ⚠ 位移与透明度**分开两条动画**：位移要用"极慢起手"的阻尼曲线，
+           但透明度若也走这条曲线，方框形成的瞬间小球还是全透明的。
            所以透明度单走一条、前 18% 就显到 0.10 ⇒ 一出现就能看见。 */
         seed.animate([
           { transform: 'translate(0,0)' },
@@ -399,7 +403,7 @@ var OUT = null, KILL = null;
       /* 第一拍：球长到与卡完全重合那一刻（720+620=1340ms）才放真卡的壳 —— 位置与外观一致 ⇒ 无缝接上 */
       setTimeout(function () { html.classList.remove('sl-shell'); }, 1346);
 
-      /* 第一拍结束：球已经长成一张**空对话框**（壳与真卡外观一致、里面空着）→ 先让它站 200ms 让人看清，
+      /* 第一拍结束：球已经长成一张**空对话框**（壳与真卡像素级一致、里面空着）→ 先让它站 200ms 让人看清，
          第二拍（A）才往框里填字/快捷选项/发送键。 */
       setTimeout(function () {
         goBtn.style.pointerEvents = 'none';   /* 球已褪成透明，别挡着下面的卡收点击 */
@@ -409,14 +413,15 @@ var OUT = null, KILL = null;
          所以 1340-420 = **920ms** 起步 ⇒ 球到位的同时，框里的字/快捷选项/发送键也正好到位。
          ⚠ 一度把它挪到 1500（想压"提前出现的方框"），是**判错了凶手**：
          那个方框其实是卡的父级 `.pane`（两层叠着的同一块玻璃，藏壳漏了它），
-         */
+         跟内容的时间点无关。口径：："问候语包括框内除了小球的其他东西，
+         都要和我们框和小球到位的同时一起到位（需要计算时间）" ⇒ 恢复倒推。 */
       setTimeout(function () {
         html.classList.remove('sl-cinew');
         try { animateIn(); } catch (eA) { }
       }, 920);   /* 920 + .42s = 1340（与球长完同刻） */
       /* 交接（撤 sl-nogo 显真键 + 移除临时圆钮）：1340 到位后 **+80ms**。
          留这 80ms 是等父级 .gobar 的 opacity 先落到 1 ——
-         */
+         否则同一帧先移除圆钮、父级还没到位，会出现"淡出再淡入"的空档（口径：过）。 */
       setTimeout(function () {
         html.classList.remove('sl-nogo');
         if (seed && seed.parentNode) seed.parentNode.removeChild(seed);
@@ -453,6 +458,7 @@ var OUT = null, KILL = null;
       if (orb && from && to && orb.animate) {
         /* 把珠子从开屏外壳里「摘」出来挂到 body 上：外壳 `.out` 要整体淡出 +
            visibility:hidden（这样主页面才浮得出来），珠子留在里面会被一起抹掉 ——
+           口径：「你别让它消失啊，它是一个视觉焦点」。摘出来后它自己一条命，
            飞到壹的位置、转着圈缩小，全程 opacity=1，最后 100ms 才淡出交接给壹。 */
         try { document.body.appendChild(orb); orb.classList.add('sl-orb-fly'); orb.style.animation = 'none'; } catch (eM) { }
         orb.style.position = 'fixed';
@@ -466,7 +472,7 @@ var OUT = null, KILL = null;
         var sc = Math.max(.08, to.width / Math.max(1, from.width));
         orb.style.transformOrigin = '50% 50%';
         /* 太极自己转：**匀速**（linear），和珠子的位移/缩放分两条动画走。
-            */
+           同一条 transform 里既写缓动又写旋转 ⇒ 转速被缓动拽得忽快忽慢。 */
         var tj = orb.querySelector('.sl-taiji');
         if (tj && tj.animate) {
           try { tj.getAnimations().forEach(function (aT) { aT.cancel(); }); } catch (eT2) { }
@@ -475,9 +481,9 @@ var OUT = null, KILL = null;
             { duration: 1020, easing: 'cubic-bezier(.52,.04,.88,.3)', fill: 'forwards' });
         }
         /* 先掐掉珠子自己的入场淡入动画 —— 否则飞行途中两条动画抢 opacity，
-           */
+           珠子会变成半透明的鬼影（口径：「别让它消失」）。 */
         try { orb.getAnimations().forEach(function (a) { a.cancel(); }); } catch (eK) { }
-        /*
+        /* 口径：：「过渡还是很生硬，后半段转速提起来、直接变模糊变成壹」——
            所以模糊不是最后 100ms 才来，而是从 55% 起一路加厚（2px→10px），
            和「壹用 blur 凝出」（CSS 的 vborn 也加了 blur）两头叠上 ⇒ 糊着交棒，不是硬切。 */
         orb.animate([
@@ -505,40 +511,35 @@ var OUT = null, KILL = null;
       if (e && e.parentNode) e.parentNode.removeChild(e);
       try { document.documentElement.classList.remove('sl-on'); } catch (eS1) { }
     }
-    /*
+    /* 口径：：「需要点击开屏中的那个带箭头的按钮（不再自动跳过）」
        ⇒ 手机版**只有点那枚按钮**才继续；宽屏保持原样（点哪儿都行 + 自动兜底）。 */
-    /* 声明差异（本工具唯一那 1 处）：把本作用域里的 out / killSplash 交到装配层。
+    /* 变更记录 声明差异（本工具唯一那 1 处）：把本作用域里的 out / killSplash 交到装配层。
        位置与手法 = 组装期 变更记录 那次注入（见 tools/assemble-desktop.mjs 的 EXPOSE_ANCHOR），
        只是搬进了本仓 —— 咬断早期实现之后，React 那份开屏的退场动作仍要有人给。 */
     try { OUT = out; KILL = killSplash; } catch (eExp) { }
     if (goBtn) goBtn.addEventListener('click', function (e) { e.stopPropagation(); out(); });
+    /* 层上的点击只做一件事：命中那枚按钮才走（口径：「启动界面，只能通过点击下一步的按键
+       才能进入下一页，点击其他地方无效」）。不要再恢复「宽屏点哪儿都退场」那条老口径。 */
     d.addEventListener('click', function (e) {
-      if (!narrowW()) { out(); return; }
       if (goBtn && (e.target === goBtn || goBtn.contains(e.target))) out();
     });
-    /*
-       —— 桌面端：3 秒不动自动进入（沿用早期实现行为 + 7 秒兜底）；
-       —— 手机端：只有点「进入」才走。
-       */
-    if (!IS_PHONE) {
-      setTimeout(function () {
-        var w = 3000 - (Date.now() - t0);
-        if (w > 0) setTimeout(out, w); else out();
-      }, 60);
-      setTimeout(out, 7000);                               /* 兜底：绝不让它一直盖着（只桌面端） */
-    }
+    /* 平台口径（口径：「启动页不要自动进入提问页面，必须手动点击才能进入」——要求）
+       —— 两端一致：**只能点那枚箭头按钮**才退场；点层内其他地方一律无效。
+       不要再加任何 setTimeout(out …) 的自动进入/兜底：那正是这次要去掉的行为。
+       判据也不再需要 IS_PHONE —— 没有自动分支了。 */
+    void t0;   /* t0 只在旧自动计时里用过，留着不影响（别删，切片是按原文搬的） */
   }
 
 /* ===== 装配层（本工具写的那一层，不是切片） ===== */
 export const SplashCore = {
   /** 建开屏层（幂等：源里首行就是「已有 #xlrSplash 就早退」）。
-      */
+      调用点 = shell/main.jsx 的 mountSplash()：**只在早期实现那张节点不存在时**才调 ⇒ 旧臂零影响。 */
   buildSplash: buildSplash,
   /** 退场（源里那份 `out`）：走 `getElementById('xlrSplash')` ⇒ 作用到 React 渲染的那个节点。
-      */
+      仅供外壳在早期实现缺位时把它挂到 `window.__xlrSplashOut`（旧臂已由组装期 变更记录 注入 ⇒ 不覆盖）。 */
   out: function () { return OUT ? OUT.apply(null, arguments) : false; },
   /** 撤层（源里那份 `killSplash`）。 */
   kill: function () { return KILL ? KILL.apply(null, arguments) : false; },
-  /* */
+  /** 只读快照，供判据取证 */
   state: function () { return { out: typeof OUT, kill: typeof KILL, on: window.__xlrSplashOn === true }; },
 };

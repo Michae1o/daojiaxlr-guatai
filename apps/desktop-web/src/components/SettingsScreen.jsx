@@ -29,7 +29,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { SettingsCore as C } from '../data/settingsCore.js';
-/* 「小智 · MCP」那一节：桥在 data/mcpBridge.js，这里只摆 DOM（见 McpSection.jsx 头注） */
+/* 「MCP接入」那一节：桥在 data/mcpBridge.js，这里只摆 DOM（见 McpSection.jsx 头注） */
 import McpSection from './McpSection.jsx';
 /* 出网那两处（测试连接 / 拉模型）改走 llmEndpoint ——
    智谱官方地址在网页版与安卓上要换成本站中转；带 /anthropic 的地址要换请求形状。 */
@@ -915,7 +915,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
             <button type="button" data-to="s-llm" aria-current="true">大模型</button>
             <button type="button" data-to="s-skin">外观</button>
             <button type="button" data-to="s-data">数据</button>
-            <button type="button" data-to="s-mcp">小智 · MCP</button>
+            <button type="button" data-to="s-mcp">MCP接入</button>
             <button type="button" data-to="s-about">关于</button>
             <button type="button" data-to="s-faq">常见问题</button>
             <button type="button" data-to="s-note">说明</button>
@@ -1075,10 +1075,10 @@ export default function SettingsScreen({ open, onClose, preload }) {
                 <button className="sbtn" type="button" id="stReset" onClick={onReset}>重置</button></div>
             </section>
 
-            {/* 「小智 · MCP」——把判据做成 MCP 工具，由本机主动连到小智的 MCP 接入点。
+            {/* 「MCP接入」——把判据做成 MCP 工具，由本机主动连到小智的 MCP 接入点。
                 只加这一节 + 左栏一项（见 #setNav 与上面 secs），不改任何既有节的内容与样式。 */}
             <section className="setsec" id="s-mcp">
-              <h3>小智 · MCP</h3>
+              <h3>MCP接入</h3>
               <p className="lead">
                 把卦台接进小智 AI：这一节填好 MCP 接入点，应用就自己连上去，
                 设备说「起一卦」时由本机判据算完再回话。不填就是纯本机使用，什么都不会出网。

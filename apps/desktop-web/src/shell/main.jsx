@@ -24,7 +24,7 @@ import { createPortal, flushSync } from 'react-dom';
 import { useEffect, useState } from 'react';
 import Splash from '../components/Splash.jsx';
 import SettingsScreen from '../components/SettingsScreen.jsx';
-/* 小智 MCP 接入（设置 → 小智 · MCP）。只在模块里建一条 WS，不挂 DOM、不引样式。 */
+/* 小智 MCP 接入（设置 → MCP接入）。只在模块里建一条 WS，不挂 DOM、不引样式。 */
 import { McpBridge } from '../data/mcpBridge.js';
 import UpdateTip from '../components/UpdateTip.jsx';
 import * as Upd from '../data/updateCore.js';
@@ -155,7 +155,7 @@ if (typeof window !== 'undefined' && typeof window.flushSidecar !== 'function') 
   window.flushSidecar = function flushSidecar() { /* React 壳：无需回写 sidecar */ };
 }
 
-/* 小智 · MCP：上次退出时接入点若开着，这里连回去（地址与开关在 localStorage `xlr-mcp`）；没填地址则不出网。 */
+/* MCP接入：上次退出时接入点若开着，这里连回去（地址与开关在 localStorage `xlr-mcp`）；没填地址则不出网。 */
 try { McpBridge.boot(); } catch (eMcp) { /* 接入点异常不影响开屏 */ }
 
 /* ============ 背景光晕（`#xlrAura`）改由本仓这套建 ============
