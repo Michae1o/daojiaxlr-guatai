@@ -115,7 +115,7 @@ private val GREET_ONCE: Pair<String, String> by lazy { greet() }
 @Composable
 internal fun AuraLayer() {
     /* ⚠ 敦煌 / 莫高窟 有自己的天光（SkinBackdrop 那层沙壁暖光）；这层通用的冷灰流光会把它们糊成一片灰
-       ⇒ 这两套不画（早先那一版 #xlrAura 本来就按皮肤换色，不是一刀切） */
+       ⇒ 这两套不画（早期版本 #xlrAura 本来就按皮肤换色，不是一刀切） */
     if (Skin.def.key == "dh" || Skin.def.key == "mg") return
     Canvas(modifier = Modifier.fillMaxSize()) {
         val w = size.width
@@ -162,7 +162,7 @@ internal fun YiContent(onCast: () -> Unit) {
     }
     val padB by com.tencent.kuikly.compose.animation.core.animateFloatAsState(
         /* ⚠ 判断用 anchorOn 这个**同步开关**，不能用动画后的 anchor：那一帧还是 0，
-           底部留白会先按 71dp 走 ⇒ 卡片开头坠一下（现象：的）。 */
+           底部留白会先按 71dp 走 ⇒ 卡片开头坠一下（2026-10-30 现象：的）。 */
         targetValue = if (Platform.imeVisible || Platform.anchorOn) 12f else 71f,
         animationSpec = com.tencent.kuikly.compose.animation.core.tween(
             260,
@@ -172,7 +172,7 @@ internal fun YiContent(onCast: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 22.dp).padding(bottom = (padB + anchor).dp)) {
         Spacer(modifier = Modifier.weight(1f))
         /* 详情展开 + 键盘弹着时，问候语让位：不然「问候语 + 整张展开的卡片」超过可视高度，
-           Column 会把卡片压扁，最后一行（事类）就被切掉一截（现象：的）。
+           Column 会把卡片压扁，最后一行（事类）就被切掉一截（2026-10-30 现象：的）。
            问候语这块实测 330px＝120dp（两行 30sp + 副句），收起时按动画缩放高度。 */
         val greetOn = !(Session.moreOpen && Platform.imeVisible)
         val greetVis by com.tencent.kuikly.compose.animation.core.animateFloatAsState(
@@ -183,7 +183,7 @@ internal fun YiContent(onCast: () -> Unit) {
             ),
         )
         if (greetVis > 0.01f) {
-            /* 现象：「问候语字被截断」：十二时辰的句子带两个逗号 ⇒ 折成三行（3×42.6sp=128dp），
+            /* 2026-10-31 现象：「问候语字被截断」：十二时辰的句子带两个逗号 ⇒ 折成三行（3×42.6sp=128dp），
                而这里写死 120dp（那是两行时的实测值）⇒ 第三行挤掉副句。按行数长高。 */
             val greetH = 120f + (GREET_ONCE.first.count { it == '\n' } - 1).coerceIn(0, 1) * 42.6f
             Box(
@@ -205,7 +205,7 @@ internal fun YiContent(onCast: () -> Unit) {
 @Composable
 private fun Greeting() {
     val g = GREET_ONCE
-    /* 开屏撤掉后隔一拍才出（早先那一版 legacy.css L3431）：opacity .35s ease ＋ transform .35s cubic-bezier(.2,.7,.25,1)，起点 translateY(-6px) */
+    /* 开屏撤掉后隔一拍才出（早期版本 legacy.css L3431）：opacity .35s ease ＋ transform .35s cubic-bezier(.2,.7,.25,1)，起点 translateY(-6px) */
     val revOp by com.tencent.kuikly.compose.animation.core.animateFloatAsState(
         targetValue = if (Session.chromeReveal) 1f else 0f,
         animationSpec = com.tencent.kuikly.compose.animation.core.tween(

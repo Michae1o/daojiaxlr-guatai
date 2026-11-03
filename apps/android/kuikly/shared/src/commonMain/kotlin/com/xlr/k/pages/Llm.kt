@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-/* 模型解卦 · 配置与请求（早先的实现：apps/mobile-web/src/data/{settingsCore.js, llmEndpoint.js}）
+/* 模型解卦 · 配置与请求（旧实现：apps/mobile-web/src/data/{settingsCore.js, llmEndpoint.js}）
    ⚠ 文案（预设表 / 缺项提示）逐字照抄旧 settingsCore.js。
    网络与存储由宿主（androidApp/LlmHost.kt）注入，shared 侧不碰平台 API。 */
 
@@ -37,10 +37,10 @@ object Platform {
     /** 键盘此刻的物理高度（px，宿主量出来写这里）——详情展开时按「键盘高 − 详情高」算回落量 */
     var imePadPx: Int by androidx.compose.runtime.mutableStateOf(0)
     /** 详情展开时在壹页**自己**的底部加的留白（dp）：＝(键盘高 − 详情高)。
-     *  ⚠ 不能靠宿主的内边距留白 —— 那块不属于页面，会露出窗口底色（白条，抓到）。 */
+     *  ⚠ 不能靠宿主的内边距留白 —— 那块不属于页面，会露出窗口底色（白条，2026-10-30 抓到）。 */
     var anchorPadDp: Float by androidx.compose.runtime.mutableStateOf(0f)
     /** 同上的**开关版**：点加号那一刻同步置 true。
-     *  ⚠ 底部留白不能用 anchorPadDp 动画后的值判断 —— 那一帧还是 0，卡片会先坠一下（现象：的）。 */
+     *  ⚠ 底部留白不能用 anchorPadDp 动画后的值判断 —— 那一帧还是 0，卡片会先坠一下（2026-10-30 现象：的）。 */
     var anchorOn: Boolean by androidx.compose.runtime.mutableStateOf(false)
     /** 由 Compose 每帧直接写给宿主的底部内边距（px）：详情展开时三个动作必须同一个时钟推进，
      *  否则原生的 ValueAnimator 和 Compose 动画各走各的，中间会错开几帧＝卡片掉过头再回弹（果冻）。
@@ -48,10 +48,10 @@ object Platform {
     var padDriven: Boolean = false
     var setImePadPx: ((Int) -> Unit)? = null
     /** 点加号那一刻记下的键盘高度（px）。⚠ 不能每帧去读 imePadPx —— 键盘一收它就被写成 0，
-     *  驱动循环会按 0 推内边距，卡片直接坠到底。 */
+     *  驱动循环会按 0 推内边距，卡片直接坠到底（2026-10-30 用户第二张图）。 */
     var anchorKbPx: Int = 0
     /** 把页面底色同步给宿主窗口：底部内边距让出来的那块必须跟页面同色，
-     *  否则动画中途会露出白色（Activity 窗口底色）——用户看到的那条白带。 */
+     *  否则动画中途会露出白色（Activity 窗口底色）——2026-10-30 用户看到的那条白带。 */
     var setPageBg: ((Float, Float, Float) -> Unit)? = null
     /** 系统返回键（宿主 onBackPressed 里调）：返回 true = 共享层已经消化掉，别退 Activity。
      *  次序见 RootPage 的 handleBack：浮层 → 设置 → 记录抽屉 → 三页（两次退出）。 */
@@ -59,7 +59,7 @@ object Platform {
     /** 真的退出应用（宿主注入 finish()）：三页上连按两次返回才调它 */
     var exitApp: (() -> Unit)? = null
     /** 震动反馈：0 = 刻度（页间滑动时八卦名切换那一格），1 = 钝感（打开记录抽屉）。
-     *  宿主没实现就静默跳过（别在这里判 typeof，直接 invoke 前判 null）。 */
+     *  宿主没实现就静默跳过（⛔ 别在这里判 typeof，直接 invoke 前判 null）。 */
     var haptic: ((Int) -> Unit)? = null
     /** 是不是 lite 包（构建期 -PxlrLite=true）：不显示「断卦依据」、解卦用 SYS_LITE */
     var lite: Boolean = false
@@ -67,7 +67,7 @@ object Platform {
     var saveFile: ((String, String) -> String?)? = null
     /** 让用户挑一个文本文件来读；读到内容（或 null）后回调 —— 旧数据导入用 */
     var pickText: (((String?) -> Unit) -> Unit)? = null
-    /** 打开系统浏览器（引导里那条智谱链接，早先那一版是 <a target=_blank>） */
+    /** 打开系统浏览器（引导里那条智谱链接，早期版本是 <a target=_blank>） */
     var openUrl: ((String) -> Unit)? = null
     /** 本应用包名 / versionCode（app 内更新比的是 versionCode，旧 updateCore.js 同口径） */
     var pkgName: String? = null
@@ -164,7 +164,7 @@ internal object LlmStore {
     }
 
     /* ---------- 自定义服务商（旧 SettingsScreen 的 #stCustomGo / prov-del） ----------
-       早先那一版两个键：`xlr-customs` = [{k,n}]、`xlr-svcs` = {k:{base,model,key}}。
+       早期版本两个键：`xlr-customs` = [{k,n}]、`xlr-svcs` = {k:{base,model,key}}。
        K 侧把 svcs 也摊成**扁平对象数组** [{k,base,model,key}] —— 共享层只有 JsonLite（扁平表），
        嵌套对象读不了；键名沿用，内容语义一致。 */
     private const val K_CUSTOMS = "xlr-customs"
@@ -223,7 +223,7 @@ internal object LlmStore {
         return ""
     }
 
-    /** 旧 missing()：逐字照抄（补了「本地中转」那一支） */
+    /** 旧 missing()：逐字照抄（2026-10-28 补了「本地中转」那一支） */
     fun missing(c: LlmCfg): String {
         if (c.base.isEmpty()) return "还没选服务商，接口地址是空的。"
         if (c.model.isEmpty()) return "还没挑模型。"
@@ -278,7 +278,7 @@ internal fun jstr(s: String): String = buildString {
     append('"')
 }
 
-/* ⚠ 早先那一版 OpenAI 那套**不加** max_tokens（各家上限不一，写大了直接报错）；Anthropic 必填。
+/* ⚠ 早期版本 OpenAI 那套**不加** max_tokens（各家上限不一，写大了直接报错）；Anthropic 必填。
    ⚠ 温度 Anthropic 只收 0–1，要夹。 */
 internal fun payloadOf(c: LlmCfg, sys: String, user: String, stream: Boolean = false): String {
     val anth = isAnth(c.base)
@@ -308,7 +308,7 @@ internal suspend fun askModel(c: LlmCfg, sys: String, user: String): String {
 }
 
 /** 流式解卦：每收到一段就回调 onText（已累计的全文）。
-    ⚠ 早先那一版就是这个行为（SSE 增量）；宿主负责读流、把增量拼进缓冲区，这边只轮询缓冲区。 */
+    ⚠ 早期版本就是这个行为（SSE 增量）；宿主负责读流、把增量拼进缓冲区，这边只轮询缓冲区。 */
 internal suspend fun askModelStream(
     c: LlmCfg,
     sys: String,

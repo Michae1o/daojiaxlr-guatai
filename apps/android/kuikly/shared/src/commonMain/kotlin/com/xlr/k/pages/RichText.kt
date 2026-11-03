@@ -12,7 +12,7 @@ import com.tencent.kuikly.compose.ui.text.font.FontWeight
 import com.tencent.kuikly.compose.ui.text.withStyle
 import com.tencent.kuikly.compose.ui.unit.sp
 
-/* 带粗体的正文：模型断辞里 `**这几个字**` 要真加粗（早先那一版是 <strong> 上墨色）。
+/* 带粗体的正文：模型断辞里 `**这几个字**` 要真加粗（早期版本是 <strong> 上墨色）。
    K 版用 AnnotatedString：普通段 400，粗段 500（再重就糊了，正文 13.5sp 上 600 会显脏）。 */
 
 internal fun splitBold(s: String): List<Pair<String, Boolean>> {

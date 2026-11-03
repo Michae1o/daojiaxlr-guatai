@@ -7,7 +7,7 @@ import com.xlr.k.judge.Cast
 import com.xlr.k.judge.Context
 
 /* 一卦的会话状态：问句、背景、起卦方式与取数、起卦结果、判据上下文。
-   早先的实现挂在 window.__ctx / AskUi 上，这里换成同一进程内的单例。 */
+   旧实现挂在 window.__ctx / AskUi 上，这里换成同一进程内的单例。 */
 internal object Session {
     var q by mutableStateOf("")
     var bg by mutableStateOf("")
@@ -19,12 +19,12 @@ internal object Session {
 
     /* 详情面板（旧 #castFields 的 off 类；「详情」按钮开合） */
     var detailOpen by mutableStateOf(false)
-    /** 壹页卡片的「更多选项」面板（补充背景 / 取数细节 / 事类）——从卡里挪出去，卡变矮 */
+    /** 壹页卡片的「更多选项」面板（补充背景 / 取数细节 / 事类）——2026-10-30 从卡里挪出去，卡变矮 */
     var moreOpen by mutableStateOf(false)
     /** 「报数」那一格的中心（dp，相对取数方式那条药丸的左缘）：报数便捷格要对着它的中轴排。
      *  由 ModeSeg 量出来写这里（：「放到卡片正中间，以报数那两个字为中心轴的正下方」）。 */
     var numAxisRelDp by mutableStateOf(0f)
-    /** 详情是不是「用户自己点开的」 */
+    /** 详情是不是「用户自己点开的」（2026-10-29 用户：切回时间取数/月日时 要自动收回，除非手动点开过） */
     var detailManual by mutableStateOf(false)
 
     /* 三个数（旧 #n1/#n2/#n3 的 value）；手改过就 numManual=true，不再被时钟覆盖 */
@@ -79,7 +79,7 @@ internal object Session {
 
     /* ---- 模型解卦 / 设置 ---- */
     var settingsOpen by mutableStateOf(false)
-    /** 顶栏那颗皮肤按钮弹出的浮层菜单（早先那一版 .skinmenu：贴在按钮下方，点外面关掉） */
+    /** 顶栏那颗皮肤按钮弹出的浮层菜单（早期版本 .skinmenu：贴在按钮下方，点外面关掉） */
     var skinMenuOpen by mutableStateOf(false)
 
     /* ---- 配置引导（旧 #onbLayer）---- */
@@ -101,13 +101,13 @@ internal object Session {
     /* 设置里的子页："" = 设置总览（六栏列表）；否则是某一栏的 k */
     var settingsPage by mutableStateOf("")
     /* 设置顶栏 tab 选中项（llm/skin/data/about/faq/note）
-       ⚠ 别改成 SettingsOverlay 里的局部 remember：这个壳里局部 state 写完不触发重组（实测 ） */
+       ⚠ 别改成 SettingsOverlay 里的局部 remember：这个壳里局部 state 写完不触发重组（实测 2026-10-28） */
     var settingsTab by mutableStateOf("llm")
     var askBusy by mutableStateOf(false)
     var askErr by mutableStateOf("")
     var askAnswer by mutableStateOf("")
     var askModelLabel by mutableStateOf("")
-    /** 状态行：早先那一版 `模型 <model> · 用时 <sec> 秒 · 连接方式：<…>` */
+    /** 状态行：早期版本 `模型 <model> · 用时 <sec> 秒 · 连接方式：<…>` */
     var askStat by mutableStateOf("")
     /** 「接着问」只有在**模型解卦完**之后才露出来（旧 modelAskCore L139 `FollowUi.set({show:true})`） */
     var followReady by mutableStateOf(false)
@@ -123,10 +123,10 @@ internal object Session {
     var splashOn by mutableStateOf(true)
     /** 壹页输入卡在根坐标里的 x/y/w/h（px）。开屏那颗球要落到它身上，得先量到 */
     var cardRect by mutableStateOf<FloatArray?>(null)
-    /** 两拍浮现（早先那一版 sl-cinew / sl-late）：先卡里的内容，再顶栏与问候语 */
+    /** 两拍浮现（早期版本 sl-cinew / sl-late）：先卡里的内容，再顶栏与问候语 */
     var cardReveal by mutableStateOf(false)
     var chromeReveal by mutableStateOf(false)
-    /** 卡的壳：飞行的那团东西长到与卡重合（1346ms）之前不露（早先那一版 html.sl-shell） */
+    /** 卡的壳：飞行的那团东西长到与卡重合（1346ms）之前不露（早期版本 html.sl-shell） */
     var cardShellOn by mutableStateOf(false)
     /** 壹页提交键（42dp 那枚）在根坐标里的位置：开屏剥出来的小球要滑到它身上 */
     var sendRect by mutableStateOf<FloatArray?>(null)
@@ -134,7 +134,7 @@ internal object Session {
     val hasGua: Boolean get() = cast != null
 
     /** 起过至少一卦（本进程内）⇒ 三页从此随便切，哪怕又点了「新开一卦」。
-     *  别拿 hasGua 当切页闸门：clear()（新开一卦）会把 cast 清掉，
+     *  ⛔ 别拿 hasGua 当切页闸门：clear()（新开一卦）会把 cast 清掉，
      *     于是回到壹页又切不动了 —— 报的就是这个 bug。 */
     var swipeUnlocked by mutableStateOf(false)
 

@@ -1,4 +1,4 @@
-/* SettingsScreen.jsx —— C2（设置页）早期版本 
+/* SettingsScreen.jsx —— C2（设置页）S2 批 1
  *   结构来源（逐字照抄）：`legacy/parts/36-script.txt`
  *     · 外壳/头部/身体   L133–L253（`build()` 里拼的那份 html，L249–253 挂到 body）
  *     · 五个 section     L149–L243 + 五步向导 L159–L194 + 进阶设置 L198–L210
@@ -13,18 +13,18 @@
  *     （早期版本 `esc()` + innerHTML 的最终文本节点 == React 文本节点；本项目文案全部落在该等价范围内）。
  *   · 每个状态驱动的属性/类名后面都标了**源行号**，便于逐条回溯。
  *
- * **交互（本轮实现的部分）** —— 逐条对应早期版本监听器：
- *   已实现：`#setBack`/Esc 关闭 · **`#setNav` 点击滚动（早期版本 L789-794；补 —— 此前漏抄，
+ * **交互（批 1 本轮实现的部分）** —— 逐条对应早期版本监听器：
+ *   已实现：`#setBack`/Esc 关闭 · **`#setNav` 点击滚动（早期版本 L789-794；2026-10-13 补 —— 此前漏抄，
  *   见下方 注）** · 左栏随滚动高亮(L958-970，**照抄早期版本只算 s-llm/s-skin/s-data/s-about 四屏、
  *   不含 s-contact**）· `#stGuide`(L748-757) ·
  *   服务商卡片点击(L817-844) · `prov-del` 删除(L798-816) · `#stCustomGo`+Enter 起名(L728-744) ·
  *   `#stAgain`/`#stStart`(L500-514) · `#stEye`(L847-851) · 三个输入框(L853-868) ·
  *   `#stWireD`/`#stWireP`(L869-874) · `#stSave`(L876-881) · `#stCaseExp`(L917-936) ·
  *   `#stCaseClr`(L938-943) · `#stReset`(L945-955)
- *   **已实现（接线，用户「第二条接」）**：`#stPull`(拉模型 L883→pull) · `#stTest`(连通测试 L882→test) ·
+ *   **已实现（2026-10-13 接线，用户「第二条接」）**：`#stPull`(拉模型 L883→pull) · `#stTest`(连通测试 L882→test) ·
  *   `#stKey` 失焦自动拉(L904-908) · `#stModels` 清单点击(L890-901) —— 见下面「出网两条」那一段
  *   （逐字照抄 `renderModels()` L583-605 / `pull()` L607-670 / `test()` L672-718）。
- *   **C1 已落地（）**：`#stThemes` 点击(L910-915) + `renderThemes()`(L573-578)
+ *   **C1 已落地（2026-10-12）**：`#stThemes` 点击(L910-915) + `renderThemes()`(L573-578)
  *   —— 走 `src/data/skinApply.js`（与 C1 换皮肤面板**共用一份**，A6 已解）
  */
 import { useEffect, useRef, useState } from 'react';
@@ -50,7 +50,7 @@ const VER = 'v1.0';   /* L16 `var VER = 'v1.0'` */
 
 /* `provCard()` L64–L68 的逐字对应（一张服务商卡片）+ `render()` 的高亮段 L526–L538：
    `aria-current` 是**每张卡都设**（`k2 === pv ? 'true' : 'false'`，L531）；
-   ⚠ 卡片末尾那个 `<em class="pst">已配置</em>` 小标**不再渲染**。
+   ⚠ 2026-10-23 起卡片末尾那个 `<em class="pst">已配置</em>` 小标**不再渲染**。
    高亮仍走 `aria-current`；「配没配好」由下面那张状态卡说。
    ⚠ `data-p` / `data-del` 是**属性值**（早期版本经过 `esc()`），其等价性**不套用**文本节点那条，
    另有单独证明（`早期实现记录` 原记录：属性值也逐字等价）。 */
@@ -573,7 +573,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
       localStorage.removeItem(C.KEYS.cases);
       localStorage.removeItem(C.KEYS.skin);
     } catch (e) { }
-    /* C1（）：L952-953 原样落齐 ——
+    /* C1（2026-10-12）：L952-953 原样落齐 ——
        `XLR_SKIN_APPLY('xuan')`（重置后皮肤回到 xuan 宣纸，**早期版本就这么写死**）
        ＋ `renderThemes()`（把 `#stThemes` 的 aria-current 重标）⇒ 这边走**共用入口** `applySkin()`，
        `setSkin('xuan')` 就是 renderThemes() 的等价物。 */
@@ -696,14 +696,14 @@ export default function SettingsScreen({ open, onClose, preload }) {
 
   /* （app 内更新·桌面档 B）：关于页那一行。
      分两步 —— 先「检查更新」拿清单，有新版时按钮变「立即更新」，再点才真下载换装。
-     不合并成一下就装：换装会让窗口自己关掉再开，得让人先看见它在干什么。 */
+     ⛔ 不合并成一下就装：换装会让窗口自己关掉再开，得让人先看见它在干什么。 */
   const [verTxt, setVerTxt] = useState('');
   const [updBusy, setUpdBusy] = useState(false);
   const [updReady, setUpdReady] = useState(false);
   const updInfo = useRef(null);
 
   /* ：下载百分比来自 Rust 侧的 atomic，250ms 轮一次。
-     不用 Tauri 事件 —— 那要在 capabilities 里多开一条 core:event 权限，为这点小数据不值。 */
+     ⛔ 不用 Tauri 事件 —— 那要在 capabilities 里多开一条 core:event 权限，为这点小数据不值。 */
   const [updPct, setUpdPct] = useState(-1);
   const pollRef = useRef(null);
   const stopPoll = () => {
@@ -817,7 +817,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
       de.classList.add('set-lock');
       /* L983：`open()` 末尾是 `render(); renderThemes(); quiet();` —— 三条都要照抄：
          · `quiet()`：否则"关掉再打开"时上一次的 #stMsg 提示会留在页面上（交互比对抓到过）
-         · `renderThemes()`：**C1（）已落地** —— 早期版本每次打开都按 `XLR_SKIN_CUR()`
+         · `renderThemes()`：**C1（2026-10-12）已落地** —— 早期版本每次打开都按 `XLR_SKIN_CUR()`
            重标 `.theme` 的 aria-current（皮肤也可能被面板改过）⇒ 这边等价物 = `setSkin(currentSkin())`，
            把 state 拉回"当前真实皮肤"，重渲染即重标（不能只在首帧取一次，否则面板改肤后此处会陈旧）。 */
       setSkin(currentSkin());
@@ -1135,7 +1135,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
             {/* （要求）：「既然你要放检查更新在关于里，那就再开一个说明栏」⇒
                 免责声明 / 联系维护者 / 开源仓库 从「关于」搬到独立的「说明」栏。
                 用 `setsec about` 类是为了复用 `.about .ab-h` / `.ab-list` 那套排版
-                （样式唯一样源在 src/styles/legacy.css 与 tailwind.css，不在这边写样式）。 */}
+                （样式唯一样源在 src/styles/legacy.css 与 tailwind.css，⛔ 不在这边写样式）。 */}
             <section className="setsec about" id="s-note">
               <h3>说明</h3>
               <p>本软件以邵一尘先生的小六壬神通·卜法卷为基础，部分功能及生成内容由人工智能技术辅助完成，结果仅供参考。所有内容仅供交流、学习使用，不用于商业用途；如涉及版权争议，请权利人联系删除，造成不便敬请谅解。</p>

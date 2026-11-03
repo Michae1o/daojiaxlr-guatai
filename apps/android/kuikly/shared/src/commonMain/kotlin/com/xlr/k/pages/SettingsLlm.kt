@@ -28,7 +28,7 @@ import com.tencent.kuikly.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 /* 设置 · 大模型（旧 SettingsScreen.jsx 的 #s-llm，五步向导）
-   口径：预设**不要列表**，要早先那一版那种「一格一家」的贴片（legacy.css .provs/.prov：
+   口径：预设**不要列表**，要早期版本那种「一格一家」的贴片（legacy.css .provs/.prov：
      grid auto-fill minmax(148px,1fr) / gap 10px；名字 13.5px 600、注 11px dim2）；
      并且补上「拉取可用模型」。 */
 
@@ -46,7 +46,7 @@ internal object LlmDraft {
     var pullHint by mutableStateOf("")
     var modelsNote by mutableStateOf("")
     /* 当前草稿属于哪一家自定义（点自定义贴片 / 刚添加时记下）；
-       空串 = 不是自定义的。保存时按它回写，不要只按地址反认——
+       空串 = 不是自定义的。保存时按它回写，⛔不要只按地址反认——
        新建的自定义还没有地址记录，按地址永远认不出来（这就是上一版「保存只做了一半」的根因） */
     var customK by mutableStateOf("")
 
@@ -192,7 +192,7 @@ internal fun LlmPage() {
 
             /* 顶部这张卡（：「最顶上那个【还没配模型】的卡片，换成重新查看引导」）
                ⇒ 整张卡就是「重新看配置引导」的入口，副标题保留一眼可见的状态（已配置/未配置）。
-               动作与底部那条早先那一版入口一致：guideStep=0 + guideOn=true。 */
+               动作与底部那条早期版本入口一致：guideStep=0 + guideOn=true。 */
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -358,7 +358,7 @@ internal fun LlmPage() {
             }
             val cur = PROVS.firstOrNull { it.base == d.base }
             if (cur != null && cur.url.isNotEmpty()) {
-                /* 早先那一版 SettingsScreen.jsx L1019：`去哪里拿：<a target=_blank>{url 去掉协议}</a>`
+                /* 早期版本 SettingsScreen.jsx L1019：`去哪里拿：<a target=_blank>{url 去掉协议}</a>`
                    ⇒ 这里整段做成可点的，点了走系统浏览器（Platform.openUrl） */
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text_(text = "去哪里拿：", fontSize = 11.5f, lineHeight = 18f, color = KY_DIM2)
@@ -517,7 +517,7 @@ internal fun LlmPage() {
                     SetField(d.proxy, { d.proxy = it; msg = "" })
                 }
             }
-            /* 早先那一版这里还有一条「重新看配置引导」，已并入顶部那张卡（同一个动作，别摆两处） */
+            /* 早期版本这里还有一条「重新看配置引导」，已并入顶部那张卡（同一个动作，别摆两处） */
             Spacer(modifier = Modifier.height(34.dp))
         }
     }

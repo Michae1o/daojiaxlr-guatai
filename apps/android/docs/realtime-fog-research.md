@@ -1,6 +1,6 @@
 # 实时雾气可行性研究
 
-。仅研究，没有修改当前应用效果，也没有接入新渲染器。
+2026-11-03。仅研究，没有修改当前应用效果，也没有接入新渲染器。
 
 ## 结论
 
@@ -51,7 +51,7 @@
 
 上述是能力与接口可行性结论，不是已完成的实时雾气或性能承诺。
 
-## 首版实测（）
+## 首版实测（2026-11-03）
 
 已接入 MakeKuiklyComposeNode → RealtimeFogNode → XLRRealtimeFog 注册组件 → 原生 FogSurface。Android 13+ 走 AGSL；旧系统保留 PNG 回退。RealtimeFogView.kt 内是完整实现。当前模拟器 API 35：assembleDebug 成功，XLRFOG 日志确认 AGSL compiled、1080×2412 hardware=true；三项判据自检 PASS 7/7、QUICK PASS 24/24、PASS 198/198。通过安卓调试连接实际点击进入页面、打开皮肤菜单、从宣纸切到梦幻，内容与触摸正常，色雾正常显示。只做了模拟器短时检查，没有实机耗电/发热数据，不把 30fps 的调度目标视作全部设备的性能保证。未打正式包，待用户看效果。
 

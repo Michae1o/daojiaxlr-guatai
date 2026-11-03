@@ -44,10 +44,10 @@ import com.xlr.k.judge.Rec
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toLocalDateTime
 
-/* 记录（旧 apps/mobile-web/src/components/Records.jsx + 参照图）
+/* 记录（旧 apps/mobile-web/src/components/Records.jsx + 2026-10-28 参照图）
    左侧抽屉：搜索框 → 页签「卦例 / 准则」→ 按天分组列表（日期 · 所问 · ⋮）→ 回收站胶囊 → 设置。
-   · 点一条 = 打开**详情**（早先那一版 `Detail`：‹ 返回列表 / 所问 / 背景 / 起卦 / 当时的断辞 / 准不准·实际情况）
-   · ⋮ = 贴行浮出菜单（早先那一版 sheetActs：看这一卦 / 应验 / 没应验 / 删）
+   · 点一条 = 打开**详情**（早期版本 `Detail`：‹ 返回列表 / 所问 / 背景 / 起卦 / 当时的断辞 / 准不准·实际情况）
+   · ⋮ = 贴行浮出菜单（早期版本 sheetActs：看这一卦 / 应验 / 没应验 / 删）
    · 左滑 = 只露出「删除」（微信那种跟手）
    ⚠ 还没搬：复制断辞、接着问、复盘（标「没应验」→ 模型说错在哪 → 写入准则）、准则列表、导出导入。 */
 
@@ -349,13 +349,13 @@ internal fun RecordsOverlay() {
                             }
                         }
 
-                        /* ---- 详情（早先那一版 Detail） ---- */
+                        /* ---- 详情（早期版本 Detail） ---- */
                         detail != null -> Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                             RecDetail(
                                 r = detail,
                                 onChange = { ver++ },
                                 onBack = { detailId = "" },
-                                /* 早先那一版写完准则会 sdbTab('rules')：详情收起、落在准则列表上 */
+                                /* 早期版本写完准则会 sdbTab('rules')：详情收起、落在准则列表上 */
                                 onRuleWritten = { detailId = ""; tab = "rules" },
                             )
                         }
@@ -484,7 +484,7 @@ internal fun RecordsOverlay() {
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text_(text = "⚙  设置", fontSize = 12.5f, lineHeight = 20f, color = KY_DIM)
-                                /* 缺 Key 的小圆点（早先那一版 #setDot：`.dot` 空心、配好了 `.dot.on` 变实心绿）
+                                /* 缺 Key 的小圆点（早期版本 #setDot：`.dot` 空心、配好了 `.dot.on` 变实心绿）
                                    —— K 里设置入口在抽屉底部，点就挂在这一行右端 */
                                 Spacer(modifier = Modifier.width(6.dp))
                                 val llmOk = LlmStore.missing(LlmStore.load()).isEmpty()
@@ -500,7 +500,7 @@ internal fun RecordsOverlay() {
                     }
                 }
 
-                /* ---- ⋮ 贴行浮出菜单（早先那一版 .cr-menu / sheetActs） ---- */
+                /* ---- ⋮ 贴行浮出菜单（早期版本 .cr-menu / sheetActs） ---- */
                 val rec = rows.firstOrNull { it["id"] == menuId }
                 if (rec != null) {
                     /* ---- 位置：长按贴手指、点 ⋮ 对齐 ⋮；放不下就翻到上面 ---- */
@@ -549,7 +549,7 @@ internal fun RecordsOverlay() {
                             }
                             .clip(RoundedCornerShape(12.dp))
                             /* ：这一版「浅色半透 + 白边 + 顶部 rim 高光」就是对的样式
-                               （lite 2.261101.3 上的样子）。它看着"像没有底"是设计意图，别再为了"看清面板"
+                               （lite 2.261101.3 上的样子）。它看着"像没有底"是设计意图，⛔ 别再为了"看清面板"
                                把 popup 的面改成 surface2 / d.bg——试过两次，用户都判"变灰了 / 变实心了"。
                                区分靠的是那圈白色内描边和边缘高光，不是底色深浅。 */
                             .glassMaterial(RoundedCornerShape(12.dp), popup = true)
@@ -564,7 +564,7 @@ internal fun RecordsOverlay() {
                         MenuItem("没应验") {
                             RecStore.setFb(rec["id"] ?: "", "错"); menuId = ""; ver++
                         }
-                        /* 早先那一版只有模型解过的才有「接着问」 */
+                        /* 早期版本只有模型解过的才有「接着问」 */
                         if (rec["ans"] == "model") {
                             MenuItem("接着问") {
                                 menuId = ""; detailId = rec["id"] ?: ""
@@ -622,7 +622,7 @@ private fun RecRow(
     val fb = r["fb"] ?: ""
     val dens = LocalDensity.current
     val dx = swipedDx
-    /* 两个块在根坐标里的位置：长按点 / ⋮ 的锚点都靠它换算（别再按行高猜） */
+    /* 两个块在根坐标里的位置：长按点 / ⋮ 的锚点都靠它换算（⛔ 别再按行高猜） */
     var qAt by remember { mutableStateOf(com.tencent.kuikly.compose.ui.geometry.Offset.Zero) }
     var dotAt by remember { mutableStateOf(com.tencent.kuikly.compose.ui.geometry.Offset.Zero) }
 
@@ -668,7 +668,7 @@ private fun RecRow(
                 Text_(text = monthDay(r["t"] ?: ""), fontSize = 10f, lineHeight = 16f, color = KY_DIM2)
                 Spacer(modifier = Modifier.width(8.dp))
                 /* 只有「所问」这一块可点开；⋮ 是另一块，别把点击抢走。
-                   长按同一块 = 出那个选项面板（早先那一版：长按一条记录、或点 ⋮，都是同一个面板） */
+                   长按同一块 = 出那个选项面板（早期版本：长按一条记录、或点 ⋮，都是同一个面板） */
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -715,7 +715,7 @@ private fun RecRow(
     }
 }
 
-/* 详情（早先那一版 Detail：逐节照抄文案） */
+/* 详情（早期版本 Detail：逐节照抄文案） */
 @Composable
 private fun RecDetail(r: Rec, onChange: () -> Unit, onBack: () -> Unit, onRuleWritten: () -> Unit = {}) {
     val id = r["id"] ?: ""
@@ -784,7 +784,7 @@ private fun RecDetail(r: Rec, onChange: () -> Unit, onBack: () -> Unit, onRuleWr
                     SetLabel("实际情况")
                     SetField(r["note"] ?: "", { RecStore.setNote(id, it) }, ph = "后来到底怎么着了？写一句，复盘要用它")
 
-                    /* ---- 在这卦里的追问（早先那一版 thread） ---- */
+                    /* ---- 在这卦里的追问（早期版本 thread） ---- */
                     val th = threadOf(r)
                     if (th.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
@@ -797,7 +797,7 @@ private fun RecDetail(r: Rec, onChange: () -> Unit, onBack: () -> Unit, onRuleWr
                         }
                     }
 
-                    /* ---- 复盘（标了「没应验」才有；早先那一版会自动跑一次） ---- */
+                    /* ---- 复盘（标了「没应验」才有；早期版本会自动跑一次） ---- */
                     if (fb == "错") {
                         Spacer(modifier = Modifier.height(16.dp))
                         RvArea(r = r, onChange = onChange, onRuleWritten = onRuleWritten)

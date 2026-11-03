@@ -8,8 +8,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 /* 卦例本（旧 apps/mobile-web/src/data/recordsStore.js 的存储层，键名沿用 `xlr-cases`）
-   一条记录＝一次起卦；模型解完把断辞写回同一条（早先那一版 `__recId` 那套）。
-   ⚠ 数据是扁平字符串表，落盘走 judge/JsonLite.kt（导出就是合法 JSON，能看到早先那一版那套字段名）。 */
+   一条记录＝一次起卦；模型解完把断辞写回同一条（早期版本 `__recId` 那套）。
+   ⚠ 数据是扁平字符串表，落盘走 judge/JsonLite.kt（导出就是合法 JSON，能看到早期版本那套字段名）。 */
 
 internal object RecStore {
     private const val KEY = "xlr-cases"
@@ -68,7 +68,7 @@ internal object RecStore {
         }
     }
 
-    /** 应验标记：再点一次取消（早先那一版 setFb 的取反语义） */
+    /** 应验标记：再点一次取消（早期版本 setFb 的取反语义） */
     fun setFb(id: String, fb: String) {
         val a = loadRaw()
         for (r in a) if (r["id"] == id) {
@@ -114,12 +114,12 @@ internal object RecStore {
         save(a)
     }
 
-    /** 全部重置用：卦例本**真删干净**（不进回收站）——早先那一版那句 removeItem('xlr-cases') */
+    /** 全部重置用：卦例本**真删干净**（不进回收站）——早期版本那句 removeItem('xlr-cases') */
     fun wipeCases() {
         Platform.put?.invoke(KEY, "[]")
     }
 
-    /* ---------- 复盘结果（写在同一条记录上，字段名照早先那一版 rv/rvWhy/rvRule） ---------- */
+    /* ---------- 复盘结果（写在同一条记录上，字段名照早期版本 rv/rvWhy/rvRule） ---------- */
 
     fun setRv(id: String, html: String, why: String, rule: String) {
         val a = loadRaw()
@@ -131,7 +131,7 @@ internal object RecStore {
         save(a)
     }
 
-    /* ---------- 准则（早先那一版 `xlr-rules`，只从「你确认过的复盘」来） ---------- */
+    /* ---------- 准则（早期版本 `xlr-rules`，只从「你确认过的复盘」来） ---------- */
 
     private const val RKEY = "xlr-rules"
 
@@ -162,13 +162,13 @@ internal object RecStore {
         saveRules(loadRules().filter { it["id"] != id })
     }
 
-    /* ---------- 导出 / 导入（早先那一版数据栏那套语义） ---------- */
+    /* ---------- 导出 / 导入（早期版本数据栏那套语义） ---------- */
 
     fun exportCasesText(): String = dumpRows(loadRaw())
 
     fun exportRulesText(): String = dumpRows(loadRules())
 
-    /** 早先那一版「只加不覆盖」：按 id 去重，本地已有的不动；没有 id 的现补一个；落盘前按时间排序 */
+    /** 早期版本「只加不覆盖」：按 id 去重，本地已有的不动；没有 id 的现补一个；落盘前按时间排序 */
     fun mergeCases(incoming: List<Rec>): Int {
         val cur = loadRaw()
         val seen = cur.map { it["id"] ?: "" }.toMutableSet()

@@ -167,7 +167,7 @@ private fun SplashOrbitContent(set: OrbitSet, alphaProvider: () -> Float) {
 
     /* 必须在**组合作用域**里读一次 turn.value（不能只在 graphicsLayer 的 lambda 里读）：
        Kuikly 的 layer 更新不吃「lambda 依赖 state」这一套 —— 只在 lambda 里读，进度推进了也没人
-       重新应用几何，画面就是钉死不动的（实测：logcat 里 progress 稳稳走到 0.29，
+       重新应用几何，画面就是钉死不动的（2026-11-01 实测：logcat 里 progress 稳稳走到 0.29，
        屏幕上零位移）。读在这里 ⇒ 每帧重组本组件 ⇒ Modifier 重建 ⇒ 位移才真的落到 layer 上。 */
     val progress = turn.value
 

@@ -35,7 +35,7 @@ import com.tencent.kuikly.compose.ui.platform.LocalDensity
 import com.tencent.kuikly.compose.ui.unit.dp
 
 /* 配置引导（旧 apps/mobile-web/src/data/guideCore.js 的 #onbLayer）
-   早先那一版样式（legacy.css L887-939）：
+   早期版本样式（legacy.css L887-939）：
      .onb          铺满、底色 = --bg、居中、padding 24（小屏 16）
      .onb .card    max-width 680、1px --line2 边、底 = --surface、padding 24 30 24、内部可滚
      .gtop         「N / 8」左（11px .16em dim2）＋「跳过」右（12px dim2）
@@ -43,7 +43,7 @@ import com.tencent.kuikly.compose.ui.unit.dp
      .gbody .lead  13.5px、行高 2、正文 dim、加粗处 ink 600
      .glink        11.5px dim2，链接串用 accent 加粗下划线（点开系统浏览器）
      .gnav         两颗按钮等宽（.sbtn，主按钮 .pri＝accent 底）
-   早先那一版「按钮钉在卡片底部、上方渐隐＋模糊」的观感 ⇒ 这里把按钮放在滚动区外面（等价效果，也不用叠渐变）。
+   早期版本「按钮钉在卡片底部、上方渐隐＋模糊」的观感 ⇒ 这里把按钮放在滚动区外面（等价效果，也不用叠渐变）。
    配图这一步先没做：Kuikly 的 Image 只收 Painter，取本地 webp 另开一轮。 */
 @Composable
 internal fun GuideOverlay() {
@@ -66,7 +66,7 @@ internal fun GuideOverlay() {
     val dens = LocalDensity.current
     val risePx = with(dens) { 46.dp.toPx() }
 
-    /* 步切换：内容整块换页要有过渡（同样 点名「八步之间没有过渡」）。
+    /* 步切换：内容整块换页要有过渡（同样 2026-10-29 点名「八步之间没有过渡」）。
        方向按前后决定，260ms 从那一侧 30dp 滑进来 + 淡入；顶行 N/8 与按钮不参与，点了立刻响应。 */
     var shownStep by remember { mutableStateOf(Session.guideStep) }
     val sp = remember { Animatable(1f) }
@@ -89,7 +89,7 @@ internal fun GuideOverlay() {
             .fillMaxSize()
             .graphicsLayer { alpha = p.value }
             .background(KY_BG)
-            /* 点卡片外面 = 跳过（早先那一版：d.addEventListener → target === d 就 close('skip')） */
+            /* 点卡片外面 = 跳过（早期版本：d.addEventListener → target === d 就 close('skip')） */
             .tapNoIndication { closeGuide("skip") },
     ) {
         Column(
@@ -201,7 +201,7 @@ internal fun GuideOverlay() {
                             Spacer(modifier = Modifier.height(6.dp))
                             /* 配图：抽到 androidApp/src/main/assets/common/guide/ 的 webp，
                                走 Kuikly 的 coil 取图（src 用 assets://common/ 前缀）。
-                               早先那一版 .gimg：1px 边、12 圆角、点一下放大（gzoom） */
+                               早期版本 .gimg：1px 边、12 圆角、点一下放大（gzoom） */
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()

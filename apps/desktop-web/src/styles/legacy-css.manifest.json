@@ -1,0 +1,96 @@
+{
+ "source": "apps/desktop-web/src/legacy/parts/{04,06,08,10,28}-style.txt（D-⑤ 起；上一版源 = 旧产物 dist，见文件头）",
+ "sources": [
+  {
+   "file": "04-style.txt",
+   "chars": 5954,
+   "sha16": "03ab70de6114c533"
+  },
+  {
+   "file": "06-style.txt",
+   "chars": 5700,
+   "sha16": "9b11d4fbad3c2150"
+  },
+  {
+   "file": "08-style.txt",
+   "chars": 10088,
+   "sha16": "f484abd0ccdacaf9"
+  },
+  {
+   "file": "10-style.txt",
+   "chars": 4601,
+   "sha16": "70dae4ee9e9666d4"
+  },
+  {
+   "file": "28-style.txt",
+   "chars": 196113,
+   "sha16": "51fab49d74e15d2d"
+  }
+ ],
+ "lineEnding": "LF（.gitattributes 钉住 apps/desktop-web/src/styles/** eol=lf）",
+ "blockCount": 5,
+ "blocks": [
+  {
+   "index": 1,
+   "source": "04-style.txt",
+   "chars": 5954,
+   "sha16": "03ab70de6114c533",
+   "offset": 565
+  },
+  {
+   "index": 2,
+   "source": "06-style.txt",
+   "chars": 5700,
+   "sha16": "9b11d4fbad3c2150",
+   "offset": 6520
+  },
+  {
+   "index": 3,
+   "source": "08-style.txt",
+   "chars": 9828,
+   "sha16": "14cea51ee698c853",
+   "offset": 12221
+  },
+  {
+   "index": 4,
+   "source": "10-style.txt",
+   "chars": 4523,
+   "sha16": "77e076743c40e07e",
+   "offset": 22050
+  },
+  {
+   "index": 5,
+   "source": "28-style.txt",
+   "chars": 142594,
+   "sha16": "c05c26a83d15e9e8",
+   "offset": 26574
+  }
+ ],
+ "totalChars": 168599,
+ "fileChars": 169171,
+ "fileSha16": "f3fe75b47dd5effb",
+ "outputBytes": 206362,
+ "output": "apps/desktop-web/src/styles/legacy.css",
+ "bannerChars": 544,
+ "wrapOpenChars": 21,
+ "wrapCloseChars": 3,
+ "note": "offset/chars/sha16 一律**行尾归一化(LF)形态**；块的落点（head / body 开头 / 骨架之后）由 tools/assemble-desktop.mjs 决定",
+ "selfCheck": "PASS",
+ "editedAfterPort": {
+  "when": "2026-10-17（会话「铜古调优」· 用户「开始代号N，主要是补过渡效果，所有皮肤都得补」）",
+  "what": "N 块：块5 内部末尾追加 —— ① 9 条公共控件 transition（.16s/--m-ease）② 页面切换入场动画（.setscreen.on / .skinmenu / #castPanel / .dlg）",
+  "blocksChanged": 1,
+  "charsAppended": 1174,
+  "by": "python _legacy-ref/_tgN1-insert.py（同步本记录）",
+  "why": "tools/port-legacy-css.mjs 已随 D-⑤ 归档 ⇒ 只能按同一契约重算块5/fileSha16；块5 末尾追加、其余块不动"
+ },
+ "editedAfterPort2": {
+  "when": "2026-10-25（用户要 app 内更新加下载进度条）",
+  "what": "块5 内部插入 .updbar / .updtrack / .updfill / .updpct 四条（下载进度条，只用皮肤变量）",
+  "where": ".datarow .n{…} 之后",
+  "blocksChanged": 1,
+  "charsAppended": 1471,
+  "by": "python tools/_css-manifest-refresh.py（按同一契约重算块5 + fileSha16）",
+  "why": "tools/port-legacy-css.mjs 已随 D-⑤ 归档 ⇒ 只能按同一契约重算"
+ }
+}

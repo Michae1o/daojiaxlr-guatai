@@ -45,7 +45,7 @@ import com.xlr.k.judge.plainAll
 import kotlinx.coroutines.launch
 
 /* 叁页下面的「接着问」（旧 `#askBox`）
-   版式真源：apps/mobile-web/src/tailwind.css L165–274（早先那一版这套是 JS 注入的，变更记录 之后由这里补回）
+   版式真源：apps/mobile-web/src/tailwind.css L165–274（早期版本这套是 JS 注入的，变更记录 之后由这里补回）
      · 它是**单独一个模块**：`#right > #askBox{padding:14px 18px; border-radius:--m-r-lg}`，
        底/边/影跟断辞卡片同一套（带 `pane` 类），宽度和断辞卡片对齐
      · `.ask-item{border-top:1px solid --line2; padding:8px 0 2px}`，第一条不要这条线
@@ -163,7 +163,7 @@ internal fun FollowPane(ctx: Context, B: List<Block>, modifier: Modifier = Modif
             .padding(horizontal = 18.dp, vertical = 14.dp),
     ) {
         /* ---- 问答列表：**不做卡内滚动**，有几轮长几轮，交给整页滚
-           （——原来这里是个 heightIn(170) 的
+           （2026-10-29 ——原来这里是个 heightIn(170) 的
            内滚列表，答完一轮它就变成可滚区，手指落在上面只滚它、页面纹丝不动。改成普通 Column ⇒ 全归整页） ---- */
         Column(modifier = Modifier.fillMaxWidth()) {
             Follow.items.forEachIndexed { idx, it ->
@@ -191,14 +191,14 @@ internal fun FollowPane(ctx: Context, B: List<Block>, modifier: Modifier = Modif
         }
         if (Follow.items.isNotEmpty()) Spacer(modifier = Modifier.height(8.dp))
 
-        /* ---- 输入行：早先那一版在手机宽度上**输入框与按钮各占一行**（.ask-line 是 flex-wrap，
+        /* ---- 输入行：早期版本在手机宽度上**输入框与按钮各占一行**（.ask-line 是 flex-wrap，
                输入框 flex 1 1 200px、按钮 92px ⇒ 390 屏上必然换行，按钮落到下一行左对齐） ---- */
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .clip(RoundedCornerShape(8.dp))
-                /* 早先那一版输入框是**透明底**，只有 1px 边 */
+                /* 早期版本输入框是**透明底**，只有 1px 边 */
                 .border(Skin.borderW, KY_LINE, RoundedCornerShape(8.dp))
                 .padding(horizontal = 10.dp, vertical = 7.dp),
             contentAlignment = Alignment.CenterStart,
@@ -270,7 +270,7 @@ private fun AskButton(ctx: Context, B: List<Block>, scope: kotlinx.coroutines.Co
             .width(w)
             .height(48.dp)
             .clip(RoundedCornerShape(rad))
-            /* 早先那一版 asking 时把按钮自身的皮（底/描边）收掉，只剩太极 */
+            /* 早期版本 asking 时把按钮自身的皮（底/描边）收掉，只剩太极 */
             .background(if (busy) Color.Transparent else KY_ACCENT)
             .tapNoIndication { if (!busy) askFollow(ctx, B, scope) },
         contentAlignment = Alignment.Center,

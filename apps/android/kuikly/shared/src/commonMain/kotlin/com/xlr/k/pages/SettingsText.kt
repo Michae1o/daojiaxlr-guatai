@@ -51,7 +51,7 @@ internal fun SkinPage() {
         item {
             SetLead("点一下立刻生效，会记住。每套不只是换颜色——底色、卡片、强调色、判词色整套跟着换。")
 
-            /* 明暗：照早先那一版 #btnDN 的口径 —— 切到夜就是切到深色那套（黑夜 / 莫高窟），点亮则回上次的浅色套 */
+            /* 明暗：照早期版本 #btnDN 的口径 —— 切到夜就是切到深色那套（黑夜 / 莫高窟），点亮则回上次的浅色套 */
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -112,7 +112,7 @@ internal fun SkinPage() {
     }
 }
 
-/** 一格皮肤：底色当小块、强调色当点，名字 + 副标题照早先那一版清单 */
+/** 一格皮肤：底色当小块、强调色当点，名字 + 副标题照早期版本清单 */
 @Composable
 private fun SkinTile(d: SkinDef) {
     val on = d.key == Skin.cur
@@ -339,7 +339,7 @@ internal fun AboutPage() {
             }
             Spacer(modifier = Modifier.height(10.dp))
 
-            /* app 内更新（早先那一版这一栏只有版本号 + 更新入口；简介/免责已搬「说明」栏） */
+            /* app 内更新（早期版本这一栏只有版本号 + 更新入口；简介/免责已搬「说明」栏） */
             if (Upd.available) {
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(KY_LINE))
                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
@@ -501,7 +501,7 @@ internal fun NotePage() {
 /* ── 开关（玻璃材质 + 跟手 + 非线性）─────────────────────────────────────────
    ：「背景雾气动态的开关没做到非线性动画和玻璃质感」。
    · 材质：与卡片/按钮同一套 glassMaterial（平涂面 + 上缘一道亮边 + 淡描边）——
-     不用阴影、不用模糊、不加径向渐变（Kuikly 这几样都不落地）。
+     ⛔ 不用阴影、⛔ 不用模糊、⛔ 不加径向渐变（Kuikly 这几样都不落地）。
      轨道在玻璃面上再压一层半透明主色（0.58×p），底面那层玻璃仍透得出来。
    · 跟手：横拖时旋钮**拖多少给多少**（按手指位移 / 可走距离算进度，不吸附）；
      松手按当前位置过没过一半决定开/关，200ms 走 KY_EASE_OUT（cubic-bezier(.22,1,.36,1)）收尾。

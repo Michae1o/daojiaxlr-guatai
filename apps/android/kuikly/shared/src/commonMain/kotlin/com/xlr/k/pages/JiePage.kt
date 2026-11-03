@@ -107,7 +107,7 @@ private fun Conclusion(text: String, large: Boolean) {
 
 /* 叁页 · 断卦
  *
- * 结构照早先的实现：断辞卡(305 宽) = 复盘栏（所问 / 三宫·时辰 / 分隔线 / 「结论」小标题）
+ * 结构照旧实现：断辞卡(305 宽) = 复盘栏（所问 / 三宫·时辰 / 分隔线 / 「结论」小标题）
  *   + 正文（结论大字 + 断语）+ 右侧操作（让模型解卦 / 新开一卦 / 本机速断提示）
  *   下面再挂一条「断卦依据」折叠条（9 组 · 每条带出处）。
  * ⚠ 现在是静态样张：判定词「能」、断语、9 组出处都是写死的，等判据移植后接真值。
@@ -116,7 +116,7 @@ private fun Conclusion(text: String, large: Boolean) {
 internal fun JieContent(active: Boolean = true, onNewCast: () -> Unit = {}) {
     val ctx = Session.ctx
     val cast = Session.cast
-    /* 没起卦（新开一卦之后还能随便切页）⇒ 给一句人话 + 回壹页，别留空白 */
+    /* 没起卦（新开一卦之后还能随便切页）⇒ 给一句人话 + 回壹页，⛔ 别留空白 */
     if (ctx == null || cast == null) {
         NoGuaHint(onBack = onNewCast)
         return
@@ -129,10 +129,10 @@ internal fun JieContent(active: Boolean = true, onNewCast: () -> Unit = {}) {
     )
     val answer = Session.askAnswer
 
-    /* 定稿，照手机端早先那一版（apps/mobile-web/src/styles/legacy.css L4386 那套）：
+    /* 定稿，照手机端早期版本（apps/mobile-web/src/styles/legacy.css L4386 那套）：
        ① 卡片＝**一屏高的卡**：上限 = 可用高 − 底部「断卦依据」条（实测高度），不再无限长；
-       ② 断辞**在卡片里自己滚**（早先那一版 `.llm-main{flex:1 1 auto;min-height:0;overflow-y:auto}`）；
-       ③ 所问/卦·时（Recap）钉卡顶、两个按钮钉卡底（早先那一版 `flex:0 0 auto`）；
+       ② 断辞**在卡片里自己滚**（早期版本 `.llm-main{flex:1 1 auto;min-height:0;overflow-y:auto}`）；
+       ③ 所问/卦·时（Recap）钉卡顶、两个按钮钉卡底（早期版本 `flex:0 0 auto`）；
        ④ 「接着问」「断卦依据」在卡外，整页仍可往下滚着看。
        ⚠ 正文可用高度必须由「卡上限 − 实测 Recap − 实测按钮区」算出来：
          Kuikly 的 LazyColumn 挂 `weight(fill=false)` 只会量第一条 item（踩过两次），
@@ -173,13 +173,13 @@ internal fun JieContent(active: Boolean = true, onNewCast: () -> Unit = {}) {
                             if (h > 0 && h != recapPx) recapPx = h
                         }
                 ) { Recap(ctx, cast, onCopy = {
-                    /* 复制「这一卦」：口径照早先那一版 resultCore.copyClean（问题／背景／卦·时／事类／断辞／落款） */
+                    /* 复制「这一卦」：口径照早期版本 resultCore.copyClean（问题／背景／卦·时／事类／断辞／落款） */
                     val body = if (answer.isNotEmpty()) answer else quick
                     Platform.copy?.invoke(copyCleanText(ctx, cast, body))
                     Session.say("已复制")
                 }) }
                 /* 断辞正文：卡内自己滚（内容短时它就短，卡片跟着收）+ 右侧墨色滚动条
-                   （早先那一版 phoneAnim.js initScrollHint：3px 圆角条、取 --ink、停手 900ms 淡出 ⇒ 这里 1000ms）
+                   （早期版本 phoneAnim.js initScrollHint：3px 圆角条、取 --ink、停手 900ms 淡出 ⇒ 这里 1000ms）
                    ⚠ 用真 Box 画，不用 drawBehind：Kuikly 的 DrawScope 里带 brush 的 drawRoundRect 不落地。 */
                 Box(
                     modifier = Modifier
@@ -234,7 +234,7 @@ internal fun JieContent(active: Boolean = true, onNewCast: () -> Unit = {}) {
                 }
             }
         }
-        /* 「接着问」在**卡外**（早先那一版是主卡下面第二张卡）：只有模型解卦完成了才出现 */
+        /* 「接着问」在**卡外**（早期版本是主卡下面第二张卡）：只有模型解卦完成了才出现 */
         if (Session.followReady) {
             item {
                 Spacer(modifier = Modifier.height(20.dp))
@@ -244,7 +244,7 @@ internal fun JieContent(active: Boolean = true, onNewCast: () -> Unit = {}) {
         /* lite 包**不显示**「断卦依据」（口径照桌面 lite：不带判据面板，解卦走白话版提示词） */
         if (!Platform.lite) item {
             Spacer(modifier = Modifier.height(20.dp))
-            /* 「断卦依据」在卡外，它的表头高度决定断辞卡的上限（早先那一版是 JS 量完写 --xlr-jie-h）。
+            /* 「断卦依据」在卡外，它的表头高度决定断辞卡的上限（早期版本是 JS 量完写 --xlr-jie-h）。
                ⚠ 量的是**表头**那一行，不是整张卡：展开后卡片会长到几千 px，量整张会把断辞卡压成一条。 */
             EvidenceCard(blocks) { h -> if (h > 0 && h != evidPx) evidPx = h }
             Spacer(modifier = Modifier.height(16.dp))
@@ -252,7 +252,7 @@ internal fun JieContent(active: Boolean = true, onNewCast: () -> Unit = {}) {
     }
 }
 
-/* 解卦中的闪烁光标（早先那一版 `#doc .cur`）：结论下面一根黑竖条，500ms 一明一灭 */
+/* 解卦中的闪烁光标（早期版本 `#doc .cur`）：结论下面一根黑竖条，500ms 一明一灭 */
 @Composable
 private fun BlinkCursor() {
     var on by remember { mutableStateOf(true) }
@@ -271,7 +271,7 @@ private fun BlinkCursor() {
     )
 }
 
-/* 让模型解卦：配好就直接发，没配好先弹设置（早先的实现同一路由：没配置 ⇒ 引导去设置页） */
+/* 让模型解卦：配好就直接发，没配好先弹设置（旧实现同一路由：没配置 ⇒ 引导去设置页） */
 internal suspend fun askNow(ctx: Context, blocks: List<Block>) {
     Session.askErr = ""
     val cfg = LlmStore.load()
@@ -292,7 +292,7 @@ internal suspend fun askNow(ctx: Context, blocks: List<Block>) {
     val t0 = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
     try {
         val user = "请按格式解这一卦：\n\n" + com.xlr.k.judge.plainAll(ctx, blocks)
-        /* 流式：每来一段就把「已累计全文」写回界面（早先那一版就是这个观感） */
+        /* 流式：每来一段就把「已累计全文」写回界面（早期版本就是这个观感） */
         val out = askModelStream(cfg, com.xlr.k.judge.SYS, user) { t ->
             if (Session.castSeq == seq) Session.askAnswer = t
         }
@@ -304,7 +304,7 @@ internal suspend fun askNow(ctx: Context, blocks: List<Block>) {
         val sec = ((kotlinx.datetime.Clock.System.now().toEpochMilliseconds() - t0) / 100.0).toInt() / 10.0
         Session.askStat = "模型 " + cfg.model + " · 用时 " + sec + " 秒 · 连接方式：" +
             (if (cfg.wire == "proxy") "本地中转" else "浏览器直连")
-        /* 断辞写回卦例本那一条（早先那一版 updateCaseDuanci + markModelAnswered） */
+        /* 断辞写回卦例本那一条（早期版本 updateCaseDuanci + markModelAnswered） */
         RecStore.updateDuanci(Session.recId, Session.askAnswer, model = true)
         Session.followReady = true     /* 答完 ⇒ 「接着问」出现 */
     } catch (e: Throwable) {
@@ -315,7 +315,7 @@ internal suspend fun askNow(ctx: Context, blocks: List<Block>) {
     }
 }
 
-/* 复制「这一卦」的正文 —— 逐条照早先那一版 resultCore.js 的 copyClean()：
+/* 复制「这一卦」的正文 —— 逐条照早期版本 resultCore.js 的 copyClean()：
    所问 / 背景（有才带）/ 卦·时（带取数来源）/ 事类（有才带）/ 断辞 / 落款 */
 private fun copyCleanText(ctx: Context, cast: Cast, body: String): String {
     val L = mutableListOf<String>()
@@ -328,7 +328,7 @@ private fun copyCleanText(ctx: Context, cast: Cast, body: String): String {
     return L.joinToString("\n")
 }
 
-/* 剪贴板图标（早先那一版 .doc-copy 里那两条 SVG 路径：11×11 圆角方块 + 左边那张纸的折角） */
+/* 剪贴板图标（早期版本 .doc-copy 里那两条 SVG 路径：11×11 圆角方块 + 左边那张纸的折角） */
 @Composable
 private fun CopyIcon(onTap: () -> Unit) {
     Box(
@@ -381,7 +381,7 @@ private fun Recap(ctx: Context, cast: Cast, onCopy: (() -> Unit)? = null) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp)
         ) {
-            /* 标签 → 值 的间距照早先那一版 CSS：`.recap-q{gap:10px}`、`.recap-row{gap:6px 20px}`、
+            /* 标签 → 值 的间距照早期版本 CSS：`.recap-q{gap:10px}`、`.recap-row{gap:6px 20px}`、
                `.rw{gap:6px}` —— 也就是**标签紧贴自己的值**（6dp），两个「卦 / 时」小段之间空 20dp，
                不再用 42dp 的固定标签槽（：「卦字后面空了很长一段才是真正的卦，
                而时字紧挨着当前时辰，布局都不统一」）。 */
@@ -395,7 +395,7 @@ private fun Recap(ctx: Context, cast: Cast, onCopy: (() -> Unit)? = null) {
                     lineHeight = 23.6f,
                     weight = 500,
                 )
-                /* 复制这一卦（问题＋卦＋断辞）—— 早先那一版是断辞栏标题右侧那颗 doc-copy 图标
+                /* 复制这一卦（问题＋卦＋断辞）—— 早期版本是断辞栏标题右侧那颗 doc-copy 图标
                    （DivinationPane.jsx:84，13px 剪贴板图标、1.7 描边），这里挂在「所问」这一行右端 */
                 if (onCopy != null) CopyIcon(onCopy)
             }
@@ -523,8 +523,8 @@ private fun EvidenceCard(blocks: List<Block>, onHeaderH: (Int) -> Unit) {
     }
 }
 
-/* 每一组：点标题展开条目（早先那一版 .blk / .blk-h2 两段式）。展开态挂在 EvOpen 上，
-   换一卦就清空（早先那一版是 innerHTML 重写，等价） */
+/* 每一组：点标题展开条目（早期版本 .blk / .blk-h2 两段式）。展开态挂在 EvOpen 上，
+   换一卦就清空（早期版本是 innerHTML 重写，等价） */
 internal object EvOpen {
     var set by mutableStateOf(setOf<String>())
     fun clear() { set = setOf() }
@@ -633,10 +633,10 @@ private fun EvGroup(b: com.xlr.k.judge.Block) {
 
 
 /* ════════════════════════════════════════════════════════════════════════════════
-   断辞的滚动条（用户：「不是进度条，而是滚动条，现在看着很卡顿。
+   断辞的滚动条（2026-10-29 用户：「不是进度条，而是滚动条，现在看着很卡顿。
    滚动条你都不会了？那种非线性的，丝滑的。」）
 
-   早先那一版真源：apps/mobile-web/src/data/phoneAnim.js → initScrollHint()
+   早期版本真源：apps/mobile-web/src/data/phoneAnim.js → initScrollHint()
      · 3px 宽圆角墨条，颜色取 `--ink`（30%→19% 竖向渐变），跟九套皮肤走；
      · 拇指高 = 轨道 × (视口高 / 内容高)，最小 26px；位置 = 轨道 × 滚动进度；
      · 只在容器真能滚时出现；停手 900ms 淡出（CSS transition .26s ease）。

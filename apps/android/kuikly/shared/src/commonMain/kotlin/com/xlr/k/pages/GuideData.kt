@@ -60,5 +60,5 @@ internal val GUIDE_STEPS = listOf(
     ),
 )
 
-/* 早先那一版存的是 localStorage 的 xlr-onboarded-2（'skip' / 'done' / 有值即算看过） */
+/* 早期版本存的是 localStorage 的 xlr-onboarded-2（'skip' / 'done' / 有值即算看过） */
 internal const val GUIDE_KEY = "xlr-onboarded-2"

@@ -41,13 +41,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /* 开屏（手机版）。抄 apps/mobile-web/src/data/splashCore.js 的**手机那一支**
-   ＋ styles/legacy.css 的 #xlrSplash 一组规则（的口径）。
+   ＋ styles/legacy.css 的 #xlrSplash 一组规则（2026-10-09 之后的口径）。
 
    ⚠ 别去画太极：明确「太极取消」，CSS 里 .sl-taiji / .sl-orbwrap 是
      display:none !important（legacy.css L3336-3337）。现在开屏＝竖轴 + 标题 + 副题 + 分隔线 +
      箴言 + 三条提示 + 一枚 58dp 液态玻璃圆按钮 + 「点击进入」。
 
-   三层时间轴（早先那一版逐段照抄，全部是**非线性**曲线）：
+   三层时间轴（早期版本逐段照抄，全部是**非线性**曲线）：
      ① 入场：按钮 slUp（0.7s / 延迟 .5s，opacity 0→1 + 上移 8px），之后 slBreath（4.2s 一循环，±3px）
      ② 飞行 720ms，5 段关键帧，**每段一条自己的 cubic-bezier**（WAAPI 里 easing 属于「该帧起始的那一段」）：
         0→.13  ease-out            translate(0,0)      → translate(0,3)      scale(1,1)  → (1.07,.93)
@@ -55,14 +55,14 @@ import kotlinx.coroutines.launch
         .42→.83 cubic(.45,0,.88,.52) → translate(dx,floorY)  scale(.95,1.09)
         .83→.92 cubic(.35,0,.9,.45)  → translate(dx,floorY)  scale(1.18,.82)   ← 撞底压扁
         .92→1   cubic(.2,.8,.3,1)    → translate(dx,floorY-bounce) scale(1,1)  ← 反弹
-     ③ 形变 620ms（早先那一版 d2=620，不是 430）：
+     ③ 形变 620ms（早期版本 d2=620，不是 430）：
         width/height  cubic(.2,.75,.25,1)
         border-radius cubic(.4,.05,.2,1)
         transform     cubic(.2,.72,.24,1)
         同时 .26s 内把「主题色实心」褪成**和输入卡同一套玻璃面**
         （⚠ 源码 L344-345 点名过：这一步给 delay 就会出现「尺寸已经是方框、颜色还是实心主题色」的黑块）
 
-   早先那一版的「小球从大球里剥离、飞去当提交键」这一段（seed，860→1340ms）这版还没做。 */
+   早期版本的「小球从大球里剥离、飞去当提交键」这一段（seed，860→1340ms）这版还没做。 */
 
 private const val MS_MOTION = 720f
 private const val MS_MORPH = 620f      /* 早期版本 var d2 = 620（不是 430） */
@@ -75,7 +75,7 @@ private class Base(val x: Float, val y: Float, val w: Float)
 /** 一个关键帧：进度 / 横向位移比例（乘 dx）/ 纵向位移（px，绝对值）/ 两个缩放 */
 private class Kf(val at: Float, val fx: Float, val ty: Float, val sx: Float, val sy: Float)
 
-/** 各段缓动（对应早先那一版关键帧上的 easing；第 0 段是 CSS 的 ease-out） */
+/** 各段缓动（对应早期版本关键帧上的 easing；第 0 段是 CSS 的 ease-out） */
 private val SEG = listOf(
     floatArrayOf(0f, 0f, 0.58f, 1f),      /* ease-out */
     floatArrayOf(0.1f, 0.9f, 0.2f, 1f),
@@ -171,7 +171,7 @@ internal fun SplashOverlay() {
         msy = a.sy + (c.sy - a.sy) * k
     }
 
-    /* ---- ② 形变段：宽高 / 位移 / 圆角 各走各的曲线（早先那一版三条 transition 分开写） ---- */
+    /* ---- ② 形变段：宽高 / 位移 / 圆角 各走各的曲线（早期版本三条 transition 分开写） ---- */
     val eW = bezier(floatArrayOf(0.2f, 0.75f, 0.25f, 1f), mm)
     val eT = bezier(floatArrayOf(0.2f, 0.72f, 0.24f, 1f), mm)
     val eR = bezier(floatArrayOf(0.4f, 0.05f, 0.2f, 1f), mm)
@@ -180,18 +180,18 @@ internal fun SplashOverlay() {
     val rPx = (bw / 2f) + (24f * den - bw / 2f) * eR
     val leftPx = (bx + mx) + (cardX - (bx + mx)) * eT
     val topPx = (by + my) + (cardY - (by + my)) * eT
-    /* 主题色 → 卡的玻璃面：0.26s，不能延后（早先那一版注释点名过，延后就是一块实心黑框）。
+    /* 主题色 → 卡的玻璃面：0.26s，不能延后（早期版本注释点名过，延后就是一块实心黑框）。
        用 ease-out（别用 ease-in）：先快速褪淡，别让它在飞行末尾还读成一块黑 */
     val glassMix = if (!tapped) 0f else bezier(floatArrayOf(0.2f, 0.85f, 0.25f, 1f), (t - MS_MOTION).coerceAtLeast(0f) / 260f)
 
     val textA = if (!tapped) 1f else (1f - (t - 150f).coerceAtLeast(0f) / 260f).coerceIn(0f, 1f)
     /* 720ms 起开屏层自己的底色渐隐（旧 #xlrSplash{transition:background .42s ease}）。
-       早先那一版是 .42s，这里放长到 560ms 并用 ease-out——`.42s ease` 在中段掉得很快，观感像"啪"一下没了 */
+       早期版本是 .42s，这里放长到 560ms 并用 ease-out——`.42s ease` 在中段掉得很快，观感像"啪"一下没了 */
     val layerA = if (!tapped) 1f else
         (1f - bezier(floatArrayOf(0.2f, 0.75f, 0.25f, 1f), (t - MS_MOTION).coerceAtLeast(0f) / 560f)).coerceIn(0f, 1f)
     val arrowA = if (!tapped) 1f else (1f - t / 220f).coerceIn(0f, 1f)
 
-    /* 用户为九套皮肤各画了一张星图（out-ref\星图各态）⇒ 开屏底色回到皮肤自己：
+    /* 2026-11-01 用户为九套皮肤各画了一张星图（out-ref\星图各态）⇒ 开屏底色回到皮肤自己：
        底色＝该皮肤的 bg，星图按 Skin.cur 取 splash-stars-<key>.png，文字/金线/圆钮全部走皮肤令牌。
        （他那九张图就是按各自底色画的，脱离底色会串味。） */
     val bg = Skin.def.bg
@@ -209,9 +209,9 @@ internal fun SplashOverlay() {
                 .graphicsLayer { alpha = layerA }
                 .background(bg)
         )
-        /* 开屏的「画」：水墨晕染圆 + 香槟金细线与节点
+        /* 开屏的「画」：水墨晕染圆 + 香槟金细线与节点（2026-10-29 用户给了参考图）
            只在没点之前画（飞行动画期间每秒重绘上千笔会掉帧），随文字一起淡出 */
-        /* ⚠ 现象：「点击后飞起来极其慢、像卡住」：这幅水墨每帧上千笔（160 弧 + 900 点 + 200 笔触），
+        /* ⚠ 2026-10-29 现象：「点击后飞起来极其慢、像卡住」：这幅水墨每帧上千笔（160 弧 + 900 点 + 200 笔触），
            我上一版把它挂在「t < 720ms」里 ⇒ 恰好盖住了整个起飞段，每帧都被这堆绘制拖住，动画看起来像在爬。
            ⇒ 改成**只在没点之前挂载**：点下去的瞬间它就撤掉（文字本来也在 150ms 后开始淡出，看不出断）。 */
         /* 背景星点：固定种子、静态，只作气氛；跟着底色一起淡出 */
@@ -222,7 +222,7 @@ internal fun SplashOverlay() {
             accent = Skin.def.accent,
         )
 
-        /* 开屏的「画」：二十八宿沿倾斜椭圆环绕北斗
+        /* 开屏的「画」：二十八宿沿倾斜椭圆环绕北斗（2026-11-01 用户做了九套环绕动画，接这里）
            只在没点之前挂载 —— 点下去整层卸载（飞行动画期间每秒重绘几十笔会掉帧，与旧星图同一口径） */
         if (!tapped) {
             SplashOrbit(alphaProvider = { textA })
@@ -328,13 +328,13 @@ internal fun SplashOverlay() {
                                         /* ：
                                            原来时间轴是**按帧累加**的（每帧 +16ms）—— 只要某几帧画得慢，
                                            时间轴就比真实时间走得慢，720ms 的起飞能拖成两三秒。
-                                           改成**按真实时钟走**（早先那一版那几条 setTimeout 本来也是墙钟）：
+                                           改成**按真实时钟走**（早期版本那几条 setTimeout 本来也是墙钟）：
                                            不管掉不掉帧，节奏都是 720 / 620 / 1340 / 1620。 */
                                         val t0 = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
                                         while (true) {
                                             val el = (kotlinx.datetime.Clock.System.now().toEpochMilliseconds() - t0).toFloat()
                                             t = el
-                                            /* 早先那一版那几条 setTimeout 的里程碑，统一在这条时间轴上判 */
+                                            /* 早期版本那几条 setTimeout 的里程碑，统一在这条时间轴上判 */
                                             if (el >= 920f && !Session.cardReveal) Session.cardReveal = true
                                             if (el >= 990f && !Session.chromeReveal) Session.chromeReveal = true
                                             if (el >= 1346f && !Session.cardShellOn) Session.cardShellOn = true
@@ -347,7 +347,7 @@ internal fun SplashOverlay() {
                             },
                         contentAlignment = Alignment.Center,
                     ) {
-                        /* 面：早先那一版 linear-gradient(168deg, rgba(255,255,255,.56), rgba(255,255,255,.22))
+                        /* 面：早期版本 linear-gradient(168deg, rgba(255,255,255,.56), rgba(255,255,255,.22))
                            → 点下去先变成主题色（旧 .sl-go.ink），形变时再褪回玻璃（旧 .sl-go.glass） */
                         Box(
                             modifier = Modifier
@@ -450,7 +450,7 @@ internal fun SplashOverlay() {
                 )
             }
         }
-        /* 剥离出来的小球（早先那一版 seed，860ms 起）：从卡底边中点向右滑到提交键的位置，
+        /* 剥离出来的小球（早期版本 seed，860ms 起）：从卡底边中点向右滑到提交键的位置，
            位移用「极慢起手」的 cubic-bezier(.62,.02,.28,1)，**透明度另走一条 ease-out**
            （源码点名：透明度若也走那条曲线，方框成形时小球还是全透明的，等于没淡入）。 */
         if (tapped && t >= 860f && t <= 1600f) {
@@ -477,7 +477,7 @@ internal fun SplashOverlay() {
                     .size(with(dens) { seedW.toDp() })
                     .graphicsLayer { alpha = sOp }
                     .drawBehind {
-                        /* 浅底上白球边界会糊掉：底下垫一圈很淡的暗晕，边才立得住（早先那一版靠投影） */
+                        /* 浅底上白球边界会糊掉：底下垫一圈很淡的暗晕，边才立得住（早期版本靠投影） */
                         softGlow(size.width / 2f, size.height / 2f, size.width * 0.82f, Color(0f, 0f, 0f), 0.16f, 10)
                     }
                     .background(

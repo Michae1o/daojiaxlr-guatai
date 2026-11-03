@@ -1,9 +1,9 @@
-/* askCore.js —— 由脚本生成（早期版本/）
+/* askCore.js —— 由脚本生成（S3b/批 A）
    来源：apps/desktop-web/src/legacy/parts/18-script.txt（「壹·问卦页」那一段）
    生成：node tools/extract-ask-core.mjs
    规矩：**原样搬运** —— 下面每一段都是从源文件**逐字节搬运**搬过来的原文；工具每次运行都会
-        逐字核对「产物文本 == 源切片」。改行为要改 legacy 源再重跑本工具（早期版本 删段后本文件升为真源）。
-   判据域函数（clockNums / numVals 的算式 / numsFilled）**不在这里**：一律 import 自 @xlr/shared-judgment
+        逐字核对「产物文本 == 源切片」。改行为要改 legacy 源再重跑本工具（S3b 删段后本文件升为真源）。
+   ⛔ 判据域函数（clockNums / numVals 的算式 / numsFilled）**不在这里**：一律 import 自 @xlr/shared-judgment
       （内部约定 原记录 + 链第 1 步 R4 守门人）；本文件只给 DOM 取值的薄包装。
    ⚠ 提取出来的正文引用 `h1/h2/mNum/mTime/mClock` 这几个自由变量（源里是全局）⇒ 由 bind() 注入。
    
@@ -34,7 +34,7 @@ export function numsFilledDom() {
   }));
 }
 
-/* 问候语（从安卓端 YiPage.kt 移植）：
+/* 问候语（2026-11-02 从安卓端 YiPage.kt 移植）：
    安卓那一版按「十二时辰」抽本名/别名造句，副句从 GREET_Z2 里抽；一次进程只抽一次
    （重组/翻页回来不换句）。这里逐字搬过来，只把「按逗号断成两行」改回单行 ——
    PC 的问卦列够宽（28px × 9~13 字放得下），断行会把输入卡整体下推、破坏原有构图。 */
@@ -104,7 +104,7 @@ function refreshClock() {
   var postT = window.__numManual
     ? ' 起卦 · ' + zhi[t.zi - 1] + '时（收起九数就回到自动）'
     : ' ⇒ 按 ' + t.nums.join(' / ') + ' 起卦 · ' + zhi[t.zi - 1] + '时（软件自动读取，起卦以当时为准）';
-  /* 口径：（）：「一切动画结束、其他元素浮现完毕之后，方框内还是会闪一下变成空再恢复」。
+  /* 口径：（2026-10-09）：「一切动画结束、其他元素浮现完毕之后，方框内还是会闪一下变成空再恢复」。
      真因就是这两行老代码——每次刷新都用 innerHTML **整块重写**，里面的 <b>（时刻）被销毁重建，
      所以每 2 秒就闪一次。改成**原地更新文本节点**：结构只建一次，之后只改 nodeValue/textContent。 */
   var kn = mini.childNodes, n1 = kn[0], nb = kn[1], n3 = kn[2];

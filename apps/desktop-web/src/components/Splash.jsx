@@ -28,7 +28,7 @@ import SplashDefs from './SplashDefs.jsx';
 import SplashShapes from './SplashShapes.jsx';
 import SplashOrbit from './SplashOrbit.jsx';
 
-/* ---------------- 开屏的「画」（从安卓端移植的环绕动效） ----------------
+/* ---------------- 开屏的「画」（2026-11-02 从安卓端移植的环绕动效） ----------------
  * 原来是九张静态星图（#xlrSplash::after + splash-art.css 里九条 data URI）；
  * 现在换成安卓 2.261102.2 的「二十四宿沿倾斜椭圆环绕北斗」：
  *   · 舞台盒子（left:-8% / top:50% / min(66vw,94vh) / opacity .55）在 splash-art.css，
@@ -76,7 +76,7 @@ export default function Splash() {
     const btn = e && e.target && typeof e.target.closest === 'function' ? e.target.closest('.sl-go') : null;
     if (!btn) return;   /* 2026-11-01：只有那枚箭头按钮能退场，点层内其他地方无效（两端一致） */
     if (btn && e && typeof e.stopPropagation === 'function') e.stopPropagation();  /* legacy L2209 */
-    /* 问候语跟着开屏退场浮现（从安卓端移植）：安卓那版在 chromeReveal（点下去 990ms）
+    /* 问候语跟着开屏退场浮现（2026-11-02 从安卓端移植）：安卓那版在 chromeReveal（点下去 990ms）
        才放顶栏与问候语 —— opacity .35s ease ＋ translateY(-6px)→0，transform 曲线 (.2,.7,.25,1)。
        · PC 宽屏原来没有这一步（问候语一直亮着，只是被开屏盖住）⇒ 这里只补**问候语**一块，
          顶栏 / 输入卡 / 步进条一概不动。

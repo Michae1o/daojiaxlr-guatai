@@ -58,7 +58,7 @@ import kotlin.math.min
 import kotlinx.coroutines.launch
 
 /* 三个步骤：壹（问卦）/ 贰（起卦）/ 叁（断卦）。
-   早先的实现把步骤挂在 html[data-step] 上、由一堆选择器分别管显隐；这里收成一个枚举 + 一次 when。 */
+   旧实现把步骤挂在 html[data-step] 上、由一堆选择器分别管显隐；这里收成一个枚举 + 一次 when。 */
 internal enum class XlrStep(val ch: String, val label: String) {
     YI("壹", "问卦"),
     GUA("贰", "起卦"),
@@ -112,7 +112,7 @@ private fun RootScreen() {
     val swipeMinPx = with(dens) { SWIPE_MIN.dp.toPx() }
 
     /* 真正起卦：按当前「起卦方式」取数 → 判据上下文 → 进贰页（旧 castCore.goCast）。
-       ⚠ 早先的实现的三路分支与报错句逐字照抄；报数没填全 ⇒ 当场提示、不播四拍。 */
+       ⚠ 旧实现的三路分支与报错句逐字照抄；报数没填全 ⇒ 当场提示、不播四拍。 */
     fun pad2(v: Int): String = if (v < 10) "0$v" else "$v"
 
     val askErr: () -> String = {
@@ -152,7 +152,7 @@ private fun RootScreen() {
         Session.cast = c
         val key = if (Session.catSel == "auto") autoCat("$q $bg") else Session.catSel
         Session.ctx = buildContext(q = q, bg = bg, catKey = key, cast = c)
-        /* 起一卦就记一条（早先那一版 `addCase`：每起一卦自动记，同一卦不重记） */
+        /* 起一卦就记一条（早期版本 `addCase`：每起一卦自动记，同一卦不重记） */
         if (Session.recId.isEmpty()) {
             val cx = Session.ctx!!
             Session.recId = RecStore.add(
@@ -262,7 +262,7 @@ private fun RootScreen() {
     }
 
     var dragAcc by remember { mutableStateOf(0f) }
-    /* 宿主窗口底色跟着皮肤/昼夜变：详情展开时底部内边距让出来的那块是页面色，不是白（） */
+    /* 宿主窗口底色跟着皮肤/昼夜变：详情展开时底部内边距让出来的那块是页面色，不是白（2026-10-30） */
     val pageBg = KY_BG
     SideEffect { Platform.setPageBg?.invoke(pageBg.red, pageBg.green, pageBg.blue) }
     Box(
@@ -271,7 +271,7 @@ private fun RootScreen() {
             .background(KY_BG)
             /* 点空白处收输入法（：「点空白部位，输入法不会收回」）：
                按钮/输入框那些子控件自己会把点击吃掉，所以「点空白」才会走到这一层。
-               别用「键盘高度 > 0」当闸门——有些机型/输入法的窗口高度量出来是 0，
+               ⛔ 别用「键盘高度 > 0」当闸门——有些机型/输入法的窗口高度量出来是 0，
                  那样这道闸永远不开，用户看到的就是「跟以前一样没反应」。 */
             .pointerInput(Unit) {
                 detectTapGestures {
@@ -507,7 +507,7 @@ private fun backMs(p: Float): Int = (max(0.2f, 0.4f - 0.18f * p) * 1000f).toInt(
      ② 设置页 ⇒ 收设置，回到「记录抽屉打开」那一态（设置是从抽屉点进来的）
      ③ 记录抽屉打开 ⇒ 收回抽屉
      ④ 壹贰叁页 ⇒ 弹一句「再按一下退出」，2.2 秒内再按才真退（Platform.exitApp）
-   别在 Activity 里直接 finish。 */
+   ⛔ 别在 Activity 里直接 finish。 */
 private var backArmedAt = 0L
 
 /** 根组合作用域（抽屉的收/开动画要用它）；RootScreen 里赋值 */
@@ -592,7 +592,7 @@ private fun TopBar(step: XlrStep) {
                 StepBadge(step = step.ch, label = step.label)
             }
             Row(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp)) {
-                /* 左：皮肤 —— 单独唤起皮肤菜单浮层（早先那一版 .skinmenu；不是进设置的外观页） */
+                /* 左：皮肤 —— 单独唤起皮肤菜单浮层（早期版本 .skinmenu；⛔ 不是进设置的外观页） */
                 GlassSurface(
                     modifier = Modifier.width(43.dp).height(40.dp).tapNoIndication {
                         dismissIme()
@@ -600,7 +600,7 @@ private fun TopBar(step: XlrStep) {
                     },
                     shape = RoundedCornerShape(topStart = 999.dp, bottomStart = 999.dp),
                 ) { SkinGlyph() }
-                /* 右：日夜 —— 照早先那一版 #btnDN：深色套亮太阳（点了回浅色），浅色套亮月亮（点了进黑夜） */
+                /* 右：日夜 —— 照早期版本 #btnDN：深色套亮太阳（点了回浅色），浅色套亮月亮（点了进黑夜） */
                 GlassSurface(
                     modifier = Modifier.width(43.dp).height(40.dp).tapNoIndication {
                         dismissIme()

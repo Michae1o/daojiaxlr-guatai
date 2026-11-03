@@ -44,7 +44,7 @@ import kotlin.math.sin
 
 /* 贰页 · 起卦（掌诀盘）
  *
- * 结构照早先的实现的 DOM：卡片(305 宽) 内 = 掌诀圆环(268) + 三宫/时辰 + 问句 + 四枚标签 + 一个主按钮。
+ * 结构照旧实现的 DOM：卡片(305 宽) 内 = 掌诀圆环(268) + 三宫/时辰 + 问句 + 四枚标签 + 一个主按钮。
  * 圆环：六宫围一圈，大安在正上，顺时针 留连→速喜→赤口→小吉→空亡，半径 96，宫格 66×66。
  * ⚠ 现在是**静态样张**：卦象数值（三宫、落宫、五行、体用、事类）是写死的样例，
  *   真值要等判据（起卦/排盘）移植进来才接。
@@ -66,7 +66,7 @@ internal fun GuaContent(onNext: () -> Unit, active: Boolean, onBack: () -> Unit 
     val ctx = Session.ctx
     val cast = Session.cast
     /* 没起卦（比如刚点过「新开一卦」）也给一句人话，别留一片空白 ——
-       「起过一卦就随便切页」，所以这两页真会被翻到没卦的状态。 */
+       2026-10-29 起「起过一卦就随便切页」，所以这两页真会被翻到没卦的状态。 */
     if (ctx == null || cast == null) {
         NoGuaHint(onBack = onBack)
         return
@@ -304,8 +304,8 @@ private fun PrimaryButton(label: String, onClick: () -> Unit) {
 }
 
 /* 还没起卦时的空态（贰/叁页共用）。
-   「起过一卦就随便切页，哪怕点了新开一卦」⇒ 这两页会被翻到没有卦的状态，
-   别留一片空白：一句话 + 一颗回壹页的胶囊。 */
+   2026-10-29 起「起过一卦就随便切页，哪怕点了新开一卦」⇒ 这两页会被翻到没有卦的状态，
+   ⛔ 别留一片空白：一句话 + 一颗回壹页的胶囊。 */
 @Composable
 internal fun NoGuaHint(onBack: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -3,7 +3,7 @@ package com.xlr.k.pages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/* app 内更新（只做安卓端，早先的实现 apps/mobile-web/src/data/updateCore.js）
+/* app 内更新（只做安卓端，旧实现 apps/mobile-web/src/data/updateCore.js）
    口径逐条照旧：
      · 只提示、不自动下；用户再点一次「立即更新」才下载；
      · 比 **versionCode**（数字），不比版本名；

@@ -42,7 +42,7 @@ import com.tencent.kuikly.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 /* 设置（旧 apps/mobile-web/src/components/SettingsScreen.jsx）
-   早先那一版是一页式：左栏点哪一栏、右栏 scrollIntoView 滚到那一段。
+   早期版本是一页式：左栏点哪一栏、右栏 scrollIntoView 滚到那一段。
    口径（第二次改）：**顶上横排几个栏位，点到哪个就切哪个**，
      要丝滑过渡，**不要总览页**。所以这里是「顶栏 tab + 内容切换」，六个栏各自一份内容。 */
 
@@ -111,7 +111,7 @@ internal fun SettingsOverlay() {
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var glideJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
 
-    /* 收尾动画：跟帧走。别再手搓 `delay(16)` 循环 —— 它和渲染帧不对齐，
+    /* 收尾动画：跟帧走。⛔ 别再手搓 `delay(16)` 循环 —— 它和渲染帧不对齐，
        越拖越散，本身就会一阵一阵的。 */
     fun glideTo(from: Float, target: Float, dur: Int, then: suspend () -> Unit) {
         glideJob?.cancel()
@@ -144,7 +144,7 @@ internal fun SettingsOverlay() {
             .background(KY_BG)
     ) {
         Spacer(modifier = Modifier.height(46.dp))
-        /* 早先那一版 `.sethead`（legacy.css）：**一行** flex，gap 14、padding 13/22、底下一条细线 ——
+        /* 早期版本 `.sethead`（legacy.css）：**一行** flex，gap 14、padding 13/22、底下一条细线 ——
            [← 返回 胶囊] [设置] ── [版本号] */
         Row(
             modifier = Modifier
@@ -294,7 +294,7 @@ internal fun SettingsOverlay() {
                                            ① 先滑到邻栏正中（此刻主体在屏外一格）；
                                            ② 到位后**先换主体**（新栏在屏外开始组合，看不见），
                                               等两三帧组合完，再把轨道归位。
-                                           原来「换主体 + 归位」同拍 ⇒ 新栏组合那一帧会闪一下上一页
+                                           ⛔ 原来「换主体 + 归位」同拍 ⇒ 新栏组合那一帧会闪一下上一页
                                               （：「切到下一页之后会直接闪一下上一页才恢复」）。 */
                                         glideTo(swDx, -dir * contentW, 200) {
                                             fromSwipe = true
@@ -418,7 +418,7 @@ internal fun SetField(value: String, onChange: (String) -> Unit, hint: String = 
     if (hint.isNotEmpty()) SetHint(hint)
 }
 
-/* 设置/记录里所有小按钮共用这一个（口径：「导入导出清空、回收站的还原/彻底删除这些
+/* 设置/记录里所有小按钮共用这一个（2026-10-28 口径：「导入导出清空、回收站的还原/彻底删除这些
    按钮很丑，不够高级感」⇒ 全部重做质感）：
    · 形状＝整圆胶囊（不是小圆角方块），高度 34 / 紧凑 30；
    · 次按钮**不铺底色**，只留 1px 极淡描边 + 深灰字 —— 原来「白 .55 底 + 白 .8 边」在浅底上是一块糊的灰；
@@ -460,7 +460,7 @@ internal fun SetBtn(
     )
     val shape = RoundedCornerShape(Skin.rPill)
     val bru = Skin.cur == "bru"
-    /* 卡通：实黑粗边（早先那一版 .go/.tbtn 都是 2px 黑边 + 800 字重），其它皮肤维持原来的淡描边 */
+    /* 卡通：实黑粗边（早期版本 .go/.tbtn 都是 2px 黑边 + 800 字重），其它皮肤维持原来的淡描边 */
     val lineColor = if (bru) Skin.def.ink else Color(base.red, base.green, base.blue, lineA)
     val fillColor = if (bru) Color(base.red, base.green, base.blue, if (fillA > 0f) fillA else 0f) else Color(base.red, base.green, base.blue, fillA)
     /* ：

@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 container.setPadding(0, 0, 0, px)
             }
         }
-        /* 页面底色同步：底部内边距让出来的那块用页面色，别露窗口白（） */
+        /* 页面底色同步：底部内边距让出来的那块用页面色，别露窗口白（2026-10-30） */
         com.xlr.k.pages.Platform.setPageBg = { r, g, b ->
             runOnUiThread {
                 val c = android.graphics.Color.rgb(
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        /* 系统返回键交给共享层决定：
+        /* 系统返回键交给共享层决定（2026-10-29 用户：原来任意页面按返回直接退回桌面，不对）：
            浮层 → 设置（→ 回到记录抽屉）→ 抽屉 → 三页（两次退出）。*/
         com.xlr.k.pages.Platform.exitApp = {
             runOnUiThread { finish() }

@@ -1,4 +1,4 @@
-/* SplashOrbit.jsx —— 开屏「二十八宿环绕北斗」（从安卓端移植）
+/* SplashOrbit.jsx —— 开屏「二十八宿环绕北斗」（2026-11-02 从安卓端移植）
  *
  * 来源：apps/android/kuikly/shared/src/commonMain/kotlin/com/xlr/k/pages/SplashOrbit.kt
  *   数据：src/data/splashOrbitData.js（由 tools/import-splash-orbit.py 从安卓端生成）
@@ -120,7 +120,7 @@ export default function SplashOrbit() {
     fit();
 
     let raf = 0;
-    /* 相位基准用 performance.now() 的**绝对值**，不再从本组件挂载时刻起算。
+    /* ★ 2026-11-03：相位基准用 performance.now() 的**绝对值**，不再从本组件挂载时刻起算。
        加密壳的加载层（protect.py 里的 bootSky）画的是同一片星图，两层各自 rAF：
        若各从自己的起点算，交接那 0.98 秒里两片星相位不同 ⇒ 用户看到「星点重叠成重影」。
        共用绝对时钟后，两层相位逐帧相同，重合得看不出接缝。 */

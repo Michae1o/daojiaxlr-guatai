@@ -25,17 +25,17 @@ import com.tencent.kuikly.compose.ui.graphics.drawscope.DrawScope
 import com.tencent.kuikly.compose.ui.unit.dp
 import com.tencent.kuikly.compose.ui.graphics.Color
 
-/* 皮肤九套 + 日夜（口径：：「皮肤九套，包括还有昼夜切换也得加」）
+/* 皮肤九套 + 日夜（2026-10-29 口径：：「皮肤九套，包括还有昼夜切换也得加」）
 
    真源 = 手机端网页版 `apps/mobile-web/src/styles/legacy.css` L681-816 的
    `html[data-skin="…"]` 变量块，一套一套逐字抄过来；名字与副标题照
    `apps/mobile-web/src/data/skinsCore.js` 的 SKINS 表。
 
    日夜口径也照旧（`src/data/globals.js` 的 toggleDayNight）：
-     · 早先那一版**不是**给每套皮肤做一份深色值，而是「切到夜＝切到深色那套皮肤」——
+     · 早期版本**不是**给每套皮肤做一份深色值，而是「切到夜＝切到深色那套皮肤」——
        DARKSKIN = { hei:1, mg:1 }；点亮时回到上一次的浅色皮肤（localStorage `xlr-skin-prevlight`）。
-     · 顶栏那颗太阳/月亮按钮就是干这个的（早先那一版 #btnDN）。
-   ⇒ K 端同样：`toggleDayNight()` 在 {hei, mg} 与「上一次浅色皮肤」之间来回，不去改每套皮肤的值。 */
+     · 顶栏那颗太阳/月亮按钮就是干这个的（早期版本 #btnDN）。
+   ⇒ K 端同样：`toggleDayNight()` 在 {hei, mg} 与「上一次浅色皮肤」之间来回，⛔ 不去改每套皮肤的值。 */
 
 class SkinDef(
     val key: String,
@@ -64,7 +64,7 @@ class SkinDef(
 private fun c(hex: Long): Color = Color(0xFF000000L or hex)
 private fun rgba(r: Int, g: Int, b: Int, a: Float): Color = Color(r / 255f, g / 255f, b / 255f, a)
 
-/** 九套皮肤（顺序照早先那一版菜单：黑白 / 黑夜 / 梦幻 / 宣纸 / 青瓷 / 豆沙 / 卡通 / 敦煌 / 莫高窟） */
+/** 九套皮肤（顺序照早期版本菜单：黑白 / 黑夜 / 梦幻 / 宣纸 / 青瓷 / 豆沙 / 卡通 / 敦煌 / 莫高窟） */
 internal val SKINS: List<SkinDef> = listOf(
     /* 黑白 —— 只有黑白灰，一个色相都不要（默认皮肤） */
     SkinDef(
@@ -138,7 +138,7 @@ internal val SKINS: List<SkinDef> = listOf(
         bg = c(0xFFFFFF), surface = c(0xFFFFFF), surface2 = c(0xE5E2DA),
         ink = c(0x0D0D0D), dim = c(0x3F3C37), dim2 = c(0x5F5C56),
         line = rgba(13, 13, 13, 0.85f), line2 = c(0x0D0D0D),
-        /* 卡通的主按钮是「橙底白字」（早先那一版 .go color:#fff），不是深字 */
+        /* 卡通的主按钮是「橙底白字」（早期版本 .go color:#fff），不是深字 */
         accent = c(0xE8442A), onAccent = c(0xFFFFFF),
         accentBg = rgba(232, 68, 42, 0.10f), accentBg2 = rgba(232, 68, 42, 0.20f),
         accentLine = c(0x0D0D0D),
@@ -169,7 +169,7 @@ internal val SKINS: List<SkinDef> = listOf(
     ),
 )
 
-/** 深色那一侧（早先那一版 DARKSKIN = {hei:1, mg:1}） */
+/** 深色那一侧（早期版本 DARKSKIN = {hei:1, mg:1}） */
 private val DARK_SKINS = setOf("hei", "mg")
 
 private const val KEY_SKIN = "K_SKIN"
@@ -178,7 +178,7 @@ private const val KEY_FOG_LEVEL = "K_FOG_LEVEL"
 private const val KEY_FOG_FROZEN = "K_FOG_FROZEN"
 
 /** 宿主在创建 Kuikly 视图前调一次：把皮肤与雾开关从本地读回来。
- *  皮肤原先只在 RootPage 组合时 Skin.load()，第一帧已经用默认 bw 画完了，
+ *  2026-11-02：皮肤原先只在 RootPage 组合时 Skin.load()，第一帧已经用默认 bw 画完了，
  *  冷启动会闪一帧黑白。 */
 fun preloadSkinForHost() { Skin.load() }
 
@@ -245,7 +245,7 @@ internal object Skin {
         if (!DARK_SKINS.contains(k)) Platform.put?.invoke(KEY_PREV_LIGHT, k)
     }
 
-    /** 顶栏那颗太阳/月亮（早先那一版 #btnDN / toggleDayNight）：
+    /** 顶栏那颗太阳/月亮（早期版本 #btnDN / toggleDayNight）：
      *  当前是深色套 ⇒ 回到上次的浅色套；否则 ⇒ 切到黑夜 */
     fun toggleDayNight() {
         if (DARK_SKINS.contains(cur)) {
@@ -266,12 +266,12 @@ internal fun veil(a: Float): Color =
     if (Skin.dark) Color(1f, 1f, 1f, (a * 0.30f).coerceAtMost(0.24f))
     else Skin.def.surface.let { c -> Color(c.red, c.green, c.blue, a.coerceAtMost(1f)) }
 
-/** 卡片 / 胶囊的描边：浅色皮肤是淡淡一道墨，深色皮肤是淡淡一道白（早先那一版 --line2） */
+/** 卡片 / 胶囊的描边：浅色皮肤是淡淡一道墨，深色皮肤是淡淡一道白（早期版本 --line2） */
 internal val KY_CARD_LINE: Color get() = Skin.def.line2
 
-/* ---------- 皮肤「造型」三件（用户：「卡通这个皮肤和黑白没啥区别了…原本想的是
+/* ---------- 皮肤「造型」三件（2026-10-29 用户：「卡通这个皮肤和黑白没啥区别了…原本想的是
    那种粗线条、橙色点缀的手绘风格」）----------
-   早先那一版卡通(bru)在 legacy.css L842-871 另有一整套「系统级加强」：
+   早期版本卡通(bru)在 legacy.css L842-871 另有一整套「系统级加强」：
      卡片 2px 实黑边 + 5px 5px 0 硬阴影、主按钮 2px 黑边 + 朱红底 + 800 字重、
      输入框 2px 黑边、顶栏压成黑板 + 朱砂底线。
    这里给 Skin 加三个造型参数，各页面只认参数 ⇒ 卡通一换就整套变，不再和黑白撞脸。 */
@@ -286,7 +286,7 @@ internal val Skin.rCard: com.tencent.kuikly.compose.ui.unit.Dp
 internal val Skin.rPill: com.tencent.kuikly.compose.ui.unit.Dp
     get() = if (cur == "bru") 6.dp else 999.dp
 
-/** 卡通的文字/按钮要压得更粗（早先那一版 700/800） */
+/** 卡通的文字/按钮要压得更粗（早期版本 700/800） */
 internal val Skin.weightBoost: Int
     get() = if (cur == "bru") 700 else 500
 
@@ -401,9 +401,9 @@ private fun mixc(a: Color, b: Color, t: Float): Color = Color(
     a.alpha + (b.alpha - a.alpha) * t,
 )
 
-/* 皮肤小样
+/* 皮肤小样（2026-10-29 ）
 
-   早先那一版菜单那颗是 12px 的纯色方块（.skinmenu .sw）+ 一个纯色小点，干、呆、跟界面没关系。
+   早期版本菜单那颗是 12px 的纯色方块（.skinmenu .sw）+ 一个纯色小点，干、呆、跟界面没关系。
    这里改成一张**迷你卡**：底色 → 里面一张卡（surface）→ 底下一条强调色小条（就是主按钮的颜色），
    一眼能看出这套皮肤「底 / 卡 / 主色」三件，尺寸 18×22，跟设置里那套圆角/描边同一语言。 */
 @Composable
@@ -488,7 +488,7 @@ internal fun Modifier.glassMaterial(
        Kuikly 没有实时背景模糊（backdrop-filter 那套在这里不存在），"透"这个观感没法靠模糊解决，
        只能把面做实。所以 popup 单独走这条：面用**不透明的 surface**（不是灰、不是 surface2），
        玻璃感交给顶部 rim 高光 + 白色内描边 + 底部淡暗边 —— 面不透字，边还在发亮。
-       别再用 surface2 / d.bg 调深色调。 */
+       ⛔ 别再用 surface2 / d.bg 调深色调。 */
     if (popup) {
         val rimP = if (Skin.dark) d.ink else Color.White
         /* ⚠ 另一条踩过的坑（留着备用）：`background(Color)` 不吃带 alpha 的纯色

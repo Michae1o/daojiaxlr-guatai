@@ -37,7 +37,7 @@ object LlmHost {
         com.xlr.k.pages.Platform.saveFile = { name, text -> saveToDownloads(ctx, name, text) }
         com.xlr.k.pages.Platform.pickText = { cb -> startPick(cb) }
         /* 引导 / 「去哪里拿」里那些链接：
-           有系统浏览器就交给系统（早先那一版是 <a target=_blank>）；
+           有系统浏览器就交给系统（早期版本是 <a target=_blank>）；
            没有（模拟器、或浏览器被禁用）就在本 App 内嵌页里打开 —— 否则点了等于没反应 */
         com.xlr.k.pages.Platform.openUrl = { url ->
             try {

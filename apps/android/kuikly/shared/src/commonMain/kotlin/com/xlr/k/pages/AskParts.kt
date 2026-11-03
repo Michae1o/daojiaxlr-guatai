@@ -52,8 +52,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 /* 壹页「所问之事」的可交互零件：起卦方式、补充背景、详情面板（九数 / 日期 / 时辰）、事类、选择弹层。
-   早先的实现对位：apps/mobile-web/src/{components/AskPanel.jsx, data/askCore.js, data/castCore.js}
-   ⚠ 文案逐字照抄早先的实现（CAST_LB / miniFor / CAT_OPTS / 报错句），改字要先改那边。 */
+   旧实现对位：apps/mobile-web/src/{components/AskPanel.jsx, data/askCore.js, data/castCore.js}
+   ⚠ 文案逐字照抄旧实现（CAST_LB / miniFor / CAT_OPTS / 报错句），改字要先改那边。 */
 
 internal val CAT_OPTS: List<Pair<String, String>> = listOf(
     "auto" to "事类·自动",
@@ -80,7 +80,7 @@ private val CAST_LB = mapOf(
 /* 点一下就响应、不带 clickable 默认高亮（Kuikly 的 clickable 会留一块白高亮/水波纹，
    小胶囊上很难看）。所有小控件统一用这个。
    ⚠ 必须走 rememberUpdatedState：`pointerInput(Unit)` 只建一次，直接捕 onTap 会**永远执行第一次
-   那个 lambda**（闭包里读到的状态也是旧的）——踩到：设置顶栏 tab 点回「大模型」没反应，
+   那个 lambda**（闭包里读到的状态也是旧的）——2026-10-28 踩到：设置顶栏 tab 点回「大模型」没反应，
    因为第一次组合时它是选中态、闭包里 `if (!on)` 一直是 false。 */
 /* ：
    根因就是下面那个 tapNoIndication 的按下反馈（缩 0.965 + 压 0.82）——它本来是给"小按钮"用的，
@@ -155,14 +155,14 @@ internal fun Modifier.tapPressable(onPress: (Boolean) -> Unit, onTap: () -> Unit
     }
 }
 
-/* 点 / 长按两件事挂在同一块上（记录行长按出选项面板用；早先那一版 520ms，Kuikly 默认长按阈值≈500ms）。
+/* 点 / 长按两件事挂在同一块上（记录行长按出选项面板用；早期版本 520ms，Kuikly 默认长按阈值≈500ms）。
    两个都走 rememberUpdatedState；长按触发时不会再触发 onTap（detectTapGestures 自己的语义）。 */
 @Composable
 internal fun Modifier.tapOrLongPress(
     onTap: () -> Unit,
     onLongPress: () -> Unit,
     /* 长按要「跟手」时用它：回调里给的是**这个控件本地坐标**里的按下点，
-       调用方自己 localToRoot 换算，才能把菜单贴在手指上（早先那一版只有无参 onLongPress，位置只能靠行高猜） */
+       调用方自己 localToRoot 换算，才能把菜单贴在手指上（早期版本只有无参 onLongPress，位置只能靠行高猜） */
     onLongPressAt: ((com.tencent.kuikly.compose.ui.geometry.Offset) -> Unit)? = null,
 ): Modifier {
     val ct = rememberUpdatedState(onTap)
@@ -208,7 +208,7 @@ internal fun setAskMode(m: String) {
        ⇒ 切到「报数」仍然自动展开（detailManual 归零＝这是自动展开的）；
          从「报数」切回别的 → 只有**不是**手动展开的才自动收回；用户自己点开过就保持原样。 */
     /* 用户改口径：「展开详情之后，任何都别收回了，因为整体逻辑变了」
-       —— 早先的实现（那次）是「切回别的模式就自动收」，现在详情是卡片自己的一部分，
+       —— 旧实现（2026-10-29 那次）是「切回别的模式就自动收」，现在详情是卡片自己的一部分，
        切模式只换里头的控件（日期 ↔ 九数），不许收。只有用户点「详情」才收起。 */
     if (m != prev && m == "num") {
         /* ⇒ 三个数改到**卡里**直接报
@@ -237,7 +237,7 @@ internal fun miniText(mode: String): String = when (mode) {
 }
 
 /* ---------- 起卦方式那一排（时间取数 / 月日时 / 报数） ----------
-   照早先的实现的真身搬：**一颗白药丸在格子里滑**（`.seg .spill`），不是每格自己变色。
+   照旧实现的真身搬：**一颗白药丸在格子里滑**（`.seg .spill`），不是每格自己变色。
    几何/曲线取自 legacy.css L2017–2020 与 38-script placeSpill：
      left  .42s cubic-bezier(.3,.9,.25,1)
      width .46s cubic-bezier(.2,1.28,.4,1)   ← 宽度带回弹
@@ -349,7 +349,7 @@ internal fun ModeSeg() {
             .onGloballyPositioned {
                 rowW = it.size.width.toFloat()
                 /* 记下这一排在 root 里的上下边：根手势拿到「起手落在这一排里」就不抢去开记录抽屉，
-                   否则往右拖药丸会被抽屉手势吃走（实测就是被吃走了）。 */
+                   否则往右拖药丸会被抽屉手势吃走（2026-10-29 实测就是被吃走了）。 */
                 val top = it.localToRoot(Offset.Zero).y
                 Session.segY0 = top
                 Session.segY1 = top + it.size.height
@@ -464,7 +464,7 @@ internal const val BG_H = 92f
 
 @Composable
 internal fun BgFold() {
-    /* 早先那一版 `transition:transform .22s var(--ease)` —— 箭头是转的，不是换字符 */
+    /* 早期版本 `transition:transform .22s var(--ease)` —— 箭头是转的，不是换字符 */
     val rot by animateFloatAsState(
         targetValue = if (Session.bgOpen) 90f else 0f,
         animationSpec = tween(220, easing = KY_EASE_OUT),
@@ -474,9 +474,9 @@ internal fun BgFold() {
             modifier = Modifier.fillMaxWidth().tapNoIndication { Session.bgOpen = !Session.bgOpen },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            /* 早先那一版是原生 <details><summary> + `summary::before{content:"▸"}`：
+            /* 早期版本是原生 <details><summary> + `summary::before{content:"▸"}`：
                **带路的那个箭头就是开合指示器**，展开时自己转 90°（legacy.css L256-262）。
-               行尾不要另加一个 ˅ —— 早先那一版没有，两个箭头会打架（点名） */
+               ⛔ 行尾不要另加一个 ˅ —— 早期版本没有，两个箭头会打架（点名） */
             Text_(
                 text = "▸",
                 fontSize = 11f,
@@ -611,7 +611,7 @@ private fun NumStep(i: Int) {
     }
 }
 
-/* 报数：三个数直接摆在卡里。
+/* 报数：三个数直接摆在卡里（2026-10-30 ）。
    和详情里的 NumStep 共用同一份状态（Session.nums），改哪边都同步。
    用户同日第二轮：「视觉上有点怪，没做到统一」⇒ 改成**跟取数方式那条药丸同款的容器**，
      里面三格 + 细分割线，读起来是「一格一组数字」，不再像三颗孤零零的胶囊。 */

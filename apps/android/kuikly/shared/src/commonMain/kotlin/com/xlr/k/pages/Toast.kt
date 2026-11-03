@@ -16,7 +16,7 @@ import com.tencent.kuikly.compose.ui.graphics.graphicsLayer
 import com.tencent.kuikly.compose.ui.unit.dp
 
 /* 全局小提示：导出/导入/复制完浮出来一句话，1.8 秒自己淡走。
-   早先那一版是设置页里那行 `say('good', …)`；K 版提到全局，任何页都能用 `Session.say(...)`。 */
+   早期版本是设置页里那行 `say('good', …)`；K 版提到全局，任何页都能用 `Session.say(...)`。 */
 @Composable
 internal fun AppToast() {
     val msg = Session.toast

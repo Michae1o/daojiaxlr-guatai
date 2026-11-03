@@ -57,7 +57,7 @@ SPLASH_SRC = Path(__file__).resolve().parents[1] / "src" / "components" / "splas
 def _splash_taiji() -> str:
     """开屏那颗太极的 SVG 内层（**逐字取自** splashMarkup.js）。
 
-    ⚠ **加载层不再用它**；
+    ⚠ 2026-11-02 起**加载层不再用它**；
        函数与自检保留在这里，回退时把 SHELL 里的 @STARMAP@ 换回 @TAIJI@ 即可。
 
     （用户：「加密壳的加载动画不要大太极变小了，就改成开屏页的太极，
@@ -150,7 +150,7 @@ STARMAP_INNER = _starmap_svg()
 #     ⚠ 上一版用错成窄屏那套（120vw 铺满）⇒ 星点被放大到粗大、边缘被裁，用户当场指出。
 #   · 动画参数与 SplashOrbit 一字不差：24s 一圈、弧长采样 1440、起伏 8~11 画布像素、
 #     周期 3/4/4.8/6 秒、黄金角错峰、星芒 sin 三次方、北斗浮动 0.0115×内容长边。
-#   合成整图那套（splash-orbit-flat）与 _starmap_svg 都留着没删，回退用。
+#   ⛔ 合成整图那套（splash-orbit-flat）与 _starmap_svg 都留着没删，回退用。
 # ======================================================================================
 SKY_JSON_PATH = Path(__file__).resolve().parent / "boot-sky.json"
 if not SKY_JSON_PATH.exists():

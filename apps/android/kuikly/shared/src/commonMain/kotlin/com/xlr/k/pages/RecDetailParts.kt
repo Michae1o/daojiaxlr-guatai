@@ -25,7 +25,7 @@ import com.xlr.k.judge.Rec
 import kotlinx.coroutines.launch
 
 /* 记录详情里的两块：复盘（RvArea）与接着问（FollowAsk）。
-   语义照早先那一版 Record.jsx 的 <Rv> 与 Detail：
+   语义照早期版本 Record.jsx 的 <Rv> 与 Detail：
    · 标了「没应验」→ 自动跑一次复盘（出网，让模型指出错在哪一步）；
    · 复盘只写在这条记录上（rv/rvWhy/rvRule），**点「写入准则」才进准则表**；
    · 接着问必须是用模型解过的卦（ans == model），一问一答追加到 thread。 */
@@ -46,7 +46,7 @@ internal fun RvArea(r: Rec, onChange: () -> Unit, onRuleWritten: () -> Unit = {}
         Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             /* 旧 Records.jsx L203-205：写入准则 / 算了，不记 ＋ 一句 mini 说明；
-               写完跟早先那一版一样切到「准则」那一页（旧 20-script L533 末尾 sdbTab('rules')） */
+               写完跟早期版本一样切到「准则」那一页（旧 20-script L533 末尾 sdbTab('rules')） */
             SetBtn("写入准则", primary = true) {
                 RecStore.addRule(r, r["rvRule"] ?: "", r["rvWhy"] ?: "")
                 onChange()
@@ -109,7 +109,7 @@ internal fun RvArea(r: Rec, onChange: () -> Unit, onRuleWritten: () -> Unit = {}
         }
     }
 
-    /* 早先那一版：标「没应验」自动复盘一次（这一条还没复盘过才跑） */
+    /* 早期版本：标「没应验」自动复盘一次（这一条还没复盘过才跑） */
     LaunchedEffect(id, rv) {
         if (rv.isEmpty() && !started && miss.isEmpty()) {
             started = true

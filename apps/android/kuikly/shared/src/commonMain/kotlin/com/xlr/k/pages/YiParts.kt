@@ -68,7 +68,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /* 动画口径（定）：**一律非线性**。
-   所有位移/缩放/透明度/尺寸过渡都走下面这几条缓动曲线，不用 LinearEasing、不做 1:1 线性插值。
+   所有位移/缩放/透明度/尺寸过渡都走下面这几条缓动曲线，⛔ 不用 LinearEasing、⛔ 不做 1:1 线性插值。
    出场类（进场、升起、落位）用 OUT；收起类用 IN；带回弹的用 BACK。 */
 internal val KY_EASE_OUT = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
 /* 需要「慢慢起、慢慢收」的一段（卡片撑开 + 键盘收起这两条要严丝合缝地叠在一起），
@@ -227,7 +227,7 @@ internal fun SkinGlyph() {
 
 @Composable
 internal fun SunGlyph() {
-    /* 照早先那一版外壳 shell.html 的 #btnDN .ic-sun：
+    /* 照早期版本外壳 shell.html 的 #btnDN .ic-sun：
        <circle cx=12 cy=12 r=4/> + 8 条射线（M12 2v3 / M12 19v3 / M2 12h3 / M19 12h3 /
        M4.9 4.9l2.1 2.1 / M17 17l2.1 2.1 / M19.1 4.9L17 7 / M7 17l-2.1 2.1），
        线宽 1.6/24、圆头 ⇒ 这里按 24 格坐标画，随画布缩放 */
@@ -254,7 +254,7 @@ internal fun SunGlyph() {
 
 @Composable
 internal fun MoonGlyph() {
-    /* 照早先那一版 .ic-moon 的那条 path：
+    /* 照早期版本 .ic-moon 的那条 path：
          M20 14.5 A8.5 8.5 0 1 1 9.5 4 a6.8 6.8 0 0 0 10.5 10.5 z
        把它拆成两段弧（圆弧参数算好写死，别再拿眼睛凑）：
          外弧：圆心 (11.82,12.18) r8.5，从 15.8° 起顺时针 238.4°（走左边那一大圈）
@@ -305,7 +305,7 @@ internal fun CaretGlyph() {
 }
 
 /* 顶栏正中的步进序号：常显当前一个；落位后自动展开「贰 · 起卦」3 秒再收回，
-   点一下也能就地展开 2 秒（早先的实现 STEP_TAP_MS = 2000）。 */
+   点一下也能就地展开 2 秒（旧实现 STEP_TAP_MS = 2000）。 */
 @Composable
 internal fun StepBadge(step: String, label: String) {
     var open by remember { mutableStateOf(false) }
@@ -327,7 +327,7 @@ internal fun StepBadge(step: String, label: String) {
     val curve = KY_EASE_BACK
     /* 手势期（旧 stepCollapseAll）标签恒收起 */
     val isOpen = open && !Session.stepLabelClosed
-    /* 三段过渡各走各的时长（照早先的实现：字号 .46s / 标签宽 .5s / 透明度 .3s），一律缓动 */
+    /* 三段过渡各走各的时长（照旧实现：字号 .46s / 标签宽 .5s / 透明度 .3s），一律缓动 */
     val p by animateFloatAsState(if (isOpen) 1f else 0f, tween(500, easing = curve))
     val fp by animateFloatAsState(if (isOpen) 1f else 0f, tween(460, easing = curve))
     val ap by animateFloatAsState(if (isOpen) 1f else 0f, tween(300, easing = curve))
@@ -378,7 +378,7 @@ internal fun StepBadge(step: String, label: String) {
 @Composable
 internal fun AskCard(onCast: () -> Unit) {
     val shape = RoundedCornerShape(Skin.rCard)
-    /* 壳的淡入（早先那一版 html[data-step] .cbar 的 opacity .18s ease） */
+    /* 壳的淡入（早期版本 html[data-step] .cbar 的 opacity .18s ease） */
     val shellA by com.tencent.kuikly.compose.animation.core.animateFloatAsState(
         targetValue = if (Session.cardShellOn) 1f else 0f,
         animationSpec = com.tencent.kuikly.compose.animation.core.tween(
@@ -390,19 +390,19 @@ internal fun AskCard(onCast: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .onGloballyPositioned {
-                /* 开屏那颗球要落到这张卡上：把它的根坐标记下来（早先那一版是 getBoundingClientRect('.cbar')） */
+                /* 开屏那颗球要落到这张卡上：把它的根坐标记下来（早期版本是 getBoundingClientRect('.cbar')） */
                 val p = it.localToRoot(com.tencent.kuikly.compose.ui.geometry.Offset.Zero)
                 Session.cardRect = floatArrayOf(p.x, p.y, it.size.width.toFloat(), it.size.height.toFloat())
             }
             .graphicsLayer {
-                /* 壳不是硬切上来的：180ms 淡入（早先那一版 1346 那一帧是硬切，但那时球和卡像素级一致；
+                /* 壳不是硬切上来的：180ms 淡入（早期版本 1346 那一帧是硬切，但那时球和卡像素级一致；
                    这里留一点交叠，万一有细微明暗差也不会"啪"一下） */
                 alpha = shellA
             }
             .clip(shape)
             .glassMaterial(shape)
     ) {
-        /* 开屏球落地后，卡里的内容才淡上来。早先那一版两条过渡分开写（legacy.css L3420）：
+        /* 开屏球落地后，卡里的内容才淡上来。早期版本两条过渡分开写（legacy.css L3420）：
            opacity .42s ease ＋ transform .34s cubic-bezier(.2,.7,.25,1)，起点 translateY(7px) */
         val revOp by com.tencent.kuikly.compose.animation.core.animateFloatAsState(
             targetValue = if (Session.cardReveal) 1f else 0f,
@@ -425,7 +425,7 @@ internal fun AskCard(onCast: () -> Unit) {
                 /* ⚠ 移位必须用 offset（走布局），不能用 graphicsLayer.translationY：
                    Kuikly 给 BasicTextField 摆原生 EditText 时只认布局坐标，
                    用 graphicsLayer 移过的组，原生输入框会错位到下面「补充背景」那一行去
-                   （实测被顶到 y1578–1658，一点就聚焦问题框）。修 */
+                   （实测被顶到 y1578–1658，一点就聚焦问题框）。2026-10-28 修 */
                 .offset(y = ((1f - revT) * 7f).dp)
                 .graphicsLayer { alpha = revOp }
                 .padding(start = 14.dp, top = 10.dp, end = 14.dp, bottom = 8.dp)
@@ -433,7 +433,7 @@ internal fun AskCard(onCast: () -> Unit) {
             /* ：
                字段高度 = 30dp + (行数-1) × 27.2dp，最多 4 行；下面是 30dp 的老空档，所以单行时总高仍是 60dp，
                与改动前完全一致，多一行就真长一行。
-               ⚠ 更正 之前记的「字段一高、下面整排按钮点不动」是**测量错误**——
+               ⚠ 更正 2026-10-31：之前记的「字段一高、下面整排按钮点不动」是**测量错误**——
                  点的是「报数」和「＋」之间的空隙（x=650）。按真实坐标（报数 543、＋ 776、箭头 916，y=2130）
                  重测：单行 57dp 与多行 87dp 两种高度下，报数/＋/箭头/字段全部正常响应。 */
             val fieldW = remember { mutableStateOf(0f) }
@@ -451,7 +451,7 @@ internal fun AskCard(onCast: () -> Unit) {
                 }
                 /* Kuikly 给原生 EditText 摆位置时比 Compose 画的低一个框高：
                    占位文字画在 y1383，能点的矩形却在 1578–1658（正好压住「补充背景」那行）。
-                   ⇒ 字段自己往回挪一个框高，让「能点的」回到「画出来的」那儿。*/
+                   ⇒ 字段自己往回挪一个框高，让「能点的」回到「画出来的」那儿。2026-10-28 */
                 BasicTextField(
                     value = Session.q,
                     onValueChange = { Session.q = it },
@@ -484,7 +484,7 @@ internal fun AskCard(onCast: () -> Unit) {
                 Spacer(modifier = Modifier.width(8.dp))
                 GoButton({ dismissIme(); onCast() }, Session.q.isNotBlank())
             }
-            /* 报数：三个数直接在卡里报。
+            /* 报数：三个数直接在卡里报（2026-10-30 用户：为写三个数去撑开详情太占地方）。
                只在报数模式出现，高度 44dp（8 间距 + 30 控件 + 6 垫底），跟别处一样缓动开合。
                用户同日：「一旦展开详情，这个小格子就隐藏」——详情里的三个步进才是完整版，
                  两个同时出现会重复 ⇒ 报数 且 详情展开时收起便捷格。 */
@@ -604,7 +604,7 @@ private fun DetailButton() {
 
 @Composable
 private fun GoButton(onClick: () -> Unit, enabled: Boolean) {
-    /* 空框不给亮面、也不给点（早先的实现 syncGo：空就 disabled，opacity .3 + 去饱和）。
+    /* 空框不给亮面、也不给点（旧实现 syncGo：空就 disabled，opacity .3 + 去饱和）。
        命中区比视觉大一圈（56dp 容器装 42dp 圆），手指不用点得那么准。 */
     var held by remember { mutableStateOf(false) }
     val light by animateFloatAsState(
@@ -618,7 +618,7 @@ private fun GoButton(onClick: () -> Unit, enabled: Boolean) {
                 val p = c.localToRoot(Offset.Zero)
                 CastFx.fromX = p.x + c.size.width / 2f
                 CastFx.fromY = p.y + c.size.height / 2f
-                /* 开屏剥出来的那枚小球要滑到这里（早先那一版 dotAbs = card.querySelector('.go')） */
+                /* 开屏剥出来的那枚小球要滑到这里（早期版本 dotAbs = card.querySelector('.go')） */
                 Session.sendRect = floatArrayOf(p.x, p.y, c.size.width.toFloat(), c.size.height.toFloat())
             }
             .tapPressable({ held = it }) { if (enabled && Session.q.isNotBlank()) onClick() },

@@ -14,7 +14,7 @@ import android.webkit.WebViewClient
  *
  * 为什么不直接 startActivity(ACTION_VIEW)：很多手机上没装浏览器（模拟器就没有），
  * 或者默认浏览器被禁用 —— 那样点了等于没反应（报「链接打不开」）。
- * 这里的策略是：系统有浏览器就交给系统（跟早先那一版 <a target=_blank> 一致），
+ * 这里的策略是：系统有浏览器就交给系统（跟早期版本 <a target=_blank> 一致），
  * 没有就在本 App 里打开，保证「点得开」。
  */
 class WebViewActivity : Activity() {

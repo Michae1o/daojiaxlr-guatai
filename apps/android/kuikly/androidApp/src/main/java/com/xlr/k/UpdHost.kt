@@ -8,9 +8,9 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-/* 宿主侧：app 内更新（早先的实现 apps/mobile-web/src/data/updateCore.js + XlrUpdatePlugin.java）
+/* 宿主侧：app 内更新（旧实现 apps/mobile-web/src/data/updateCore.js + XlrUpdatePlugin.java）
    · 安卓这条路**只能**下 APK 交系统安装器覆盖装，做不到静默安装；
-   · 比的是 versionCode（数字），不比版本名；
+   · 比的是 versionCode（数字），⛔ 不比版本名；
    · 清单是同一个：(你的站点)
    网络与安装都在这里，shared 里只留纯逻辑与界面。 */
 object UpdHost {
@@ -31,8 +31,7 @@ object UpdHost {
        清单形状（与手机端网页版、桌面端共用）：
        { "android": { "cn.guatai.xiaoliuren": {"versionName":"…","versionCode":2610291,"url":"…","sha256":"…"}, … } } */
     private fun checkManifest(pkg: String): com.xlr.k.pages.UpdItem? {
-        if (MANIFEST_URL.isBlank()) return null
-        val body = fetchText(MANIFEST_URL + "?t=" + System.currentTimeMillis())
+        if (MANIFEST_URL.isBlank()) return null        val body = fetchText(MANIFEST_URL + "?t=" + System.currentTimeMillis())
         val j = try {
             org.json.JSONObject(body)
         } catch (e: Exception) {
@@ -43,7 +42,7 @@ object UpdHost {
         return com.xlr.k.pages.UpdItem(
             /* ⚠ 清单里安卓这条的版本名字段写的是 `version`（生成更新清单.py 统一口径），
                桌面端读的是 `version`、这里原先读 `versionName` ⇒ 提示里会显示成 v12610294 这种裸号。
-               两个键都认，先 versionName 再 version（实测踩到）。 */
+               两个键都认，先 versionName 再 version（2026-10-29 实测踩到）。 */
             versionName = it.optString("versionName", it.optString("version", "")),
             versionCode = it.optInt("versionCode", 0),
             url = it.optString("url", ""),

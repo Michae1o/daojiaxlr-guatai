@@ -29,13 +29,13 @@ import com.tencent.kuikly.compose.ui.graphics.graphicsLayer
 import com.tencent.kuikly.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
-/* 皮肤菜单浮层（早先的实现：外壳 `.skinmenu`，贴在皮肤按钮下方 8px、right 0、min-width 210px、
+/* 皮肤菜单浮层（旧实现：外壳 `.skinmenu`，贴在皮肤按钮下方 8px、right 0、min-width 210px、
    面=--surface、边=--line2、当前项=--accent-bg2 + 强调色）
 
-   口径：：「皮肤按钮点开怎么直接进设置了？这个按钮按下是单独唤起皮肤菜单，
+   2026-10-29 口径：：「皮肤按钮点开怎么直接进设置了？这个按钮按下是单独唤起皮肤菜单，
    而不是进入设置的外观页面」⇒ 顶栏那颗按钮现在只开这个浮层；设置里的「外观」还在，但不抢这个按钮。
 
-   早先那一版结构：
+   早期版本结构：
      .skinmenu .sh   「主题」小标题（10px / letterspacing .2em / dim2）
      .skinmenu button  [色块 12px] 名字（flex 1） [副标题 10px dim2]
      button[aria-current=true]  底 accent-bg2、字 accent */
