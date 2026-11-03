@@ -469,7 +469,7 @@ internal fun AskCard(onCast: () -> Unit) {
                     cursorBrush = SolidColor(KY_INK),
                     maxLines = 4,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                    keyboardActions = KeyboardActions(onSend = { if (Session.q.isNotBlank()) onCast() }),
+                    keyboardActions = KeyboardActions(onSend = { if (Session.q.isNotBlank()) { dismissIme(); onCast() } }),
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))
@@ -482,7 +482,7 @@ internal fun AskCard(onCast: () -> Unit) {
                 Spacer(modifier = Modifier.weight(1f))
                 DetailButton()
                 Spacer(modifier = Modifier.width(8.dp))
-                GoButton(onCast, Session.q.isNotBlank())
+                GoButton({ dismissIme(); onCast() }, Session.q.isNotBlank())
             }
             /* 报数：三个数直接在卡里报。
                只在报数模式出现，高度 44dp（8 间距 + 30 控件 + 6 垫底），跟别处一样缓动开合。

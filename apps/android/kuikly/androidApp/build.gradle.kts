@@ -21,8 +21,8 @@ android {
         applicationId = "cn.guatai.xiaoliuren"
         minSdk = 24
         targetSdk = 34
-        versionCode = 12611032
-        versionName = "2.261103.2"
+        versionCode = 12611033
+        versionName = "2.261103.3"
     }
 
     buildFeatures {
