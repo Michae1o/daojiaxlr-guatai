@@ -76,8 +76,17 @@ const withPre = skeleton.slice(0, HEAD_END) + TAG_PRE + skeleton.slice(HEAD_END)
 const ENTRY_AT = withPre.lastIndexOf('</body>');
 if (ENTRY_AT < 0) { console.error('✗ 骨架里找不到 </body>'); process.exit(3); }
 const TAG_CSS = '<link rel="stylesheet" href="/src/tailwind.css">';
+/* 开屏星图（每套皮肤一张，2.5MB data URI）单独挂：不能塞进 legacy.css ——
+   组装器按固定长度切块，塞大尾巴会被截断在 base64 中间，构建直接报 "Missing opening {"。
+   静态星图换成安卓端的环绕动效后，贴图（24 宿 + 24 星芒 + 北斗 × 九套）
+   由 import-splash-orbit.py 生成到 splash-orbit-tiles.css，同样单独挂、同样不进 legacy.css。 */
+const SPLASH_CSS = path.join(REPO, 'apps', 'desktop-web', 'src', 'styles', 'splash-art.css');
+const TAG_SPLASH = fs.existsSync(SPLASH_CSS) ? '<link rel="stylesheet" href="/src/styles/splash-art.css">' : '';
+const ORBIT_CSS = path.join(REPO, 'apps', 'desktop-web', 'src', 'styles', 'splash-orbit-tiles.css');
+const TAG_ORBIT = fs.existsSync(ORBIT_CSS) ? '<link rel="stylesheet" href="/src/styles/splash-orbit-tiles.css">' : '';
 const TAG_JS = '<script type="module" src="/shell-dist/shell.js"></script>';
-const entry = withPre.slice(0, ENTRY_AT) + TAG_CSS + '\n' + TAG_JS + '\n' + withPre.slice(ENTRY_AT);
+const entry = withPre.slice(0, ENTRY_AT) + TAG_CSS + '\n' + (TAG_SPLASH ? TAG_SPLASH + '\n' : '')
+  + (TAG_ORBIT ? TAG_ORBIT + '\n' : '') + TAG_JS + '\n' + withPre.slice(ENTRY_AT);
 
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, entry, 'utf8');

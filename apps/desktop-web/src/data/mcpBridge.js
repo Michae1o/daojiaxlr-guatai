@@ -1,4 +1,4 @@
-/* mcpBridge.js —— 桌面 App 里的「小智 · MCP」桥。
+/* mcpBridge.js —— 桌面 App 里的「MCP接入」桥。
  *
  * 重写：工具表与算法全部搬到 `@xlr/shared-judgment` 的 mcp-tools.js（内核），
  * 这里只剩「怎么连、怎么重连、日志怎么给设置页看」——也就是一条传输。
@@ -13,7 +13,7 @@
  *     在线 ≥ 5s 后断开的不受此限。
  *   · 断线退避重连 1s→60s，失败原因进日志。
  */
-import { MCP_TOOLS, listTools, callMcpTool, createCastStore } from '@xlr/shared-judgment';
+import { MCP_TOOLS, listTools, callMcpTool, createCastStore, errorEnvelope } from '@xlr/shared-judgment';
 
 export { MCP_TOOLS };
 
@@ -127,7 +127,7 @@ class McpBridgeClass {
       this.log('info', `按上次的设置自动连接…（最多试 ${BOOT_MAX_ATTEMPTS} 次）`);
       this.connect('', { internal: true });
     } else {
-      this.log('info', 'MCP 接入未开启（设置 → 小智 · MCP）');
+      this.log('info', 'MCP 接入未开启（设置 → MCP接入）');
     }
     return this;
   }
@@ -215,7 +215,7 @@ class McpBridgeClass {
     this.autoSeq = false;
     this.state = 'gaveup';
     this.lastError = `接入点没连上（已试 ${BOOT_MAX_ATTEMPTS} 次）` + (reason && reason !== '已到上限' ? '：' + reason : '');
-    this.log('err', `自动连接已停：试了 ${BOOT_MAX_ATTEMPTS} 次都没连上，不再重试（要用请到设置 → 小智 · MCP 手动「连接」）`);
+    this.log('err', `自动连接已停：试了 ${BOOT_MAX_ATTEMPTS} 次都没连上，不再重试（要用请到设置 → MCP接入 手动「连接」）`);
     this.emit();
   }
 
@@ -292,7 +292,9 @@ class McpBridgeClass {
           instructions:
             '道家小六壬（邵一尘 · 卜法卷）起卦断卦。先 xiaoliuren_qigua 起卦，回包里有一个卦 id（gid）；'
             + '接着要细说、要专门取象，都用同一个 gid 再调，别重新起卦。问依据用 xiaoliuren_chadian。'
-            + '口播保持简短：结论一句、依据两三条。凡断辞以工具返回为准，不自行发挥；民俗内容，仅供娱乐参考。',
+            + '工具只做确定性计算、只给判据素材，不出结论；解卦由你完成：结合原文与 calc 自己推理，'
+            + '口播保持简短（结论一句、依据两三条），不要说字段名、不要念 JSON。'
+            + '算式与判据以工具返回为准，措辞与推论由你组织；民俗内容，仅供娱乐参考。',
         },
       });
       return;
@@ -314,9 +316,9 @@ class McpBridgeClass {
         this.log('ok', `调用 ${name}（${Date.now() - t0}ms）：${String(args.question || args.keyword || '').slice(0, 24) || '—'}`);
         this.send({ jsonrpc: '2.0', id, result });
       } catch (e) {
-        const m = e && e.message ? e.message : String(e);
-        this.log('err', `调用 ${name} 失败：${m}`);
-        this.send({ jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: '调用失败：' + m }], isError: true } });
+        const env = errorEnvelope(name, args, e);
+        this.log('err', `调用 ${name} 失败〔${env.error.code}〕：${env.error.message}`);
+        this.send({ jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: JSON.stringify(env) }], structuredContent: env, isError: true } });
       }
       return;
     }
@@ -331,4 +333,5 @@ export const McpBridge = new McpBridgeClass();
 /* 调试口：控制台里 `__xlrMcp.status()` 能看到当前状态（也方便自动化验证） */
 if (typeof window !== 'undefined') {
   window.__xlrMcp = McpBridge;
+
 }

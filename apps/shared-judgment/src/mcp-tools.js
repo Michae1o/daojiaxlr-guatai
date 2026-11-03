@@ -1,7 +1,7 @@
 /* mcp-tools.js —— MCP 的**内核**：工具表 + 怎么算。判据只从本包取，这里不复制任何判据。
  *
  * 为什么放在 shared-judgment 包里：同一份内核要给三种出口用——
- *   ① 桌面 App 内的「小智 · MCP」桥（浏览器里，走 WebSocket 反连）
+ *   ① 桌面 App 内的「MCP接入」桥（浏览器里，走 WebSocket 反连）
  *   ② 命令行 `node mcp/cli.mjs`（Node 里，stdio / HTTP / 小智 三种传输）
  *   ③ 以后任何人自己接的客户端
  * 判据只存在一份的口径不变：工具执行全部落在 cast/buildContext/plainAll/sections 上。
@@ -16,6 +16,102 @@ import { autoCat, buildContext, buildBlocks, G, zhi } from './judgment.js';
 import { plainAll } from './plain-text.js';
 import { sections } from './corpus.js';
 import { SYS } from './prompt.js';
+
+/* ---------------- 结构化信封（给小智侧模型读的那份） ----------------
+ * 既有字段一个不动（客户端/测试都在用），这里只**追加**：
+ *   { tool, params, calc, rules, notes, error? }
+ *   calc  = 确定性计算（三宫/落宫/体用/应期/取数/时辰/事类/来源）
+ *   rules = 判据素材（jie 的 blocks、shilei 的取象、chadian 的命中）
+ *   notes = 给模型的短提示（怎么用这份数据；不要念 JSON、不要照读）
+ * 出错时由出口用 errorEnvelope() 包一层（内核仍然 throw，保持既有语义）。
+ */
+
+function errCode(msg) {
+  if (/未知工具/.test(msg)) return 'UNKNOWN_TOOL';
+  if (/没有检索到/.test(msg)) return 'NO_HIT';
+  if (/没配模型/.test(msg)) return 'MODEL_UNAVAILABLE';
+  if (/keyword|报数模式|日期模式|时辰/.test(msg)) return 'MISSING_PARAM';
+  if (/超出内置农历表|不合法/.test(msg)) return 'CALC_ERROR';
+  return 'CALC_ERROR';
+}
+
+export function errorEnvelope(tool, params, e) {
+  const message = e && e.message ? e.message : String(e);
+  return {
+    tool: String(tool || ''),
+    params: params || {},
+    calc: null,
+    rules: null,
+    notes: ['这次没有算出结果，按 error 处理：可以问用户要缺失的信息，或换个方式起卦。'],
+    error: { code: errCode(message), message },
+  };
+}
+
+const NOTE_INTERPRET = '解卦由你完成：结合原文与 calc 自己推理，口播时不要念 JSON、不要念字段名。';
+
+function paramsOf(name, a) {
+  const p = { question: a.question, background: a.background };
+  if (name !== 'xiaoliuren_chadian') {
+    p.mode = a.mode || 'auto';
+    if (a.nums) p.nums = a.nums;
+    if (a.date) p.date = a.date;
+    if (a.zi !== undefined) p.zi = a.zi;
+    if (a.gid) p.gid = a.gid;
+    if (a.withXiang !== undefined) p.withXiang = !!a.withXiang;
+    if (a.catKey) p.catKey = a.catKey;
+    if (a.g3) p.g3 = a.g3;
+  } else {
+    p.keyword = a.keyword;
+    if (a.limit !== undefined) p.limit = a.limit;
+    if (a.chars !== undefined) p.chars = a.chars;
+  }
+  return p;
+}
+
+/* 按工具把 sc（既有 structuredContent）翻成 calc / rules / notes。只读，不改 sc。 */
+function envelopeOf(name, a, sc) {
+  const base = { tool: name, params: paramsOf(name, a), calc: null, rules: null, notes: [NOTE_INTERPRET] };
+  if (!sc) return base;
+  if (name === 'xiaoliuren_qigua') {
+    base.calc = {
+      gid: sc.gid,
+      sixGong: sc.gong,
+      luoGong: sc.luoGong,
+      luoGongAttrs: { jiXiong: sc.jx, wuXing: sc.wx, act: sc.act },
+      gua: sc.gua,
+      yinYang: sc.yy,
+      shiChen: { zi: sc.zi, name: sc.ziName },
+      bodyUse: sc.bodyUse,
+      yingQi: sc.yingQi,
+      shuCount: sc.nums,
+      questionType: { key: sc.catKey, name: sc.catName },
+      source: sc.src,
+    };
+    base.notes = ['这是起卦的确定性结果。先给一句结论，再说两三条依据；体用与取数只在必要时补。', NOTE_INTERPRET];
+  } else if (name === 'xiaoliuren_jie') {
+    base.calc = { gid: sc.gid, sixGong: sc.gong };
+    base.rules = { kind: 'judgment', blocks: sc.blocks, chars: sc.chars };
+    base.notes = ['rules 是判据素材（约 ' + (sc.chars || 0) + ' 字），不是结论：挑 2–4 条与所问直接相关的自己讲，绝不要整段照读。', NOTE_INTERPRET];
+  } else if (name === 'xiaoliuren_shilei') {
+    base.calc = { gid: sc.gid, luoGong: sc.luoGong, questionType: { key: sc.catKey, name: sc.catName } };
+    base.rules = { kind: 'cat-material', luoGongText: sc.luoGongText || null, tips: sc.tips || [] };
+    base.notes = ['这类取象要落到用户具体问的事上，别把清单念完。', NOTE_INTERPRET];
+  } else if (name === 'xiaoliuren_chadian') {
+    base.rules = { kind: 'corpus-hits', hits: sc.hitDetails || [], total: sc.hits };
+    base.notes = ['这是原文检索结果，用来核对说法；结论仍由你自己下。', NOTE_INTERPRET];
+  } else if (name === 'xiaoliuren_duanci') {
+    base.calc = { gid: sc.gid, sixGong: sc.gong };
+    base.notes = ['这段断辞是本机配置的模型按判据写的，可直接念给用户；要依据请用 xiaoliuren_jie。'];
+  }
+  return base;
+}
+
+function attach(name, a, out) {
+  if (!out || !out.structuredContent) return out;
+  const env = envelopeOf(name, a, out.structuredContent);
+  out.structuredContent = Object.assign({}, out.structuredContent, env);
+  return out;
+}
 
 /* ---------------- 卦 id 与最近卦缓存 ---------------- */
 
@@ -285,7 +381,8 @@ export async function callMcpTool(name, a, opt) {
   const ctx = {
     store: (opt && opt.store) || createCastStore(),
   };
-  return callToolInner(name, a, ctx, opt || {});
+  const out = await callToolInner(name, a, ctx, opt || {});
+  return attach(name, a, out);
 }
 
 async function callToolInner(name, a, ctx, opt) {
@@ -326,7 +423,11 @@ async function callToolInner(name, a, ctx, opt) {
       }
       return {
         content: [{ type: 'text', text: shileiText(c) }],
-        structuredContent: { gid, catKey: c.catKey, catName: c.cat.name, luoGong: c.g3 },
+        structuredContent: {
+          gid, catKey: c.catKey, catName: c.cat.name, luoGong: c.g3,
+          luoGongText: (c.cat.luo && c.cat.luo[c.g3]) ? plainTag(c.cat.luo[c.g3]) : null,
+          tips: Array.isArray(c.cat.tips) ? c.cat.tips.map(plainTag) : [],
+        },
       };
     }
     case 'xiaoliuren_chadian': {
@@ -335,11 +436,19 @@ async function callToolInner(name, a, ctx, opt) {
       const limit = Math.min(Math.max(Number(a.limit) || 3, 1), 6);
       const chars = Math.min(Math.max(Number(a.chars) || 500, 100), 1200);
       const hits = sections(kw).slice(0, limit);
-      if (!hits.length) return { content: [{ type: 'text', text: `语料里没有检索到「${kw}」。` }] };
+      /* 查不到也走 throw：出口会把它包成 isError + error.code=NO_HIT，
+         客户端能机器识别；只回一段文本的话，模型与脚本都只能靠猜。 */
+      if (!hits.length) throw new Error(`语料里没有检索到「${kw}」，换个词再试`);
       const text = hits.map((h, i) =>
         `【${i + 1}】${h.title} · ${h.head}\n` + String(h.text).slice(0, chars).trim() + '…'
       ).join('\n\n');
-      return { content: [{ type: 'text', text }], structuredContent: { keyword: kw, hits: hits.length, docs: hits.map((h) => h.id) } };
+      return {
+        content: [{ type: 'text', text }],
+        structuredContent: {
+          keyword: kw, hits: hits.length, docs: hits.map((h) => h.id),
+          hitDetails: hits.map((h) => ({ doc: h.id, title: h.title, heading: h.head, text: String(h.text).slice(0, chars).trim() })),
+        },
+      };
     }
     case 'xiaoliuren_duanci': {
       if (!hasModel(opt)) throw new Error('这台机器没配模型（XLR_MCP_LLM_BASE / KEY / MODEL），解卦工具不可用；要依据请用 xiaoliuren_jie');

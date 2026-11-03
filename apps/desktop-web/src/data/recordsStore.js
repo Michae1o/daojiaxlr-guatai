@@ -40,7 +40,12 @@ function loadCases() {
   return loadCasesRaw().filter(function (r) { return !r.deleted; });
 }
 function saveCases(a) {
-  try { localStorage.setItem(CASE_KEY, JSON.stringify(a.slice(-200))); } catch (e) { }
+  try { localStorage.setItem(CASE_KEY, JSON.stringify(a)); }
+  catch (e) {
+    /* 只有真存不下（本地存储满）才走到这儿：必须让人知道，不能静默丢卦例 */
+    try { if (typeof window.toast === "function") window.toast("本地存储已满，这条没存上"); } catch (x) { }
+    try { console.error("卦例保存失败", e); } catch (x) { }
+  }
   notify();
 }
 function loadRules() {
@@ -50,7 +55,12 @@ function loadRules() {
   } catch (e) { return []; }
 }
 function saveRules(a) {
-  try { localStorage.setItem(RULE_KEY, JSON.stringify(a.slice(-100))); } catch (e) { }
+  try { localStorage.setItem(RULE_KEY, JSON.stringify(a)); }
+  catch (e) {
+    /* 只有真存不下（本地存储满）才走到这儿：必须让人知道，不能静默丢准则 */
+    try { if (typeof window.toast === "function") window.toast("本地存储已满，这条没存上"); } catch (x) { }
+    try { console.error("准则保存失败", e); } catch (x) { }
+  }
   notify();
 }
 function stamp() {
@@ -71,13 +81,13 @@ function addCase() {
     rv: '', rvWhy: '', rvAt: '',
     thread: (window.__thread || []).slice()
   };
-  var a = loadCases(); a.push(rec); saveCases(a);
+  var a = loadCasesRaw(); a.push(rec); saveCases(a);
   window.__recId = rec.id;   /* 之后在原卦上「接着问」、解完的断辞，都记进这一条 */
 }
 function updateCaseDuanci() {
   var id = window.__recId;
   if (!id) return;
-  var a = loadCases();
+  var a = loadCasesRaw();
   for (var i = 0; i < a.length; i++) if (a[i].id === id) {
     a[i].duanci = window.__md || '';
     saveCases(a);
@@ -87,11 +97,11 @@ function updateCaseDuanci() {
 function markModelAnswered() {
   var id = window.__recId;
   if (!id) return;
-  var a = loadCases();
+  var a = loadCasesRaw();
   for (var i = 0; i < a.length; i++) if (a[i].id === id) { a[i].ans = 'model'; saveCases(a); return; }
 }
 function setFb(id, fb) {
-  var a = loadCases(), rec = null;
+  var a = loadCasesRaw(), rec = null;
   for (var i = 0; i < a.length; i++) {
     if (a[i].id === id) {
       a[i].fb = (a[i].fb === fb ? '' : fb);
@@ -103,7 +113,7 @@ function setFb(id, fb) {
   if (rec && rec.fb === '错' && !rec.rv) reviewHook(id);          /* 触发复盘 */
 }
 function setNote(id, note) {
-  var a = loadCases();
+  var a = loadCasesRaw();
   for (var i = 0; i < a.length; i++) if (a[i].id === id) a[i].note = note;
   saveCases(a);
 }

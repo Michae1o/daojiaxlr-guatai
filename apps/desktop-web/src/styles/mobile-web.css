@@ -1,0 +1,165 @@
+/* ============================================================================
+   mobile-web.css —— 网页版（/xlr/）在手机浏览器上的适配层
+   ----------------------------------------------------------------------------
+   来历（）：手机端那条独立分支（旧 apps/mobile-web）已于 整条删掉，
+   手机浏览器现在直接看桌面网页版。桌面那套是「分步骨架 + DeepSeek 式大框 + 右侧断辞」，
+   在 390~430px 的竖屏上：版心左右各留 44px、顶栏品牌与按钮被挤成两行、设置页仍是
+   190px 导航 + 详情的双栏（右栏被压到只剩八十字宽）、控件普遍小于 44px 触控区。
+
+   落点：**组装期注入**（tools/assemble-desktop.mjs，跟着 变更记录 那块一起插在 </body> 前）。
+   为什么不在 legacy.css 里改：那份是逐字搬来的早期产物样式（5 块 + manifest 哈希），
+   改它要重算 manifest，而且会把桌面端的窄窗口一起改掉。本文件只做「补一层」：
+   选择器与 legacy 同权重、靠「更晚出现」取胜；开口一律 @media (max-width:820px)，
+   桌面（≥821px，含 Tauri 窗口）一个字节都不受影响。
+
+   不改任何交互语义：段控/事类/详情/起卦键还是原来那几个、原来的位置语言（框内
+      左下角控件 + 右下角箭头）；设置页还是「点导航滚到对应段落」，只是导航从左侧
+      竖列变成顶部横条。这里只调几何、字号、触控尺寸。
+   ============================================================================ */
+
+@media (max-width:820px) {
+
+  /* ---------- 一、基础 ---------- */
+  /* iOS 横竖屏切换会自动放大字号，这里按住；输入框 <16px 时 iOS 聚焦会自动缩放页面
+     （实测 #q 原为 15.5px ⇒ 一点输入框整页就被撑大），手机上一律 16px。 */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #q, #bg, #askQ, #dt, #h1, #h2, #cat,
+  .stf input[type=text], .stf input[type=password], .stf input[type=number], .stf select { font-size: 16px; }
+
+  /* ---------- 二、顶栏：不许换行、不许把字挤成竖排 ---------- */
+  .top-in { max-width: none; padding: 10px 14px; gap: 5px; }
+  .brand { flex: 0 0 auto; white-space: nowrap; font-size: 13px; letter-spacing: 0; }
+  .brand i { display: none; }                       /* 品牌后面那截小字（版本/副标），手机上不显示 */
+  #btnSum, #btnSet { flex: 0 0 auto; white-space: nowrap; padding: 8px 10px; font-size: 11.5px; gap: 5px; min-height: 40px; }
+  #btnSum .lbl, #btnSet .lbl { white-space: nowrap; }
+  #btnTheme, #btnDN { flex: 0 0 auto; min-width: 36px; min-height: 38px; }
+
+  /* ---------- 三、版心：边距收到 14px（原 44px ⇒ 390 屏上内容只剩 302 宽） ---------- */
+  .wrap, html[data-step] .wrap { max-width: none; padding: 14px 14px 44px; }
+  html[data-step="q"] .wrap { max-width: none; padding: 14px 14px 44px; }
+  html[data-step] .top-in { max-width: none; }
+  .mfoot { max-width: none; padding: 0 14px 26px; }
+
+  /* ---------- 四、问卦页（壹） ---------- */
+  html[data-step="q"] .left { padding-top: 8px; }
+  .greetwrap { margin: 0 0 14px; }
+  .greet { font-size: 23px; line-height: 1.5; letter-spacing: .04em; }   /* 28px 在 302 宽会孤行 */
+  .greetsub { margin-top: 6px; letter-spacing: .1em; }
+
+  /* 大框 + 控件行 + 箭头行：手机上竖着排三段（框 / 左控件+右箭头 / 详情数字）。
+     ⚠ 复测发现 `.cside`/`.gobar` 的 `grid-area:box` 与 `.cbar` 的 `grid-template-areas`
+       对不上名（computed 里 gridArea 是 auto）⇒ 它们是**依次排下来的普通行**，不是叠在框里。
+       所以这里显式重定义 areas，别指望把控件塞回框内。 */
+  .cbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto auto;
+    grid-template-areas: "box box" "side go" "detail detail"; gap: 0 10px; padding: 0; }
+  .cbar .cmain { grid-area: box; padding: 14px 14px 16px; }
+  .cmain textarea { min-height: 96px; line-height: 1.75; }
+
+  /* 左控件（起卦方式 / 事类 / 详情）+ 右箭头：同一行，各自贴底对齐 */
+  .cbar .cside { grid-area: side; align-self: end; justify-self: stretch;
+    display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; max-width: none; }
+  .cside .f { width: auto; flex: 1 1 100%; }
+  .cbar .cside .f { min-width: 0; }
+  .cside .seg { flex: 1 1 auto; min-width: 0; }
+  .cside .seg button { flex: 1 1 0; min-width: 0; padding: 8px 4px; }
+  .cside select { width: 100%; max-width: none; padding: 8px 26px 8px 12px; min-height: 38px;
+    background-position: calc(100% - 14px) 15px, calc(100% - 10px) 15px; }
+  #castToggle { flex: 0 0 auto; margin-left: 0; padding: 9px 14px; min-height: 38px; }
+
+  /* 起卦箭头：46 ⇒ 52（拇指够得到） */
+  .cbar .gobar { grid-area: go; align-self: end; justify-self: end; margin: 10px 0 0;
+    align-items: flex-end; }
+  .cbar .go { width: 52px; height: 52px; }
+  .cbar .go svg { width: 21px; height: 21px; }
+  .cbar .gobar .err { max-width: min(70vw, 300px); }
+  #castPanel { grid-area: detail; margin-top: 10px; }
+
+  /* ---------- 五、结果 / 断辞页（贰 · 叁） ---------- */
+  html[data-step="gua"] .right, html[data-step="jie"] .right { gap: 14px; }
+  .vnext button { min-height: 52px; }               /* 「看断辞 · 结果 →」拇指键 */
+
+  /* 换肤菜单：它是挂到 body 上的 absolute 菜单（top:calc(100% + 8px)），body 又不是定位容器
+     ⇒ 实测量到的位置是 y=852（整页高 844）——手机上点「换皮肤」什么也看不见。
+     这里改成长在右上角那颗换肤键下面，并在窄屏上给自己一个可滚动的上限。 */
+  .skinmenu { position: fixed; top: 58px; right: 12px; left: auto; z-index: 680;
+    width: min(300px, calc(100vw - 24px)); min-width: 0;
+    max-height: calc(100vh - 76px); overflow-y: auto; overscroll-behavior: contain; }
+
+  /* ---------- 六、设置页：左导航竖列 ⇒ 顶部横向锚点条 + 单列内容 ----------
+     交互不变（点导航 → 滚到对应段落、滚动时高亮跟着走），只是布局改成手机上该有的样子。 */
+  .sethead { padding: 10px 14px; gap: 10px; }
+  .sethead .bk { flex: 0 0 auto; min-height: 38px; padding: 7px 13px; white-space: nowrap; }
+  .sethead .ttl { white-space: nowrap; }
+  .setbody { padding: 0 14px 64px; }
+  .setgrid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .setnav { position: sticky; top: 0; z-index: 3; flex-direction: row; gap: 6px;
+    overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+    margin: 0 -14px 16px; padding: 10px 14px; background: var(--bg);
+    border-bottom: 1px solid var(--line); scrollbar-width: none; }
+  .setnav::-webkit-scrollbar { display: none; }
+  .setnav button { flex: 0 0 auto; border-left: none; border-radius: 999px;
+    padding: 8px 14px; white-space: nowrap; letter-spacing: .04em; }
+  .setnav button[aria-current="true"] { border-left-color: transparent; background: var(--accent-bg2); }
+  .setsec { margin-bottom: 40px; scroll-margin-top: 62px; }   /* 锚点滚到横条下面，不被盖住 */
+  .stf input[type=text], .stf input[type=password], .stf input[type=number], .stf select { min-height: 44px; }
+  .sbtn { min-height: 42px; }
+  .strow { flex-wrap: wrap; }
+  .strow > .sbtn, .strow > .btn { flex: 0 0 auto; }
+
+  /* ---------- 七、记录抽屉 ---------- */
+  /* ⚠ 这里有两个「窄屏专用」的老件（搜索框 .sdb-qw / 抽屉底部那个设置入口 .sdb-set）：
+     它们的窄屏样式在 A5-2 那次「删窄屏块」里跟着没了 ⇒ 现在裸着：搜索框里那个放大镜
+     SVG 被撑成 185×185、抽屉底部「设置」按钮被撑成 362×385 的大方块，把列表挤没了。
+     处理：搜索框补回成一行正常输入框；那个设置入口**藏掉**（我们手机版顶栏本来就留着
+     「设置」键，抽屉底部再来一个是重复入口）。 */
+  #sdb .sdb-set { display: none !important; }
+  .sdb-h { flex-wrap: wrap; align-items: center; padding: 14px 16px 12px; }
+  .sdb-h .sp { order: 1; flex: 1 1 auto; }
+  .sdb-h .x { order: 2; padding: 8px 10px; margin: -4px -6px -4px 0; min-width: 36px; min-height: 36px;
+    font-size: 20px; }
+  .sdb-h .sdb-qw { order: 3; flex: 1 1 100%; display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .sdb-h .sdb-qw svg { width: 18px; height: 18px; flex: 0 0 18px;
+    fill: none; stroke: currentColor; stroke-width: 1.7; opacity: .7; }   /* 放大镜（原来没有描边样式 ⇒ 只剩一个黑点） */
+  #sdbQ { width: 100%; min-height: 44px; font-size: 16px; color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--m-r-md); background: var(--surface2);
+    padding: 10px 12px; -webkit-appearance: none; appearance: none; }
+  #sdbQ::-webkit-search-decoration, #sdbQ::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .stab { padding: 10px 11px; min-height: 44px; }
+  #sdbCases .sdb-foot .btn.wide { min-height: 48px; }
+  .sdb-foot .trash > summary { min-height: 44px; }
+  .case-row { padding: 14px 16px; }
+  .cr-a .btn { min-height: 36px; }
+  .sdb-f { padding: 9px 16px calc(9px + env(safe-area-inset-bottom)); }
+
+  /* 报数面板：三个数字框里的「−/＋」原来只有 24×24，手机上点不准 ⇒ 撑到 40 高 */
+  #castPanel .nwrap > button.nsb { min-width: 30px; min-height: 40px; }
+  #castPanel .nwrap input { min-height: 40px; }
+
+  /* ---------- 八、触屏没有 hover：把只有 hover 才亮的控件按住常亮 ---------- */
+  @media (hover: none) {
+    .tbtn:hover, .ibt:hover, .castsw:hover, .sbtn:hover, .setnav button:hover,
+    .sethead .bk:hover, .stable:hover, .stab:hover { background: transparent; }
+    .sethead .bk:hover { border-color: var(--line); }
+
+    /* 步骤条「壹 · 问卦」重影的根因（实测，两层）：
+       ① 触屏没有 hover ⇒ CSS 让**当前步的标签常显**（.vsl max-width:3em），
+          而 [data-st="on"] 的文字色是 on-accent（白）⇒ 白字落在浅色页面上，看着就是糊字/重影；
+       ② 那个滑动黑药丸（.vpill）的 left/width 是 JS 量出来写死的，量的时候标签还没展开
+          ⇒ 390 屏上它停在 [178,85 34x32]，而当前按钮是 [151,85 88x32]、圆在 [157,90 22x22]
+          —— 药丸**没盖住那个圆**，圆的 rgba(255,255,255,.24) 白底直接落在浅色页面上，白字就更看不见了。
+       手机上的修法：不玩那个滑动药丸，当前步整个按钮（圆 + 标签）就是那颗黑药丸 ——
+       legacy 里 `[data-st="on"]` 本来就是「底色交给药丸」，这里把底色收回来即可。
+       桌面（≥821px）照旧走 JS 药丸，一个字节不动。 */
+    .vstep .vpill, .vstep .vneck, .vstep .vsrc { display: none; }
+    .vstep button[data-st="on"] { background: var(--accent); color: var(--on-accent, #fffefa); }
+    .vstep button[data-st="on"]:hover { background: var(--accent); }
+    .vstep button[data-st="on"] i { background: rgba(255, 255, 255, .24); border-color: transparent;
+      color: var(--on-accent, #fffefa); }
+    /* （现象：「步进条现在不会缩回去了」）：legacy 里那条 `@media (hover:none)`
+       让**当前步的标签常显**（.vsl max-width:3em）—— 触屏没有 hover，当年只好让它一直摊着。
+       但桌面上的口径是「平时只露一个圆，悬停才展开」，手机上一直摊成「壹 · 问卦」就不缩了。
+       这里把它按桌面口径收回去：手机上三步都只露圆，当前步靠黑底那颗圆区分。 */
+    .vstep button[data-st="on"] .vsl { max-width: 0; opacity: 0; margin-left: 0; margin-right: 0;
+      transform: translateX(-5px); }
+  }
+}
