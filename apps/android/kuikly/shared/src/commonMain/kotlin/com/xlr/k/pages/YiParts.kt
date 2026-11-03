@@ -552,7 +552,7 @@ private fun DetailButton() {
             .clip(RoundedCornerShape(999.dp))
             .glassMaterial(RoundedCornerShape(999.dp), pressed = light, control = true)
             .tapPressable({ held = it }) {
-                /* ★★ 用户改口径：「不要两拍，一次成型，就像详情把键盘顶下去」——
+                /* ★★ 此前改口径：「不要两拍，一次成型，就像详情把键盘顶下去」——
                    点下去同一帧就干两件事：叫键盘收、撑卡。
                    宿主那边 hideIme 会**当场**把底部补间推回 0（200ms），撑卡也是 200ms 同一曲线
                    ⇒ 卡片的顶边几乎不动、底边跟着往下去换键盘的位置，看起来就是一次。

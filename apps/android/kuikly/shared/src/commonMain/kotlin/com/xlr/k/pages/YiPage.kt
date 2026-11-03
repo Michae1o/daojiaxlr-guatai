@@ -162,7 +162,7 @@ internal fun YiContent(onCast: () -> Unit) {
     }
     val padB by com.tencent.kuikly.compose.animation.core.animateFloatAsState(
         /* ⚠ 判断用 anchorOn 这个**同步开关**，不能用动画后的 anchor：那一帧还是 0，
-           底部留白会先按 71dp 走 ⇒ 卡片开头坠一下（2026-10-30 现象：的）。 */
+           底部留白会先按 71dp 走 ⇒ 卡片开头坠一下。 */
         targetValue = if (Platform.imeVisible || Platform.anchorOn) 12f else 71f,
         animationSpec = com.tencent.kuikly.compose.animation.core.tween(
             260,
@@ -172,7 +172,7 @@ internal fun YiContent(onCast: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 22.dp).padding(bottom = (padB + anchor).dp)) {
         Spacer(modifier = Modifier.weight(1f))
         /* 详情展开 + 键盘弹着时，问候语让位：不然「问候语 + 整张展开的卡片」超过可视高度，
-           Column 会把卡片压扁，最后一行（事类）就被切掉一截（2026-10-30 现象：的）。
+           Column 会把卡片压扁，最后一行（事类）就被切掉一截。
            问候语这块实测 330px＝120dp（两行 30sp + 副句），收起时按动画缩放高度。 */
         val greetOn = !(Session.moreOpen && Platform.imeVisible)
         val greetVis by com.tencent.kuikly.compose.animation.core.animateFloatAsState(
@@ -183,7 +183,7 @@ internal fun YiContent(onCast: () -> Unit) {
             ),
         )
         if (greetVis > 0.01f) {
-            /* 2026-10-31 现象：「问候语字被截断」：十二时辰的句子带两个逗号 ⇒ 折成三行（3×42.6sp=128dp），
+            /* 此前报「问候语字被截断」：十二时辰的句子带两个逗号 ⇒ 折成三行（3×42.6sp=128dp），
                而这里写死 120dp（那是两行时的实测值）⇒ 第三行挤掉副句。按行数长高。 */
             val greetH = 120f + (GREET_ONCE.first.count { it == '\n' } - 1).coerceIn(0, 1) * 42.6f
             Box(

@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import com.tencent.kuikly.compose.ui.layout.onSizeChanged
 import com.tencent.kuikly.compose.ui.platform.LocalDensity
 import com.tencent.kuikly.compose.ui.semantics.Role
+import com.tencent.kuikly.compose.foundation.selection.toggleable
 import com.tencent.kuikly.compose.foundation.background
 import com.tencent.kuikly.compose.foundation.border
 import com.tencent.kuikly.compose.foundation.layout.size
@@ -85,12 +86,16 @@ internal fun SkinPage() {
                 val hint = when {
                     Skin.cur == "bru" -> "卡通保持清爽底色，不叠加雾气。"
                     Skin.fogLevel == 0 -> "淡雾静置，减少动态消耗。"
-                    Skin.fogFrozen -> "已定格当前雾景，停止持续动画与生成。"
                     Skin.fogLevel == 1 -> "雾气沿平滑路径缓缓游移。"
                     !realtimeFogAvailable() -> "当前系统使用轻柔流动，实时流雾需要 Android 13 或以上。"
                     else -> "雾形持续变化、交织流动。"
                 }
                 Text_(hint, fontSize = 11f, lineHeight = 18f, color = KY_DIM2)
+                if (Skin.fogLevel > 0 && Skin.cur != "bru") {
+                    Spacer(Modifier.height(12.dp))
+                    Box(Modifier.fillMaxWidth().height(0.5.dp).background(KY_LINE))
+                    FogFreezeControl()
+                }
             }
 
             var i = 0
@@ -642,10 +647,6 @@ private fun FogLevelControl() {
                         Text_(title, fontSize = 12f, lineHeight = 20f,
                             weight = if (level == index) 600 else 400,
                             color = if (level == index) KY_ACCENT else KY_DIM2)
-                        if (index > 0 && Skin.cur != "bru") {
-                            Spacer(Modifier.width(3.dp))
-                            FogFreezeButton(index)
-                        }
                     }
                 }
             }
@@ -654,21 +655,36 @@ private fun FogLevelControl() {
 }
 
 
+/** Freeze is a separate, explained control for the currently selected moving tier. */
 @Composable
-private fun FogFreezeButton(level: Int) {
+private fun FogFreezeControl() {
+    val level = Skin.fogLevel
     val frozen = Skin.isFogFrozen(level)
-    val light by animateFloatAsState(if (frozen) 1f else 0f, tween(220, easing = KY_EASE_OUT))
-    val shape = RoundedCornerShape(999.dp)
-    Box(Modifier.size(24.dp).clip(shape)
-        .glassMaterial(shape, control = true, pressed = light)
-        .background(KY_ACCENT.copy(alpha = 0.22f * light))
-        .border(0.7.dp, KY_ACCENT.copy(alpha = 0.10f + 0.55f * light), shape)
-        .clickable {
-            Skin.updateFogLevel(level)
-            Skin.toggleFogFrozen(level)
-        }, contentAlignment = Alignment.Center) {
-        Text_("冻", fontSize = 10f, lineHeight = 16f,
-            weight = if (frozen) 700 else 400,
-            color = if (frozen) KY_ACCENT else KY_DIM2)
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+            .toggleable(value = frozen, role = Role.Switch, onValueChange = { enabled ->
+                if (enabled != Skin.isFogFrozen(Skin.fogLevel)) Skin.toggleFogFrozen(Skin.fogLevel)
+            })
+            .padding(top = 12.dp, bottom = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f).padding(end = 14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text_("冻结雾气", fontSize = 13f, lineHeight = 21f, weight = 500)
+                Spacer(Modifier.width(8.dp))
+                Text_(if (frozen) "已冻结" else "流动中", fontSize = 10f, lineHeight = 18f,
+                    weight = if (frozen) 600 else 400,
+                    color = if (frozen) KY_ACCENT else KY_DIM2)
+            }
+            Text_(
+                if (frozen) "已停在当前画面，关闭后继续流动。"
+                else if (level == 2 && realtimeFogAvailable()) "开启后定格当前雾景，停止持续生成。"
+                else "开启后停在此刻，减少持续动画开销。",
+                fontSize = 11f, lineHeight = 18f, color = KY_DIM2,
+            )
+        }
+        GlassSwitch(checked = frozen, onChange = { enabled ->
+            if (enabled != Skin.isFogFrozen(Skin.fogLevel)) Skin.toggleFogFrozen(Skin.fogLevel)
+        })
     }
 }

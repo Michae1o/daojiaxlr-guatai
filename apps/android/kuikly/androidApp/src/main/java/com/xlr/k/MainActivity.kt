@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 container.setPadding(0, 0, 0, px)
             }
         }
-        /* 页面底色同步：底部内边距让出来的那块用页面色，别露窗口白 */
+        /* 页面底色同步：底部内边距让出来的那块用页面色，别露窗口白（2026-10-30） */
         com.xlr.k.pages.Platform.setPageBg = { r, g, b ->
             runOnUiThread {
                 val c = android.graphics.Color.rgb(

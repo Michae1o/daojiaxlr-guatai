@@ -163,7 +163,7 @@ internal fun FollowPane(ctx: Context, B: List<Block>, modifier: Modifier = Modif
             .padding(horizontal = 18.dp, vertical = 14.dp),
     ) {
         /* ---- 问答列表：**不做卡内滚动**，有几轮长几轮，交给整页滚
-           （2026-10-29 ——原来这里是个 heightIn(170) 的
+            的
            内滚列表，答完一轮它就变成可滚区，手指落在上面只滚它、页面纹丝不动。改成普通 Column ⇒ 全归整页） ---- */
         Column(modifier = Modifier.fillMaxWidth()) {
             Follow.items.forEachIndexed { idx, it ->

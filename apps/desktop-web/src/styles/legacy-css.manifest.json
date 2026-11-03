@@ -1,5 +1,5 @@
 {
- "source": "apps/desktop-web/src/legacy/parts/{04,06,08,10,28}-style.txt（D-⑤ 起；上一版源 = 旧产物 dist，见文件头）",
+ "source": "apps/desktop-web/src/legacy/parts/{04,06,08,10,28}-style.txt（变更记录 起；上一版源 = 早期产物 dist，见文件头）",
  "sources": [
   {
    "file": "04-style.txt",
@@ -77,12 +77,12 @@
  "note": "offset/chars/sha16 一律**行尾归一化(LF)形态**；块的落点（head / body 开头 / 骨架之后）由 tools/assemble-desktop.mjs 决定",
  "selfCheck": "PASS",
  "editedAfterPort": {
-  "when": "2026-10-17（会话「铜古调优」· 用户「开始代号N，主要是补过渡效果，所有皮肤都得补」）",
+  "when": "2026-10-17（(会话)· 用户「开始代号N，主要是补过渡效果，所有皮肤都得补」）",
   "what": "N 块：块5 内部末尾追加 —— ① 9 条公共控件 transition（.16s/--m-ease）② 页面切换入场动画（.setscreen.on / .skinmenu / #castPanel / .dlg）",
   "blocksChanged": 1,
   "charsAppended": 1174,
-  "by": "python _legacy-ref/_tgN1-insert.py（同步本记录）",
-  "why": "tools/port-legacy-css.mjs 已随 D-⑤ 归档 ⇒ 只能按同一契约重算块5/fileSha16；块5 末尾追加、其余块不动"
+  "by": "python （生成过程）（同步本记录）",
+  "why": "tools/port-legacy-css.mjs 已随 变更记录 归档 ⇒ 只能按同一契约重算块5/fileSha16；块5 末尾追加、其余块不动"
  },
  "editedAfterPort2": {
   "when": "2026-10-25（用户要 app 内更新加下载进度条）",
@@ -91,6 +91,6 @@
   "blocksChanged": 1,
   "charsAppended": 1471,
   "by": "python tools/_css-manifest-refresh.py（按同一契约重算块5 + fileSha16）",
-  "why": "tools/port-legacy-css.mjs 已随 D-⑤ 归档 ⇒ 只能按同一契约重算"
+  "why": "tools/port-legacy-css.mjs 已随 变更记录 归档 ⇒ 只能按同一契约重算"
  }
 }

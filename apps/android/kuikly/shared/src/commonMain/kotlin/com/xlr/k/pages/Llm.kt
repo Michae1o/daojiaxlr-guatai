@@ -223,7 +223,7 @@ internal object LlmStore {
         return ""
     }
 
-    /** 旧 missing()：逐字照抄 */
+    /** 旧 missing()：逐字照抄（2026-10-28 补了「本地中转」那一支） */
     fun missing(c: LlmCfg): String {
         if (c.base.isEmpty()) return "还没选服务商，接口地址是空的。"
         if (c.model.isEmpty()) return "还没挑模型。"

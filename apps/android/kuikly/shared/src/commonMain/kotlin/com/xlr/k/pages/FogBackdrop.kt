@@ -49,6 +49,9 @@ internal fun SkinFogBackdrop(skin: String) {
         }
         fade.animateTo(1f, tween(360, easing = KY_EASE_OUT))
     }
+    // User-selected historical folded PNGs belong to Dunhuang tier 2 only.
+    val foldedDunhuang = skin == "dh" && shownLevel == 1
+    val originalPeriod = (skin == "dh" || skin == "mg") && !foldedDunhuang
     val moving = shownLevel > 0 && !Skin.isFogFrozen(shownLevel)
     val clock = remember(skin, shownLevel) { Animatable(if (shownLevel > 0) Skin.fogPngPhase(skin) else 0f) }
     val realtime = shownLevel == 2 && realtimeFogAvailable() && skin in REALTIME_FOG_SKINS
@@ -59,7 +62,7 @@ internal fun SkinFogBackdrop(skin: String) {
             return@LaunchedEffect
         }
         while (isActive) {
-            val duration = if (skin == "dh" || skin == "mg") 90_000 else CLOCK_MS
+            val duration = if (originalPeriod) 90_000 else if (foldedDunhuang) 180_000 else CLOCK_MS
             clock.animateTo(1f, tween((duration * (1f-clock.value)).toInt().coerceAtLeast(1), easing = LinearEasing))
             clock.snapTo(0f)
         }
@@ -70,7 +73,7 @@ internal fun SkinFogBackdrop(skin: String) {
             if (persistPhase) Skin.saveFogPngPhase(skin, clock.value)
         }
     }
-    val seconds = clock.value * if (skin == "dh" || skin == "mg") 90f else CLOCK_S
+    val seconds = clock.value * if (originalPeriod) 90f else CLOCK_S
     val opacity = fade.value // Read during composition so Kuikly updates each transition frame.
     Box(Modifier.fillMaxSize().clipToBounds().background(d.bg)) {
         Box(Modifier.fillMaxSize().graphicsLayer { alpha = opacity }) {
@@ -104,9 +107,9 @@ internal fun SkinFogBackdrop(skin: String) {
                     FogCloud("dou-mauve", 2.9f, -54f, 59f, 0.13f, sec = seconds)
                 }
                 "dh" -> {
-                    FogCloud("dh-ochre", 0.4f, 54f, -45f, 0.12f, original = true, sec = seconds)
-                    FogCloud("dh-mineral", 2.4f, -59f, 50f, 0.13f, original = true, sec = seconds)
-                    FogCloud("dh-azurite", 4.2f, 45f, -54f, 0.11f, original = true, sec = seconds)
+                    FogCloud("dh-ochre", 0.4f, 54f, -45f, 0.12f, original = !foldedDunhuang, historical = foldedDunhuang, sec = seconds)
+                    FogCloud("dh-mineral", 2.4f, -59f, 50f, 0.13f, original = !foldedDunhuang, historical = foldedDunhuang, sec = seconds)
+                    FogCloud("dh-azurite", 4.2f, 45f, -54f, 0.11f, original = !foldedDunhuang, historical = foldedDunhuang, sec = seconds)
                 }
                 "mg" -> {
                     FogCloud("mg-gold", 1.1f, 50f, -40f, 0.12f, original = true, sec = seconds)
@@ -133,13 +136,13 @@ internal fun SkinFogBackdrop(skin: String) {
 
 /* 主密度、薄雾、逆向薄雾：三股独立流动。 */
 @Composable
-private fun FogCloud(name: String, seed: Float, dx: Float, dy: Float, spread: Float, original: Boolean = false, sec: Float) {
+private fun FogCloud(name: String, seed: Float, dx: Float, dy: Float, spread: Float, original: Boolean = false, historical: Boolean = false, sec: Float) {
     for (li in 0..if (original) 1 else 2) {
         val fast = if (li == 0) 1f else if (li == 1) 2f else 0.5f          /* 第二层周期减半 */
         val amp = if (original) { if (li == 0) 1f else 0.55f } else { if (li == 0) 0.48f else if (li == 1) 0.20f else 0.18f }        /* 第二层位移/浓度更小 */
         val ph = seed + li * 7.13f
-        val px = dx * (if (original) amp else if (li == 2) -2.0f else 1.85f) * (0.62f * wave(sec, 9f / fast, ph) + 0.38f * wave(sec, 15f / fast, ph + 1.7f))
-        val py = dy * (if (original) amp else if (li == 1) -1.8f else 1.65f) * (0.66f * wave(sec, 10f / fast, ph + 3.1f) + 0.34f * wave(sec, 18f / fast, ph + 5.3f))
+        val px = dx * (if (original) amp else if (li == 2) { if (historical) -1.6f else -2.0f } else { if (historical) 1.45f else 1.85f }) * (0.62f * wave(sec, 9f / fast, ph) + 0.38f * wave(sec, 15f / fast, ph + 1.7f))
+        val py = dy * (if (original) amp else if (li == 1) { if (historical) -1.4f else -1.8f } else { if (historical) 1.25f else 1.65f }) * (0.66f * wave(sec, 10f / fast, ph + 3.1f) + 0.34f * wave(sec, 18f / fast, ph + 5.3f))
         val a = amp * ((if (original) 0.55f else 0.65f) + (if (original) 0.45f else 0.35f) * (0.5f + 0.5f * wave(sec, 6f / fast, ph + 2.2f)))
         /* ★ 非等比缩放：X/Y 各自独立相位与周期（10s / 18s，都是 180 的约数）⇒
            密度纹理被拉长、压扁，看起来是在"变形"，而不是整体放大缩小。

@@ -57,7 +57,7 @@ SPLASH_SRC = Path(__file__).resolve().parents[1] / "src" / "components" / "splas
 def _splash_taiji() -> str:
     """开屏那颗太极的 SVG 内层（**逐字取自** splashMarkup.js）。
 
-    ⚠ 2026-11-02 起**加载层不再用它**；
+    ⚠ 2026-11-02 起**加载层不再用它**（要求换成开屏的星图，见 _starmap_svg）；
        函数与自检保留在这里，回退时把 SHELL 里的 @STARMAP@ 换回 @TAIJI@ 即可。
 
     ★★ （用户：「加密壳的加载动画不要大太极变小了，就改成开屏页的太极，
