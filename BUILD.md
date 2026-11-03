@@ -19,7 +19,7 @@ npx --yes @tauri-apps/cli@^2 build
 | 平台 | 产物 |
 |---|---|
 | Windows | `src-tauri/target/release/xiaoliuren.exe` —— 单个文件，双击即用 |
-| macOS | `bash mac/build-desktop.sh` → `*.app`（细节见 `mac/README-MAC.md`） |
+| macOS | 同一份源码，在 Mac 上跑 `npx --yes @tauri-apps/cli@^2 build` → `*.app` |
 
 前端**不用**先构建：`apps/desktop-shell/web/index.html` 是入库的加密壳，`tauri build` 直接拿它。
 
@@ -80,7 +80,6 @@ JAVA_HOME=<JDK 17> ANDROID_HOME=<Android SDK 34> ./gradlew :androidApp:assembleR
 | `apps/desktop-shell/` | Tauri 2 壳；`web/` 是入库的加密壳 |
 | `apps/*/build/` | 加密脚本（`protect.py` / `prep_tauri_web.py` / `shim.js`） |
 | `tools/` | 组装器、文档入口生成、语料打包 |
-| `mac/` | macOS 构建脚本与说明 |
 | `docs/images/` | README 里的截图 |
 
 不含：安卓端、网站、密钥、签名物料、构建产物、早期版本快照。
