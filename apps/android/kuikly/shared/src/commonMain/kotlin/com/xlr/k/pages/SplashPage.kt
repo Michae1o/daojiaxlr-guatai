@@ -197,7 +197,7 @@ internal fun SplashOverlay() {
     val bg = Skin.def.bg
 
     Box(modifier = Modifier.fillMaxSize()
-        /* ：
+        /* ★ ：
            开屏整层吃掉点击。子控件（那枚圆钮）先命中、照旧可用；其余位置的点击落在这里被吞掉。
            ⚠ 必须用 tapSwallow：tapNoIndication 的按下反馈会把整层压到 0.82（长按整屏变透明）。 */
         .tapSwallow { }
@@ -325,7 +325,7 @@ internal fun SplashOverlay() {
                                 if (!tapped) {
                                     t = 0f
                                     scope.launch {
-                                        /* ：
+                                        /* ★ ：
                                            原来时间轴是**按帧累加**的（每帧 +16ms）—— 只要某几帧画得慢，
                                            时间轴就比真实时间走得慢，720ms 的起飞能拖成两三秒。
                                            改成**按真实时钟走**（早期版本那几条 setTimeout 本来也是墙钟）：
@@ -509,7 +509,7 @@ private fun SplashArt(alphaProvider: () -> Float) {
     val swPx = (if (Platform.screenW > 0) Platform.screenW else 1080).toFloat()
     val shPx = (if (Platform.screenH > 0) Platform.screenH else 2400).toFloat()
     /* 开屏的「画」= 为每套皮肤各画的一张星图（out-ref\星图各态，1254×1254 方形、透明底）。
-       按 Skin.cur 取 splash-stars-<key>.png。九张图原来的内容占画布 83%~93% 不等（卡通最满、豆沙最空），
+       按 Skin.cur 取 splash-stars-<key>.png。★九张图原来的内容占画布 83%~93% 不等（卡通最满、豆沙最空），
        直接同尺寸摆出来大小会差一截 ⇒ 打包时已统一归一化：内容最长边 = 1130/1254、内容底边落在 1206/1254。
        这里按「画布宽 = 0.74 屏宽、内容底边压到 0.90 屏高」摆，九套视觉大小/落点一致。 */
     val artW = swPx * 0.74f

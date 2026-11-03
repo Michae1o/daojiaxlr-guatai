@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         com.xlr.k.LlmHost.install(applicationContext)
         com.xlr.k.LlmHost.activity = this
         com.xlr.k.UpdHost.install(applicationContext)
-        /* ：
+        /* ★ ：
            皮肤原先在 RootPage 组合里才 Skin.load()，第一帧已经用默认的 bw 画完了，
            读到 K_SKIN 再切 ⇒ 冷启动闪一帧黑白。这里在 Kuikly 视图创建前先读回来。 */
         com.xlr.k.pages.preloadSkinForHost()
@@ -48,9 +48,9 @@ class MainActivity : AppCompatActivity() {
                 val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
                     as android.view.inputmethod.InputMethodManager
                 imm.hideSoftInputFromWindow(container.windowToken, 0)
-                /* 收键盘的同时**立刻**把底部补间推回 0 ——
+                /* ★ 收键盘的同时**立刻**把底部补间推回 0 ——
                    等系统把可见区报回来再动会晚一跳，卡片就闪一下。
-                   同时把 imeVisible 立刻置 false：壹页的卡片底部留白（12→71dp）
+                   ★★ 同时把 imeVisible 立刻置 false：壹页的卡片底部留白（12→71dp）
                    也必须在同一帧起步，否则键盘都收完了它才补那一下 = 再闪一次。 */
                 com.xlr.k.pages.Platform.imeVisible = false
                 /* 详情展开那一段由 Compose 单时钟驱动（padDriven），这里别跟它抢 */
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                         getSystemService(android.content.Context.VIBRATOR_SERVICE) as? android.os.Vibrator
                     }
                     if (vib != null && vib.hasVibrator()) {
-                        /* ：三档都往上抬 ——
+                        /* ★ ：三档都往上抬 ——
                            刻度 10→14ms / 120→150，钝感 28→34ms / 200→225，重档 48ms / 255。
                            ⚠ 振幅要先问 hasAmplitudeControl：不支持的机器上带 amplitude 的效果
                               会被当成「0 振幅」⇒ 一点感觉都没有；不支持就退 DEFAULT_AMPLITUDE。
@@ -221,7 +221,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /* ：
+    /* ★ ：
        padding 一步到位＝硬跳 ⇒ 统一走 200ms 缓出补间。涨落都走这里，别处不要直接 setPadding。
        ⚠ 动画期间 layout 会再回调，用 imePadTarget 去重，别自己打断自己。 */
     private fun animateImePad(v: View, pad: Int) {
@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         imeAnim?.cancel()
         val a = android.animation.ValueAnimator.ofInt(v.paddingBottom, pad)
         a.duration = 260
-        /* （第三轮）：和 Compose 那头对齐成**同一条 ease-in-out**（cubic-bezier(.4,0,.2,1)）。
+        /* ★★ （第三轮）：和 Compose 那头对齐成**同一条 ease-in-out**（cubic-bezier(.4,0,.2,1)）。
            原先用「先快后慢」的曲线，两个动画只要差半帧，位移误差就被放大成看得见的抖动；
            改成起手很轻的曲线后，同样的时间误差只剩原来的十分之一，肉眼就看不出来了。 */
         a.interpolator = android.view.animation.PathInterpolator(0.4f, 0f, 0.2f, 1f)

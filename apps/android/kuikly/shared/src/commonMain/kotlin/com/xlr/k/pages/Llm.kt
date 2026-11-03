@@ -31,7 +31,7 @@ object Platform {
     var hideIme: (() -> Unit)? = null
     /** 输入法此刻是不是挂着（宿主在量完窗口可见区后写）：点空白处收键盘前先看这个，
      *  没挂就别乱 clearFocus（：点空白不收输入法） */
-    /* 键盘是否弹着（MainActivity 的 inset 回调写它）。必须是 Compose 状态：
+    /* 键盘是否弹着（MainActivity 的 inset 回调写它）。★ 必须是 Compose 状态：
        壹页要靠它把卡片底部 71dp 留白收掉，普通 var 不会触发重组。 */
     var imeVisible: Boolean by androidx.compose.runtime.mutableStateOf(false)
     /** 键盘此刻的物理高度（px，宿主量出来写这里）——详情展开时按「键盘高 − 详情高」算回落量 */

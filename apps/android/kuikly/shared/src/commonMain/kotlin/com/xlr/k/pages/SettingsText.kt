@@ -339,7 +339,7 @@ internal fun AboutPage() {
             }
             Spacer(modifier = Modifier.height(10.dp))
 
-            /* app 内更新（早期版本这一栏只有版本号 + 更新入口；简介/免责已搬「说明」栏） */
+            /* ★ app 内更新（早期版本这一栏只有版本号 + 更新入口；简介/免责已搬「说明」栏） */
             if (Upd.available) {
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(KY_LINE))
                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {

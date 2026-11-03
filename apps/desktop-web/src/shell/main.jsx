@@ -15,7 +15,7 @@
  *   2 路由：跟踪 html[data-step]（旧界面的步进），对外给一个只读的步进 API
  *   3 加载状态：把「外壳就绪 / 界面就绪」报出来，供 Phase 3 与调试用
  */
-/* 产物身份（口径：「一个 exe 一个 apk 这么好区分，为什么还要用屏幕宽度区分？」）
+/* ★★ 产物身份（口径：「一个 exe 一个 apk 这么好区分，为什么还要用屏幕宽度区分？」）
    平台判定一律读这个常量，**不再用 innerWidth/matchMedia** —— 桌面窗口拉窄、模拟器 WebView
    没吃到 viewport meta（实测模拟器里 innerWidth=760，而本仓 viewport 写的是 390）都会让宽度判据
    把手机端错判成"宽屏"，于是开屏走了桌面那一套（自动退场 + 珠子飞向「壹」）。 */
@@ -36,7 +36,7 @@ import AskPanel from '../components/AskPanel.jsx';
 import { SkinsCore } from '../data/skinsCore.js';
 import { applySkin } from '../data/skinApply.js';
 import { ResultCore } from '../data/resultCore.js';
-import { resetAskBox } from '../data/askBoxUi.js';   /* 每次起卦清「接着问」＋补小字 */
+import { resetAskBox } from '../data/askBoxUi.js';   /* ★ 每次起卦清「接着问」＋补小字 */
 import { WalkCore } from '../data/walkCore.js';
 import { RecordsStore } from '../data/recordsStore.js';
 import { ReviewCore } from '../review/reviewCore.js';
@@ -46,12 +46,12 @@ import { Globals } from '../data/globals.js';
 import { OpenOut } from '../data/openOut.js';
 import { SetDot } from '../data/setDot.js';
 import { SettingsCore } from '../data/settingsCore.js';
-/* 变更记录（砍段前置，2026-10-14 用户放行第 1 条）：旧「设置对话框」两块列表的填充 ——
+/* ★ 变更记录（砍段前置，2026-10-14 用户放行第 1 条）：旧「设置对话框」两块列表的填充 ——
    `#presets`（10 个预设按钮）＋ `#modelMenu`（7 条模型）。早期实现由 `24-script` 在**解析期**填；
    砍段后必须由本仓补，否则 `tools/shell-checks.mjs` 第 5 项结构核对少 31 个节点（实测）。
    生成物（改动后重新构建）：src/data/llmDialogCore.js ← tools/extract-llm-dialog.mjs（import 即执行，与早期实现同款）。 */
 import '../data/llmDialogCore.js';
-/* 引导配图（`window.XLR_GUIDE_IMG`）：S3b 删段时 `34-script` 的 5 张 data-URI 跟着删了、
+/* ★ 引导配图（`window.XLR_GUIDE_IMG`）：S3b 删段时 `34-script` 的 5 张 data-URI 跟着删了、
    `guideCore` 只搬了读取方 ⇒ 引导第 2–6 步没图（2026-10-17 现象：）。本模块把配图表补回来，
    import 即执行（早期实现同款：解析期赋值）。 */
 import '../data/guideImages.js';
@@ -64,10 +64,10 @@ import { SplashCore } from '../data/splashCore.js';
 const VERSION = '0.1.0-phase2';
 
 /* ============ 「界面就绪」判据（变更记录「乙」· 口径：）============
- * 旧口径（2026-10-11 起）：`['buildBlocks','renderGua']` 两个 **legacy 全局** ＋ 四个骨架节点
+ * ★ 旧口径（2026-10-11 起）：`['buildBlocks','renderGua']` 两个 **legacy 全局** ＋ 四个骨架节点
  *   —— 那是判「**旧**界面就绪」。删段（变更记录）之后那两个全局会消失 ⇒ 判据必须先换基准，
  *   否则删段当天它必红。
- * 现口径（变更记录「乙」）：**只看本仓自己的信号** ——
+ * ★ 现口径（变更记录「乙」）：**只看本仓自己的信号** ——
  *   ① 外壳在场（`window.__xlrShell`，本模块自己挂的）；
  *   ② 本仓各挂载块**已接管**（`api.<k>.owner === 'react'`）；
  *   ③ 四个**骨架节点**在场（静态骨架，源 `11-text`；骨架搬本仓属 变更记录 ⇒ 本阶段照旧）。
@@ -144,7 +144,7 @@ api.s3bOwn = function (k) { if (k && api.owned.indexOf(k) < 0) api.owned.push(k)
 /* ===== （历史）bisect 臂：`VITE_BISECT=noreact` =====
  * S1a–S3b 期间用它做「React 在不在」的对照：壳脚本仍加载但不做任何事 ⇒ 只剩下「React 运行时被
  *   import/初始化本身」（含 变更记录 那两条 react-dom 装的被动监听），用来分离致因。
- * **S3b 尾项：该开关已随段退役** —— legacy 段删掉之后，`noreact` 产物 = 既无早期实现、
+ * ★ **S3b 尾项：该开关已随段退役** —— legacy 段删掉之后，`noreact` 产物 = 既无早期实现、
  *   也不渲染 React 的**空白页** ⇒ 这个臂再无诊断价值；开关本身与它在各挂载块里的分支一并删除。
  *   （旧读数与用法留档：早期实现记录 · 变更记录 变更记录。） */
 root.render(<Shell onState={(s) => { api.step = s.step; api.legacyState = s.legacy; }} />);
@@ -496,7 +496,7 @@ function mountStepper() {
     isOurs: null,            /* 重指之后 `window.__xlrSetStep === StepCore.setStep` */
   };
   if (built) api.s3bOwn('stepper');
-  /* 见上面 ②：必须晚于早期实现 ready() 的赋值 ⇒ 挂在 load 上 */
+  /* ★ 见上面 ②：必须晚于早期实现 ready() 的赋值 ⇒ 挂在 load 上 */
   const tookOver = () => {
     api.stepper.legacyHooked = (typeof window.__xlrSetStep === 'function') && window.__xlrSetStep !== StepCore.setStep;
     try { window.__xlrSetStep = StepCore.setStep; } catch (eS2) { }
@@ -512,7 +512,7 @@ function mountStepper() {
 mountStepper();
 
 /* ============ S1a：开屏组件挂载（React 从「外壳」变成"开屏"这个组件的主导）============
- * S3b 尾项（2026-10-14）**语义已变**：早期实现脚本已删 ⇒ 这一段不再是「让位给 legacy」，
+ * ★ S3b 尾项（2026-10-14）**语义已变**：早期实现脚本已删 ⇒ 这一段不再是「让位给 legacy」，
  *   而是「**接管本仓自建的开屏**」：`#xlrSplash` 由下面 `selfBuildSplash()` 在本仓建（变更记录），
  *   而**那条轮询就是接管动作本身**（摘掉自建节点 → 挂 React `<Splash/>`）⇒ ⛔ 属**承重件**，
  *   不许当「隐藏 legacy 逻辑」删掉（删了 React 开屏永远挂不上）。
@@ -528,7 +528,7 @@ mountStepper();
  *      （⚠ 临时桥：legacy 会对 React 的节点做 DOM 手术；「组件自己接管退场」留给 S1b）
  */
 function mountSplash() {
-  /* 变更记录（砍段前置）：退场动作的**兜底** —— 早期实现缺位时把 `window.__xlrSplashOut` / `__xlrSplashKill`
+  /* ★ 变更记录（砍段前置）：退场动作的**兜底** —— 早期实现缺位时把 `window.__xlrSplashOut` / `__xlrSplashKill`
      指到本仓那份逐字切片（`src/data/splashCore.js` 的 `out` / `kill`）。
      ⚠ **不覆盖早期实现已有的**（组装期 变更记录 注入在解析期就写好了 `window.__xlrSplashOut`）⇒ 旧臂一字不变。 */
   if (typeof window.__xlrSplashOut !== 'function') { try { window.__xlrSplashOut = SplashCore.out; } catch (eSO) { } }
@@ -560,7 +560,7 @@ function mountSplash() {
     };
   }, 50);
 
-  /* ============ 变更记录：早期实现不在时**自己把开屏立起来** ============
+  /* ============ ★ 变更记录：早期实现不在时**自己把开屏立起来** ============
    * 为什么：产物里那 14 个旧内联脚本一被咬断，`#xlrSplash` 就**根本不存在** ⇒ 上面那条轮询等不到 ⇒
    *   没有开屏 ⇒ 本仓引导层 `Guide.maybeWelcome()`（源 `36-script` L436，守卫逐字是
    *   `if (window.__xlrSplashOn || document.getElementById('xlrSplash')) return;`）条件成立 ⇒
@@ -611,7 +611,7 @@ mountSplash();
  */
 
 let settingsRoot = null, settingsHost = null, settingsOpen = false;
-/* ：
+/* ★ ：
    自动检查查到的清单条目先存在这儿，点「去更新」时随 render 一并交给设置页 ——
    设置页据此把按钮直接置成「立即更新」（强调色），但**不自动下载**，还得他再点一下。 */
 let pendingUpdate = null;
@@ -629,7 +629,7 @@ function setSettingsOpen(v) {
 }
 function openSettings() {
   if (!settingsRoot) {
-    /* S3b 尾项（2026-10-14）：早期实现的「让位/摘旧节点」动作随段退役 —— 砍段之后 `#setScreen`
+    /* ★ S3b 尾项（2026-10-14）：早期实现的「让位/摘旧节点」动作随段退役 —— 砍段之后 `#setScreen`
        那棵**从来就不存在**（变更记录 有意删除），不再需要先摘掉它。
        ⚠ 字段名 `legacyNodeRemoved` **沿用不改**（判据 `(实测探针)` /
          `(实测探针)` 读它）；语义升级为**更强的事实**：本仓接管时文档里本来就没有它。 */
@@ -660,11 +660,11 @@ function mountSettingsInterceptor() {
     st.lastHit = String(hit.id || hit.className || '');
     st.lastTrusted = e.isTrusted;
     openSettings();
-  }, true);   /* 捕获阶段（第三参 true）= 抢在 legacy 的 document 捕获委托之前 */
+  }, true);   /* ★ 捕获阶段（第三参 true）= 抢在 legacy 的 document 捕获委托之前 */
 }
 mountSettingsInterceptor();
 
-/* ============ 变更记录（2026-10-14，用户放行第 2 条）：加载期把「当前服务商 / 服务商档案」落盘 ============
+/* ============ ★ 变更记录（2026-10-14，用户放行第 2 条）：加载期把「当前服务商 / 服务商档案」落盘 ============
  * 为什么需要：早期实现设置页（`36-script`）的 `wire()` 在**加载期**就跑过这几步（源 L759–785）——
  *   ① `pv = loadProv(); if (!pvValid(pv)) pv = guessProv(load()); saveProv(pv);`
  *   ② `xlr-llm-svcs` 还空、而全局配置里有 base ⇒ `svcPut(guessProv(s0), { base, model, key })`；
@@ -821,7 +821,7 @@ function mountSkinInterceptor() {
       st.intercepts += 1; st.lastHit = 'outside'; st.lastTrusted = e.isTrusted;
       closeSkinMenu();
     }
-  }, true);   /* window 捕获阶段 = 抢在 legacy 的 document 捕获委托之前 */
+  }, true);   /* ★ window 捕获阶段 = 抢在 legacy 的 document 捕获委托之前 */
 }
 mountSkinInterceptor();
 
@@ -843,7 +843,7 @@ mountSkinInterceptor();
  */
 
 let recordsRoot = null, recordsHost = null, recordsOpen = false;
-/* （变更记录 / 变更记录）：记录抽屉的**门户目标不能用 `document.body`** ——
+/* ★ （变更记录 / 变更记录）：记录抽屉的**门户目标不能用 `document.body`** ——
    React 17+ 会把**整套委托监听**挂到「根容器之外的 portal 容器」上 ⇒ body 被 React 接管
    （实测 body 上 0 → 87 种监听，登记 变更记录；这就是 变更记录 第 4 项的成因）。
    改用**外壳自有的裸 div 宿主**：无样式、无 transform/filter ⇒ 抽屉仍是相对视口的
@@ -866,9 +866,9 @@ function openRecords(tab) { if (api.s2records && tab) api.s2records.tab = tab; s
 
 function mountRecords() {
   const legacyNode = document.getElementById('sdb');
-  /* 变更记录：记住 legacy 抽屉在 body 里的**位置**（门户宿主稍后插回同一位置，不是 append 到末尾）
+  /* ★ 变更记录：记住 legacy 抽屉在 body 里的**位置**（门户宿主稍后插回同一位置，不是 append 到末尾）
      ⇒ body 子节点顺序与早期版本一致，`shell-checks` 把宿主当透明层时 `#sdb` 的位置也对得上。
-     变更记录（2026-10-14，用户放行第 3 条）：这个锚点**不再依赖早期实现节点** ——
+     ★★ 变更记录（2026-10-14，用户放行第 3 条）：这个锚点**不再依赖早期实现节点** ——
      实测早期实现那个 `#sdb` 是 `22-script` 的 `mk()` 在**解析期** `document.body.appendChild(d)` 追加的
      （骨架里根本没有它），砍段后它不存在 ⇒ 原写法会退回 `append`，`#sdb` 在 body 里的位置与早期版本不同
      （实测旧 [#… #mask #sdb STYLE #onbLayer sl-orb] vs 新 [#… #mask STYLE #onbLayer #sdb sl-orb]）。
@@ -881,7 +881,7 @@ function mountRecords() {
   if (legacyNode) legacyNode.remove();          /* 摘掉 legacy 那个（与 C2 摘 `#setScreen` 同款） */
   recordsHost = document.createElement('div');  /* React 根容器：故意不挂进文档（DOM 由 portal 提供） */
   recordsRoot = createRoot(recordsHost);
-  /* 变更记录：门户宿主挂在 body 上，但**门户目标 = 这个宿主**（不是 body 本身）⇒
+  /* ★ 变更记录：门户宿主挂在 body 上，但**门户目标 = 这个宿主**（不是 body 本身）⇒
      body 不再被 React 接管；抽屉的 DOM 落在宿主里，结构上只多一层「透明」容器
      （`shell-checks` 第 3/5 项按 id 把它当透明层上提，见 tools/shell-checks.mjs）。 */
   recordsPortalHost = document.createElement('div');
@@ -892,14 +892,14 @@ function mountRecords() {
   catch (eH) { document.body.appendChild(recordsPortalHost); }
   const st = {
     owner: 'react', open: false, tab: 'cases', intercepts: 0, redirects: 0, askBlocked: 0, lastAsk: '', fixedSaves: 0,
-    writerCalls: 0, lastWriter: '',   /* 审计用（S5-0 盲区扫描）：有 bug 写入者被调用的次数/最后一个是谁 */
+    writerCalls: 0, lastWriter: '',   /* ★ 审计用（S5-0 盲区扫描）：有 bug 写入者被调用的次数/最后一个是谁 */
     lastHit: '', lastTrusted: null, legacyNodeRemoved: !!legacyNode, mountedAt: Date.now(),
-    /* 抽屉「开关所有权」接管的审计计数（见下面接管块的注释） */
+    /* ★ 抽屉「开关所有权」接管的审计计数（见下面接管块的注释） */
     lastClickInside: null, lastCloseBy: '', outsideClosed: 0, legacyCloseIgnored: 0, escClosed: 0, openRouted: 0,
   };
   api.s2records = st;
 
-  /* 已定（真坑一 + 真坑二，都在 C3 靶区）：把「点抽屉外面关抽屉」的**所有权**
+  /* ★★ 已定（真坑一 + 真坑二，都在 C3 靶区）：把「点抽屉外面关抽屉」的**所有权**
      从 legacy 的 document 级几何判定收到外壳（React）自己身上。三步照口径：
        ① legacy 那条**不再生效**；
        ② 外壳**自己**实现「点抽屉真正外面才关」，判据 = 抽屉的实际 DOM 边界（`#sdb` 整棵，
@@ -940,14 +940,14 @@ function mountRecords() {
     e.preventDefault(); e.stopPropagation();
     st.escClosed += 1; st.lastCloseBy = 'esc'; setRecordsOpen(false);
   }, true);
-  /* 重定向 legacy 的渲染入口（**不是置空**；等价性来源见 原记录：React 承接 L154–159 四类写入） */
+  /* ★ 重定向 legacy 的渲染入口（**不是置空**；等价性来源见 原记录：React 承接 L154–159 四类写入） */
   st.legacyRenderSdb = window.renderSdb;
   window.renderSdb = function () {
     st.redirects += 1;
     /* 前置 B：组件还没注册刷新函数时**静默早退**（不抛、不落 legacy 渲染） */
     try { if (typeof window.__xlrRecordsRefresh === 'function') return window.__xlrRecordsRefresh(); } catch (eR) { }
   };
-  /* A4①（2026-10-13）**存储层收口**：把 legacy 的五个存储原语换成 React 侧那一份
+  /* ★★ A4①（2026-10-13）**存储层收口**：把 legacy 的五个存储原语换成 React 侧那一份
      （`src/data/recordsStore.js`＝`tools/extract-records-store.mjs` 从 `20-script.txt` L9–47 逐字切片）。
      换掉之后全应用**只有一份真相**：
        · React 侧（`Records.jsx`）直接 import 这份；
@@ -972,11 +972,11 @@ function mountRecords() {
   RecordsStore.setNotify(() => {
     try { if (typeof window.__xlrRecordsRefresh === 'function') return window.__xlrRecordsRefresh(); } catch (eN) { }
   });
-  /* A4② 复盘接缝：`setFb` 标「没应验」时（源里调全局 `reviewCase`）⇒ 接到 React 侧的复盘实现
+  /* ★ A4② 复盘接缝：`setFb` 标「没应验」时（源里调全局 `reviewCase`）⇒ 接到 React 侧的复盘实现
      （A4③ 的 `ReviewCore.reviewCase`）。⚠ 抽屉那条路径**不在 setFb 里当场跑**（React 的 setState 是异步的：
      早期版本是 setFb → renderSdb 同步重建 DOM → reviewCase 找得到 `#rv-<id>`；React 里要等渲染提交）
      ⇒ 抽屉先把钩子挂空做本地标记，再由 Records.jsx 的 rvPending effect 在渲染后跑，见那里的注释。 */
-  /* A4③（2026-10-13）**复盘 / 准则那条线**也搬到 React（逐字切片：`tools/extract-review-core.mjs`）：
+  /* ★★ A4③（2026-10-13）**复盘 / 准则那条线**也搬到 React（逐字切片：`tools/extract-review-core.mjs`）：
      `reviewCase`（复盘主流程，**会出网**——走设置那套出口，口径不变）/ `reviewBlock` / `ruleBlock` /
      `confirmRule`（只有用户点「写入准则」才写库）。换掉之后 React 抽屉直接用这一份；
      legacy 里剩下的调用者（`setFb` → 钩子、解卦链 → `ruleBlock`）也落到同一份上。 */
@@ -993,7 +993,7 @@ function mountRecords() {
   });
   RecordsStore.setReviewHook(ReviewCore.reviewCase);
 
-  /* 有意行为变更（登记 **变更记录**）：**修 legacy 的「写回 `loadCases()` ⇒ 把回收站写没」数据破坏 bug**。
+  /* ★★ 有意行为变更（登记 **变更记录**）：**修 legacy 的「写回 `loadCases()` ⇒ 把回收站写没」数据破坏 bug**。
      全枚举（`grep 'saveCases(' / 'loadCases()'`，20/22/26-script）—— 入参取自 `loadCases()` 的**都是**这个 bug：
        · `addCase`（20 L63）· `updateCaseDuanci`（L70-73）· `markModelAnswered`（L81-82）
        · `setFb`（L85-93）· `setNote`（L97-99）              ← **本批可达**（抽屉四条写路径 + 每次起卦）
@@ -1005,7 +1005,7 @@ function mountRecords() {
        **想真删**的记录又补回来，被比对第 11 步当场抓到（22 项 FAIL，差异字段 `trashSum`/`trashRows`/`ls`）。
      ⇒ 正确做法 = **只包那几个有 bug 的写入者**：调完原函数后，把「这次被它丢掉的已删记录」按
        `loadCasesRaw()` 的**原序**补回；**没丢就什么都不做**（那些写入者本来正确的语义一字不动）。
-     （S3b 尾项）：原先那两条开关（`VITE_S2_RECORDS` 等）已随段退役。 */
+     ★ （S3b 尾项）：原先那两条开关（`VITE_S2_RECORDS` 等）已随段退役。 */
   st.legacySaveCases = window.saveCases;   /* ⚠ 只留引用，**不替换** */
   st.wrappedWriters = [];
   const mergeBack = (before, cur) => {
@@ -1029,7 +1029,7 @@ function mountRecords() {
     window[nm] = function () {
       const before = (typeof window.loadCasesRaw === 'function') ? window.loadCasesRaw() : null;
       const res = orig.apply(this, arguments);
-      st.writerCalls += 1; st.lastWriter = nm;   /* 审计用（S5-0 盲区扫描）：证明"这一步真的调了这个有 bug 的写入者" */
+      st.writerCalls += 1; st.lastWriter = nm;   /* ★ 审计用（S5-0 盲区扫描）：证明"这一步真的调了这个有 bug 的写入者" */
       try {
         const cur = (typeof window.loadCasesRaw === 'function') ? window.loadCasesRaw() : null;
         const merged = (before && cur) ? mergeBack(before, cur) : null;
@@ -1042,7 +1042,7 @@ function mountRecords() {
   window.addEventListener('click', (e) => {
     const t = e.target;
     if (!t || typeof t.closest !== 'function') return;
-    /* 有意差异（登记 **变更记录**）：`[data-ask]`（接着问）整条属**出网**，按 原记录① 留待
+    /* ★ 有意差异（登记 **变更记录**）：`[data-ask]`（接着问）整条属**出网**，按 原记录① 留待
        ⇒ 在 window 捕获阶段**吞掉**这次点击：按钮 DOM 保留（结构等价），但点它没反应。
        不吞的话 legacy 那条 **document 级委托**（`26-script.txt` L755-769 → `openRecAsk`）仍会生效 ——
        它会把 legacy 造的 HTML 写进 **React 管的容器**里（接管期共管，本批不允许）。
@@ -1063,14 +1063,14 @@ function mountRecords() {
     st.intercepts += 1;
     st.lastHit = String(hit.id || '');
     st.lastTrusted = e.isTrusted;
-    /* Step 4 补齐「第 4 条关闭路径」（`38-script.txt` L2483–2490）：
+    /* ★ Step 4 补齐「第 4 条关闭路径」（`38-script.txt` L2483–2490）：
        `22-script.txt` L177 那条入口**只管开**，真正的"开着时点它 = 收起"是 38-script 在 **document
        捕获**阶段另装的一条。我们装在 window 捕获阶段（比它更早）⇒ **必须把这层语义一起接过来**，
        否则 ≤560px 档（抽屉打开时 `#btnSum` 被抬到 z-index 520、真的点得到）会把"点它收起"变成"点了没反应"。
        （Step 3 那句"legacy 的入口语义是只开不关"只覆盖了 22-script 那一条，本步更正。） */
     if (recordsOpen) setRecordsOpen(false);
     else openRecords('cases');
-  }, true);   /* window 捕获阶段 = 抢在 legacy 的 `#btnSum` 监听之前 */
+  }, true);   /* ★ window 捕获阶段 = 抢在 legacy 的 `#btnSum` 监听之前 */
   api.s2records.activeNode = () => document.getElementById('sdb');
 }
 mountRecords();
@@ -1122,16 +1122,16 @@ function mountMain() {
   mainRoot = createRoot(document.createElement('div'));   /* 容器故意不挂进文档（DOM 由 portal 提供） */
   paintMain();
   st.activeNode = () => document.getElementById('right');
-  /* ② 装最外层 `show`：S3b 批 变更记录（2026-10-14）—— **链上不再有早期实现实现**。
+  /* ② 装最外层 `show`：★ S3b 批 变更记录（2026-10-14）—— **链上不再有早期实现实现**。
      源里 `window.show` 是两层（26-script 包 16-script）；本批把中间那两层收进本仓
      （`src/data/showCore.js`，逐字切片）⇒ 现在是「外壳这一层（flushSync 渲染 React → 调本仓那份）」。
      ⚠ 早期实现那份**留着不动**（`st.legacyShow` 只作证据：它还挂在 window 上，但没人再调它）。
      ⚠ 上面 ① 那条 `#right` 的 innerHTML 封条**留着**：它是「DOM 归 React」的守卫（本仓这份已不写 DOM）。
      ⚠ 自由变量：本仓那份里的 `bindResult`/`playWalk` 转发 window（**已是本仓**：resultCore/walkCore）；
        `updateSetDot`/`addCase` 转发 window（**仍是早期实现**：设置页小红点 / 记录自动记账）⇒ 本批不收，已登记。
-     （S3b 尾项）：原先的 `VITE_S2_MAIN` 一键回退开关已随段退役。 */
+     ★ （S3b 尾项）：原先的 `VITE_S2_MAIN` 一键回退开关已随段退役。 */
   const inner = window.show;
-  /* （砍段前置，(会话)）：**安装不再依赖「早期实现的 window.show 已就位」**。
+  /* ★ （砍段前置，(会话)）：**安装不再依赖「早期实现的 window.show 已就位」**。
      原来这里是 `if (typeof inner !== 'function') { …; return; }` —— 那是 变更记录 之前的口径（当时本块只是
      「在最外层**包一层**」legacy 那份）。变更记录 之后链上那份已经是本仓的 `ShowCore.show`（`st.legacyShow`
      只留作**证据**，没人再调它）⇒ 早期实现在不在都必须装。
@@ -1143,12 +1143,12 @@ function mountMain() {
     st.renders += 1;
     st.lastC = String((c && c.g1) || '') + ' · ' + String((c && c.g2) || '') + ' · ' + String((c && c.g3) || '');
     renderMain(c, B);                    /* DOM 归 React（**同步**提交，链上紧接着要按 id/class 找节点） */
-    const r = ShowCore.show(c, B);       /* 态写者（__ctx/__blocks/__md）＋ 接着问区 ＋ addCase：本仓这条链 */
-    /* （现象：「新开一卦之后，接着问还带着上一卦的问题」）：`__thread` 每卦都清，
+    const r = ShowCore.show(c, B);       /* ★ 态写者（__ctx/__blocks/__md）＋ 接着问区 ＋ addCase：本仓这条链 */
+    /* ★ （现象：「新开一卦之后，接着问还带着上一卦的问题」）：`__thread` 每卦都清，
        但 `#askBox` 里那些 `.ask-item` 是 DOM 残留、没人清。⇒ 在这里收口：**任何入口起卦**都走这条
        `show`，所以清在这里才等于「有新起卦就刷新」；顺带补上「在本卦的基础上接着问」那行小字。 */
     try { resetAskBox(); } catch (eAB) { }
-    /* 证据挂在**外壳侧**（首跑实测：`ShowCore.state()` 那份模块作用域计数在打包后读不到 —— minifier 把
+    /* ★ 证据挂在**外壳侧**（首跑实测：`ShowCore.state()` 那份模块作用域计数在打包后读不到 —— minifier 把
        那层计数函数与切片那份合并了；链子本身照跑：态被写、`#askBox` 也挂上了）⇒ 判据读这一份，不受打包影响。 */
     try {
       st.showHits = (st.showHits || 0) + 1;
@@ -1167,7 +1167,7 @@ function mountMain() {
   /** 供判据取证：本仓这条链跑过几次、每跑一次现场登记（态是不是本仓写的）；
       ⚠ 读**外壳侧**这份（`st.showHits` / `st.showLast`）—— 模块作用域那份在打包后读不到（见上面注释） */
   st.showState = function () { return { hits: st.showHits || 0, last: st.showLast || null }; };
-  /* ③ S3b 批 A3①（2026-10-13）：`bindResult()` **整函数搬进 React**。
+  /* ③ ★ S3b 批 A3①（2026-10-13）：`bindResult()` **整函数搬进 React**。
      它原来挂三处监听：复制「干净一卦」/「让模型解卦」/ 断卦依据折叠 —— 现在由两个组件用 `onClick` 接
      （见 `DivinationPane.jsx` · `EvidencePane.jsx` 的 A3① 段；切片在 `src/data/resultCore.js`）。
      ⇒ 这里把 legacy 那份换成 React 侧收尾件，只留它**唯一不属于那两个组件**的一步 `renderSdb()`
@@ -1186,14 +1186,14 @@ function mountMain() {
   };
   api.s3bOwn('bindResult');
 
-  /* ④ S3b 批 A3②（2026-10-13）：**走宫改由 React 发起**。
+  /* ④ ★ S3b 批 A3②（2026-10-13）：**走宫改由 React 发起**。
      `WalkCore.installWalk()`（切片在 `src/data/walkCore.js`）把 `window.playWalk` 换成
      「切片版 playWalk + 切片版 calmWalk 的瞬时化」，最外层照 `38-script` 的 `wireWalk()` 先切到「起卦」步
      （调的是 legacy 自己暴露的 `window.__xlrSetStep`，那是它 IIFE 里唯一的对外入口）。
      ⇒ legacy 的 `wireWalk` / `calmWalk` 两层包装成为**不可达的死代码**（`show()` 里那句 `playWalk(c)`
      调到的就是本模块）；点名要的「落卦之后不占时间」形态由切片原样保留。
      `onSettle` = 「走宫落定」的回调：通知 `GuaCard` 把「看断辞 · 结果 →」挂出来。
-     （口径：）：「按钮不是随着起卦页面一起出现的，而是页面差不多好了之后才突兀地跳出来」——
+     ★ （口径：）：「按钮不是随着起卦页面一起出现的，而是页面差不多好了之后才突兀地跳出来」——
        原来这里**照抄**了源 `watchReveal()` 的 350ms 轮询间隔（落定后 350ms 才挂按钮），那本是轮询的副产品；
        现在**落定即挂**（同一个同步链里，与三宫名/胶囊同一次提交 ⇒ 同一帧出现），登记为 变更记录。 */
   try {
@@ -1223,7 +1223,7 @@ mountMain();
  *   ⑤ 挂载后补一次 `setMode(window.__mode || 'clock')` 把初值补齐（aria-pressed / hidden / `#castLb` / `#modeHint` / 九数 / `#castMini`）。
  * ⛔ `.vstep` 步进条**不归 React**：整套步进机（`setStep` / 药丸几何 / `html[data-step]`）在 38-script 的 IIFE 里，
  *    而且它的 `buildStepper` 有幂等守卫 —— React 若自己渲染 `.vstep`，守卫会让它直接 return ⇒ 步进条变死。
- * （S3b 批 A1）：**问卦页的行为开始搬进 React**（`AskCore` + `AskPanel` 的 effect）——
+ * ★ （S3b 批 A1）：**问卦页的行为开始搬进 React**（`AskCore` + `AskPanel` 的 effect）——
  *   方式三键 / 详情键 / 九数手改 / 时辰 change / 初值补齐 / 每 2 秒刷时钟，**已由 React 侧接管**；
  *   本块的「重绑 + 转发」**A2 起收到零**（`#btnGo` 那条转发也撤了：起卦链改由 `CastCore.goCast()` 发起），
  *   并把 legacy 那条每 2 秒的
@@ -1238,22 +1238,22 @@ function mountAsk() {
     owner: 'react', forwards: 0, lastForward: '', rebound: [], legacyNodeRemoved: false,
     blockedWrites: 0, startedAt: Date.now(),
     /* S3b 批 A1 起：判据读的**两张清单**（不再用「转发条数」反推接管与否）
-       A3①：`owned` 指向 **api 上那一份共用登记表**（见文件头附近 `api.s3bOwn`）——
+       ★ A3①：`owned` 指向 **api 上那一份共用登记表**（见文件头附近 `api.s3bOwn`）——
          否则更早跑的 S2/MAIN 块登记不到它自己接管的那几项。 */
     owned: api.owned, forwarded: [],
     /* S3b 批 A2② 起：React 侧播四拍的次数（判据断言「只播一次」⇒ 直接抓「两套并存播两遍」这种事故） */
     fxPlays: 0,
-    /* B2-①（2026-10-13）：键盘流（回车）由 React 接的**命中计数** —— 判据读它 = 证明
+    /* ★ B2-①（2026-10-13）：键盘流（回车）由 React 接的**命中计数** —— 判据读它 = 证明
        「这一击真是 React 那份接的」，而不是"两边都绑着、恰好另一份响了"。
        ⚠ 只有 React 会写这两个字段（早期版本臂读到 undefined ⇒ 不进三臂比对，只做 React 臂正向断言）。 */
     keysHits: 0, keysLast: ''
   };
   api.s2ask = st;
-  /* A3①：「已接管项」的登记函数已提到文件头附近（定义在 `api` 上）—— 见那里的注释。
+  /* ★ A3①：「已接管项」的登记函数已提到文件头附近（定义在 `api` 上）—— 见那里的注释。
      （原先在这里定义 ⇒ S2/MAIN 块调不到，A3 的 `bindResult` 就登记不进去。） */
   /* 四拍由 React 播时，每播一次报一次（判据读 `fxPlays`） */
   api.markFxPlay = function () { st.fxPlays += 1; };
-  /* S3b 批 A2②：**常置** `window.__xlrCasting = 1` ⇒ 38-script 那个 legacy 拦截器（它只认这一个旗）
+  /* ★ S3b 批 A2②：**常置** `window.__xlrCasting = 1` ⇒ 38-script 那个 legacy 拦截器（它只认这一个旗）
      整体空转，四拍只由 React 的 `CastFx.installCastFx` 播 ⇒ 不会两套并存播两遍。 */
   try { window.__xlrCasting = 1; } catch (eC) { }
 
@@ -1287,9 +1287,9 @@ function mountAsk() {
   });
 
   /* ④ 事件转发：新节点 → 旧节点（旧监听器照常跑到 legacy 的全局函数）
-     S3b 批 A1（2026-10-13）：方式三键 / 详情键 / 九数 input / 时辰 change **已搬进 React**（`AskPanel`）
+     ★ S3b 批 A1（2026-10-13）：方式三键 / 详情键 / 九数 input / 时辰 change **已搬进 React**（`AskPanel`）
        ⇒ 对应的转发**逐条撤掉**（转发还在 = 两套写者抢同一个态）。
-     S3b 批 A2（2026-10-13）：**`#btnGo` 那条也撤掉** —— 整条起卦链改由 `CastCore.goCast()`
+     ★ S3b 批 A2（2026-10-13）：**`#btnGo` 那条也撤掉** —— 整条起卦链改由 `CastCore.goCast()`
        （18-script 那段 handler 的逐字切片）发起 ⇒ **本块不再转发任何事件**（FWD 空表）。
        ⚠ 四拍动画不受影响：38-script 的 `wireCastFx()` 挂在 document 捕获阶段、按 `closest('#btnGo')` 命中，
          与「按钮由谁渲染」无关；它拦下首次点击、2400ms 后补发 click 交给应用（= React 的 handler）。 */
@@ -1308,7 +1308,7 @@ function mountAsk() {
     try { requestAnimationFrame(function () { if (st.placeSpill) st.placeSpill(true); }); } catch (eP) { }
   });
 
-  /* ⑤ 初值补齐 —— S3b 批 A1（2026-10-13）：**已搬进 `AskPanel`**
+  /* ⑤ 初值补齐 —— ★ S3b 批 A1（2026-10-13）：**已搬进 `AskPanel`**
      （「`#h1/#h2` 初值 = `clockNums().zi`」「`#dt` = 今天」「`setMode(window.__mode || 'clock')` 一次补齐」
       四件都在组件里的那个 effect 里，同一套规则、同一套函数）。
      这里只留一件 **legacy 侧的中和**：把 `window.refreshClock` 覆盖成 no-op。
@@ -1339,7 +1339,7 @@ function mountAsk() {
   };
   placeSpill(false);
   st.placeSpill = placeSpill;
-  /* 为什么还要一个 ResizeObserver：我们挂载时**旧增强层可能还没重排**（移动端/桌面由 `30-script`/`38-script`
+  /* ★ 为什么还要一个 ResizeObserver：我们挂载时**旧增强层可能还没重排**（移动端/桌面由 `30-script`/`38-script`
      在 DCL 后把 `.f` 整块搬进 `.cside`）⇒ 那一刻量到的按钮宽度是**重排前**的（实测 plain 臂量成 19/278，
      正确答案是 3/88）⇒ 药丸停在错位置。旧增强层自己的 `wireSeg()` 又被幂等守卫挡住不跑。
      ⇒ 用 RO 盯住那颗 `.seg`：重排让它的尺寸一变就重新摆一次（`placeSpill` 内部每次都重新取按钮的
@@ -1399,7 +1399,7 @@ function mountVariantC() {
 }
 mountVariantC();
 
-/* （）老三条 ②：开场 `#q` **丢焦点** —— 在「节点已经定下来之后」补同一次聚焦
+/* ★★ （）老三条 ②：开场 `#q` **丢焦点** —— 在「节点已经定下来之后」补同一次聚焦
  *
  * 现场读数（（生成过程），1280×900，两臂对照；本节数字都是实测）：
  *   旧臂：[133ms] `focusIN textarea#q`（`setStep` 里那句 focus）⇒ 之后 1240/1245/1366/3070/3773ms 焦点**一直在**（同一个节点）
@@ -1437,7 +1437,7 @@ function refocusQ() {
 }
 refocusQ();
 
-/* ===== ：启动静默查一次 =====
+/* ===== ★ ：启动静默查一次 =====
  * 口径：
  *   · 启动后 4 秒才查（别跟开屏动画抢时间）；查不到 / 没新版一律静默，界面上什么都不出。
  *   · 有新版：右下角一条小提示（去更新 / 以后）。点「以后」本次运行不再弹。

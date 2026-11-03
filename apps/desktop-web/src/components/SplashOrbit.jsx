@@ -120,7 +120,7 @@ export default function SplashOrbit() {
     fit();
 
     let raf = 0;
-    /* ★ 2026-11-03：相位基准用 performance.now() 的**绝对值**，不再从本组件挂载时刻起算。
+    /* ★ 相位基准用 performance.now() 的**绝对值**，不再从本组件挂载时刻起算。
        加密壳的加载层（protect.py 里的 bootSky）画的是同一片星图，两层各自 rAF：
        若各从自己的起点算，交接那 0.98 秒里两片星相位不同 ⇒ 用户看到「星点重叠成重影」。
        共用绝对时钟后，两层相位逐帧相同，重合得看不出接缝。 */

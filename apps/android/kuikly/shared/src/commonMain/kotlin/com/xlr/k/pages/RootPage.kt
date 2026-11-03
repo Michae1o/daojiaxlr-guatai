@@ -185,7 +185,7 @@ private fun RootScreen() {
             Follow.reset()
             Session.recId = ""
             Session.followReady = false
-            /* 上一卦的模型断辞必须一起清掉 —— 否则新卦进叁页会顶着上一卦的断辞
+            /* ★ 上一卦的模型断辞必须一起清掉 —— 否则新卦进叁页会顶着上一卦的断辞
                。 */
             Session.askAnswer = ""
             Session.askStat = ""
@@ -426,7 +426,7 @@ private fun RootScreen() {
                             val over = raw - base
                             base + damp(over, EDGE_MAX * density)
                         } else raw
-                        /* 顶栏步进条「途中闪八卦」（旧 phoneAnim swipeMove 里那段）：
+                        /* ★ 顶栏步进条「途中闪八卦」（旧 phoneAnim swipeMove 里那段）：
                            有目标页时，按拖动进度 0/25/50/75% 依次换成起手抽到的 4 个卦名；
                            到头（阻尼那一路）不换。 */
                         val d = raw - base

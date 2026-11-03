@@ -64,7 +64,7 @@ export default function Splash() {
   const skinDef = SkinsCore.SKINS.filter((x) => x.k === skinKey)[0] || { ac: '#0f1013' };
   const dark = !!SkinsCore.DARK[skinKey];
   const dots = buildStarField(dark, skinDef.ac);
-  /* 变更记录（口径：选 A）：补回 legacy 的「点击退场」接线。
+  /* ★ 变更记录（口径：选 A）：补回 legacy 的「点击退场」接线。
      legacy 的两条点击监听器分别绑在**它自己那颗按钮**上（38-script.txt L2209）与**它自己的开屏层**上
      （L2210-2213：宽屏点层内任意处都退场；窄屏只认那颗按钮）；而外壳 `mountSplash()` 把那一层
      `remove()` 掉了（shell/main.jsx L123）⇒ 两条监听器全死 ⇒ 点了没反应。

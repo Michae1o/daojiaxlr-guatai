@@ -129,7 +129,7 @@ internal fun JieContent(active: Boolean = true, onNewCast: () -> Unit = {}) {
     )
     val answer = Session.askAnswer
 
-    /* 定稿，照手机端早期版本（apps/mobile-web/src/styles/legacy.css L4386 那套）：
+    /* ★★ 定稿，照手机端早期版本（apps/mobile-web/src/styles/legacy.css L4386 那套）：
        ① 卡片＝**一屏高的卡**：上限 = 可用高 − 底部「断卦依据」条（实测高度），不再无限长；
        ② 断辞**在卡片里自己滚**（早期版本 `.llm-main{flex:1 1 auto;min-height:0;overflow-y:auto}`）；
        ③ 所问/卦·时（Recap）钉卡顶、两个按钮钉卡底（早期版本 `flex:0 0 auto`）；
@@ -286,7 +286,7 @@ internal suspend fun askNow(ctx: Context, blocks: List<Block>) {
     Session.askAnswer = ""
     Session.followReady = false      /* 早期版本是答完才 show:true；重解一次先收回 */
     Session.askStat = ""             /* 免得「解卦中」时还挂着上一轮的用时 */
-    /* 记下这是第几卦 —— 解卦还在路上时用户又起了一卦的话，
+    /* ★ 记下这是第几卦 —— 解卦还在路上时用户又起了一卦的话，
        这一趟的流式文字与收尾统统作废，别把上一卦的断辞写进新卦。 */
     val seq = Session.castSeq
     val t0 = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()

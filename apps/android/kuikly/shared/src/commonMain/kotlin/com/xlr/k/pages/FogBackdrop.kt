@@ -141,7 +141,7 @@ private fun FogCloud(name: String, seed: Float, dx: Float, dy: Float, spread: Fl
         val px = dx * (if (original) amp else if (li == 2) -2.0f else 1.85f) * (0.62f * wave(sec, 9f / fast, ph) + 0.38f * wave(sec, 15f / fast, ph + 1.7f))
         val py = dy * (if (original) amp else if (li == 1) -1.8f else 1.65f) * (0.66f * wave(sec, 10f / fast, ph + 3.1f) + 0.34f * wave(sec, 18f / fast, ph + 5.3f))
         val a = amp * ((if (original) 0.55f else 0.65f) + (if (original) 0.45f else 0.35f) * (0.5f + 0.5f * wave(sec, 6f / fast, ph + 2.2f)))
-        /* 非等比缩放：X/Y 各自独立相位与周期（10s / 18s，都是 180 的约数）⇒
+        /* ★ 非等比缩放：X/Y 各自独立相位与周期（10s / 18s，都是 180 的约数）⇒
            密度纹理被拉长、压扁，看起来是在"变形"，而不是整体放大缩小。
            素材边缘透明，小角度旋转改变流向。 */
         val sx = 1.02f + spread * 2.6f * (0.5f + 0.5f * wave(sec, 10f / fast, ph + 6.1f))

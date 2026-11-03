@@ -21,7 +21,7 @@
  *   ⇒ 作用到的就是 React 渲染的那个节点）。
  */
 /* eslint-disable */
-import { IS_PHONE } from '../platform.js';   /* 平台只看产物（构建期常量），不看屏幕宽度 */
+import { IS_PHONE } from '../platform.js';   /* ★ 平台只看产物（构建期常量），不看屏幕宽度 */
 
 /* ===== 装配层声明：切片里那处暴露赋值指到这里（必须排在本函数之前） ===== */
 var OUT = null, KILL = null;
@@ -31,13 +31,13 @@ var OUT = null, KILL = null;
     if (document.getElementById('xlrSplash')) return;
     var reduce = false;
     try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e2) { }
-    /* 声明差异②（手机端同款修复，口径：「我的手机版开屏动画呢？怎么不见了？而且还tm给我自动跳过开屏」）
+    /* ★★ 声明差异②（手机端同款修复，口径：「我的手机版开屏动画呢？怎么不见了？而且还tm给我自动跳过开屏」）
        源里这行是 `if (reduce) return;` —— 系统一开「减弱动态效果」（Windows「动画效果」关掉同理）
        就**整屏不建**开屏 ⇒ 底下首启引导当场盖上来 ＝「开屏被自动跳过」。
        正确语义：**reduce = 不播动画，页面还在。** 动画本身由 legacy 的
        `@media (prefers-reduced-motion:reduce){*{animation:none!important}}` 关掉。 */
     window.__xlrSplashReduce = !!reduce;
-    /* 现象：「一切到位之后，框内还是会像刷新了一样」：
+    /* ★ 现象：「一切到位之后，框内还是会像刷新了一样」：
        真因是**首次配置引导层**（#onbLayer，整屏 var(--bg) 半透明底）踩着开屏的尾巴出场，
        整片盖上来 ⇒ 看着就是"页面被刷了一下"。
        开屏本身就是一道"入口"，引导不该踩着它的尾巴弹 ⇒ 给个标记，让引导**别在开屏期间自动弹**
@@ -49,7 +49,7 @@ var OUT = null, KILL = null;
     d.id = 'xlrSplash';
     /* 开屏层在场期间挂上 sl-on：用来压住底下的首次配置引导（开屏背景半透明，不压会透出来） */
     try { document.documentElement.classList.add('sl-on'); } catch (eS0) { }
-    /* 用户给了风格稿（玻璃阴阳珠 + 发丝线 + 极简留白）：按稿重排开屏，
+    /* ★ 用户给了风格稿（玻璃阴阳珠 + 发丝线 + 极简留白）：按稿重排开屏，
        并且**用动画把开屏和主页面接起来** —— 那颗珠子飞向该在的位置、缩成第一步「壹」的圆。 */
     d.innerHTML =
       '<span class="sl-axis sl-axis-t" aria-hidden="true"></span>' +
@@ -57,7 +57,7 @@ var OUT = null, KILL = null;
         '<div class="sl-orbwrap">' +
           '<span class="sl-line"></span><span class="sl-dot"></span>' +
           '<span class="sl-orb">' +
-            /* 二改：
+            /* ★★ 二改：
                参照图＝**3D 渲染的液态太极**，不是我上一版的「扁平玻璃」——
                ① 浅瓣＝清水/胶质（乳白、半透，边缘略沉做出厚度）；
                ② 深瓣＝液态金属/墨（中心最沉、往边缘提亮，右下外缘一道**月牙棱光**）；
@@ -144,7 +144,7 @@ var OUT = null, KILL = null;
               '<circle class="tjY" cx="60" cy="59.5" r="52" fill="url(#tjYang)"/>' +
               '<circle class="tjEdge" cx="60" cy="59.5" r="50.6" fill="none" stroke="rgba(30,36,44,.07)" stroke-width="2.6"/>' +
               '<path class="tjD" d="M60 7.5 A52 52 0 0 1 60 111.5 A26 26 0 0 1 60 59.5 A26 26 0 0 0 60 7.5 Z" fill="url(#tjYin)"/>' +
-              /* 二改补丁：**外轮廓细圈**。48px 实尺下浅瓣是白、底色是米白，
+              /* ★ 二改补丁：**外轮廓细圈**。48px 实尺下浅瓣是白、底色是米白，
                  白对米白 ≈ 没有边界 ⇒ 整颗被读成「浮着一块深色月牙」。给整颗描一道
                  极细的中性灰边（1× 下约 0.6px），轮廓才立得住。⛔ 别加粗成实线描边。 */
               '<circle class="tjRim" cx="60" cy="59.5" r="51.4" fill="none" stroke="rgba(52,60,70,.26)" stroke-width="1.5"/>' +
@@ -199,14 +199,14 @@ var OUT = null, KILL = null;
     document.body.appendChild(d);
     var t0 = Date.now(), gone = false;
     var goBtn = d.querySelector('.sl-go');
-    /* 平台判定（口径：「手机就是手机，电脑就是电脑，关屏幕大小什么事」）
+    /* ★★ 平台判定（口径：「手机就是手机，电脑就是电脑，关屏幕大小什么事」）
        —— 宽度不是平台，两条线各自由构建期常量标明：手机端 `__XLR_PLATFORM__='phone'`、
        桌面端 `'desktop'`（见 ../platform.js 的 IS_PHONE）。⛔ 这里不留任何 innerWidth /
        matchMedia 回退：模拟器 WebView 实测 innerWidth=760（viewport 写的是 390 也没吃到），
        一靠宽度就会把手机端判成"宽屏"⇒ 3 秒自动退场 + 珠子飞向「壹」，手机版下落弹跳动效等于没发生。 */
     function narrowW() { return IS_PHONE; }
 
-    /* 手机版开屏转场（照用户给的六阶段规格逐条落地）：
+    /* ★★ 手机版开屏转场（照用户给的六阶段规格逐条落地）：
        A 0-180ms   蓄力：先轻微下压(scale 1.07/.93) → 迅速向上弹起，带缩放，有明确加速度（不匀速）
        B 180-380ms 上升：到最高点速度渐慢 → 开始下落，轨迹平滑；背景开始极轻微变亮（tinted 淡入）
        C 380-600ms 自由下落：向**视口底部**加速；带极轻微纵向形变（不能变明显椭圆）
@@ -248,7 +248,7 @@ var OUT = null, KILL = null;
       }
 
       html.classList.add('sl-anim', 'sl-nogo');
-      /* 用户要的"两步"：从点下的第一刻起就把**卡里的内容**和**页面的其它东西**都压着（不是等到形变时才压，
+      /* ★ 用户要的"两步"：从点下的第一刻起就把**卡里的内容**和**页面的其它东西**都压着（不是等到形变时才压，
          否则页面浮现的那一瞬会看到卡里的字闪一下再消失）。第一拍只让"球→空对话框"完成，
          第二拍(1330ms)放卡里的字/选项/发送键，最后(1820ms)才放顶栏与问候语。 */
       html.classList.add('sl-cinew', 'sl-late');
@@ -293,7 +293,7 @@ var OUT = null, KILL = null;
         setTimeout(function () { html.classList.remove('sl-hit'); }, 540);
       }, 640);
 
-      /* 分两步验证用：只看运动（蓄力→起跳→下落→撞屏底→反弹），不做形态转换。
+      /* ★ 分两步验证用：只看运动（蓄力→起跳→下落→撞屏底→反弹），不做形态转换。
          由预览壳的「⑥ 只看小球运动」打开 window.__xlrSlMotionOnly。 */
       var motionOnly = false;
       try { motionOnly = !!window.__xlrSlMotionOnly || localStorage.getItem('xlr-sl-motion') === '1'; } catch (eM0) { }
@@ -305,7 +305,7 @@ var OUT = null, KILL = null;
 
       /* ── E→F：反弹最高点即形变起跑线；同一个元素边上升边展开，落位到输入卡 ── */
       setTimeout(function () {
-        /* 口径：：「小球变成方形之后淡出了，然后出现主页面 —— 我要的是它变成主页面那个对话框！」
+        /* ★ 口径：：「小球变成方形之后淡出了，然后出现主页面 —— 我要的是它变成主页面那个对话框！」
            根因：球的底色被我设成了 transparent（变成一个**空壳方框**），而真卡此时还被 sl-anim 压着，
            于是看起来是「空框淡出 → 卡再出现」两块东西。
            改法：从这一刻起就让**真卡在球底下**浮现（撤 sl-anim）、开屏层的主题色底同时渐隐；
@@ -341,7 +341,7 @@ var OUT = null, KILL = null;
         goBtn.style.height = H + 'px';
         goBtn.style.borderRadius = '24px';
         goBtn.style.transform = 'translate(' + (dx - ex) + 'px,' + (dy - ey) + 'px)';
-        /* 像素级复刻（口径：）：把球的外观切成**真卡那套玻璃** —— 边/面/毛玻璃/阴影/方向性高光
+        /* ★ 像素级复刻（口径：）：把球的外观切成**真卡那套玻璃** —— 边/面/毛玻璃/阴影/方向性高光
            全在 .glass 里，值是从 html[data-step="q"] .cbar 的规则里逐项抄的。
            于是球展开出来就是一张**空对话框**（壳与真卡一模一样、里面还没有字与选项），
            而不是一块主题色实心方块。第二拍再往框里填内容。 */
@@ -353,11 +353,11 @@ var OUT = null, KILL = null;
         if (sv) { sv.style.transition = 'transform .28s ease,opacity .28s ease'; }
       }, 720);
 
-      /* 用户要的新效果：变形途中，从大球里**自然剥离出一个小球** —— 它飞出去定格在卡内右下角
+      /* ★ 用户要的新效果：变形途中，从大球里**自然剥离出一个小球** —— 它飞出去定格在卡内右下角
          那枚提交按钮的位置（带箭头的圆形按钮）。于是"箭头最后才出现"这件事，就由这个过程本身完成：
          大球里的箭头跟着小球飞走，最后落成提交键。 */
       var seed = null;
-      /* 口径（最终版）：**在方框展开的过程中**按钮小球就淡入并开始向右滑，
+      /* ★★ 口径（最终版）：**在方框展开的过程中**按钮小球就淡入并开始向右滑，
          而且速度不能比方框展开快；**方框完全展开（1340ms）时，按钮滑到位、其他元素也浮现到位** —— 三者同时到位。
          时间全部倒推自 T = 1340ms（= 球展开完成的时刻，720+620）：
            · 按钮：860 起步、滑 480ms ⇒ 1340 到位（平均 0.29px/ms，比方框展开的 0.45px/ms 慢 ⇒ 不会比它快）
@@ -445,7 +445,7 @@ var OUT = null, KILL = null;
       gone = true;
       var el = document.getElementById('xlrSplash');
       if (!el) return;
-      /* 手机版走上面那套新动效；宽屏保持原样（珠子飞向「壹」）。 */
+      /* ★ 手机版走上面那套新动效；宽屏保持原样（珠子飞向「壹」）。 */
       if (narrowW() && goBtn) { outPhone(); return; }
       var orb = el.querySelector('.sl-orb');   /* 用珠子本体量：外面那层还含上下细线，高≠宽，算出来会落偏 */
       var tgt = document.querySelector('.vstep button[data-k="q"] i') ||
@@ -456,7 +456,7 @@ var OUT = null, KILL = null;
       try { document.documentElement.classList.add('slgo'); } catch (eG) { }
       setTimeout(function () { try { document.documentElement.classList.remove('slgo'); } catch (eG2) { } }, 2200);
       if (orb && from && to && orb.animate) {
-        /* 把珠子从开屏外壳里「摘」出来挂到 body 上：外壳 `.out` 要整体淡出 +
+        /* ★★ 把珠子从开屏外壳里「摘」出来挂到 body 上：外壳 `.out` 要整体淡出 +
            visibility:hidden（这样主页面才浮得出来），珠子留在里面会被一起抹掉 ——
            口径：「你别让它消失啊，它是一个视觉焦点」。摘出来后它自己一条命，
            飞到壹的位置、转着圈缩小，全程 opacity=1，最后 100ms 才淡出交接给壹。 */
@@ -471,7 +471,7 @@ var OUT = null, KILL = null;
         var dy = (to.top + to.height / 2) - (from.top + from.height / 2);
         var sc = Math.max(.08, to.width / Math.max(1, from.width));
         orb.style.transformOrigin = '50% 50%';
-        /* 太极自己转：**匀速**（linear），和珠子的位移/缩放分两条动画走。
+        /* ★ 太极自己转：**匀速**（linear），和珠子的位移/缩放分两条动画走。
            同一条 transform 里既写缓动又写旋转 ⇒ 转速被缓动拽得忽快忽慢。 */
         var tj = orb.querySelector('.sl-taiji');
         if (tj && tj.animate) {
@@ -480,10 +480,10 @@ var OUT = null, KILL = null;
           tj.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(720deg)' }],
             { duration: 1020, easing: 'cubic-bezier(.52,.04,.88,.3)', fill: 'forwards' });
         }
-        /* 先掐掉珠子自己的入场淡入动画 —— 否则飞行途中两条动画抢 opacity，
+        /* ★ 先掐掉珠子自己的入场淡入动画 —— 否则飞行途中两条动画抢 opacity，
            珠子会变成半透明的鬼影（口径：「别让它消失」）。 */
         try { orb.getAnimations().forEach(function (a) { a.cancel(); }); } catch (eK) { }
-        /* 口径：：「过渡还是很生硬，后半段转速提起来、直接变模糊变成壹」——
+        /* ★ 口径：：「过渡还是很生硬，后半段转速提起来、直接变模糊变成壹」——
            所以模糊不是最后 100ms 才来，而是从 55% 起一路加厚（2px→10px），
            和「壹用 blur 凝出」（CSS 的 vborn 也加了 blur）两头叠上 ⇒ 糊着交棒，不是硬切。 */
         orb.animate([
@@ -497,7 +497,7 @@ var OUT = null, KILL = null;
         if (b1) { b1.classList.add('vborn'); setTimeout(function () { b1.classList.remove('vborn'); }, 1400); }
       }
       setTimeout(function () {
-        /* 飞行结束（1020ms，fill:forwards）就把珠子从 body 上摘干净。
+        /* ★ 飞行结束（1020ms，fill:forwards）就把珠子从 body 上摘干净。
            留着它＝一个 fixed / z-index:10001 的透明方块永远压在「壹」上，吃掉 hover
            （现象：「步进条移上去不展开、抽搐，只有靠右一点才行」就是这个）。
            CSS 侧还有 .sl-orb-fly{pointer-events:none} 兜底，这里再断根。 */
@@ -511,9 +511,9 @@ var OUT = null, KILL = null;
       if (e && e.parentNode) e.parentNode.removeChild(e);
       try { document.documentElement.classList.remove('sl-on'); } catch (eS1) { }
     }
-    /* 口径：：「需要点击开屏中的那个带箭头的按钮（不再自动跳过）」
+    /* ★ 口径：：「需要点击开屏中的那个带箭头的按钮（不再自动跳过）」
        ⇒ 手机版**只有点那枚按钮**才继续；宽屏保持原样（点哪儿都行 + 自动兜底）。 */
-    /* 变更记录 声明差异（本工具唯一那 1 处）：把本作用域里的 out / killSplash 交到装配层。
+    /* ★ 变更记录 声明差异（本工具唯一那 1 处）：把本作用域里的 out / killSplash 交到装配层。
        位置与手法 = 组装期 变更记录 那次注入（见 tools/assemble-desktop.mjs 的 EXPOSE_ANCHOR），
        只是搬进了本仓 —— 咬断早期实现之后，React 那份开屏的退场动作仍要有人给。 */
     try { OUT = out; KILL = killSplash; } catch (eExp) { }
@@ -523,7 +523,7 @@ var OUT = null, KILL = null;
     d.addEventListener('click', function (e) {
       if (goBtn && (e.target === goBtn || goBtn.contains(e.target))) out();
     });
-    /* 平台口径（口径：「启动页不要自动进入提问页面，必须手动点击才能进入」——2026-11-01 要求）
+    /* ★★ 平台口径（口径：「启动页不要自动进入提问页面，必须手动点击才能进入」——2026-11-01 要求）
        —— 两端一致：**只能点那枚箭头按钮**才退场；点层内其他地方一律无效。
        ⛔ 不要再加任何 setTimeout(out …) 的自动进入/兜底：那正是这次要去掉的行为。
        判据也不再需要 IS_PHONE —— 没有自动分支了。 */

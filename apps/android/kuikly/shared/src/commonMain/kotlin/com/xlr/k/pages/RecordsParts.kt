@@ -169,13 +169,13 @@ internal fun RecordsOverlay() {
                 .clip(RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp))
                 .glassMaterial(RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp), drawer = true)
                 /* ⚠ 面板自己吃掉空白处的点击：否则会**穿透到后面那层**（点了就关抽屉/跳回主界面）。
-                   用 tapSwallow 不用 tapNoIndication：后者按下会把整块压到 0.82（长按=整屏变透明）。 */
+                   ★ 用 tapSwallow 不用 tapNoIndication：后者按下会把整块压到 0.82（长按=整屏变透明）。 */
                 .tapSwallow { menuId = "" }
                 /* 左滑删除：手势挂在**面板**这层（行内那层收不到拖动，只到点击），
                    起手按 y 认最近的一行；松手 easeOutBack 弹到位 */
                 .pointerInput(Unit) {
                     var activeId = ""
-                    /* ：
+                    /* ★ ：
                        行的左滑先露「删除」（-delW 拉满）；继续左拉的超量算成「收抽屉」，
                        直接写 Session.recProg 跟手（拖多少退多少），松手按进度吸附。
                        起手不在任何一行（页签/空白）时，左滑同样收抽屉。 */
@@ -526,7 +526,7 @@ internal fun RecordsOverlay() {
                             easing = com.tencent.kuikly.compose.animation.core.CubicBezierEasing(0.22f, 1f, 0.36f, 1f),
                         ),
                     )
-                    /* ：
+                    /* ★ ：
                        真凶不是材质，是下面那个 graphicsLayer 里直接读 mp。
                        Kuikly 只在 lambda 里读 state 时**不会**重新应用这一层 ⇒ alpha 停在首帧的
                        中间值（实测菜单区被压到 214/233，看着就是半透）。必须在组合作用域读一次。 */
@@ -541,14 +541,14 @@ internal fun RecordsOverlay() {
                         modifier = Modifier
                             .width(150.dp)
                             .offset(x = with(dens) { mx.toDp() }, y = with(dens) { my.toDp() })
-                            /* alpha 必须用**组合作用域**里读出来的 mpNow，
+                            /* ★ alpha 必须用**组合作用域**里读出来的 mpNow，
                                不能在 lambda 里直接读 mp（见上面 mpNow 那行注释）。 */
                             .graphicsLayer {
                                 alpha = mpNow
                                 translationY = (1f - mpNow) * (if (flip) -6f else 6f) * dens.density
                             }
                             .clip(RoundedCornerShape(12.dp))
-                            /* ：这一版「浅色半透 + 白边 + 顶部 rim 高光」就是对的样式
+                            /* ★ ：这一版「浅色半透 + 白边 + 顶部 rim 高光」就是对的样式
                                （lite 2.261101.3 上的样子）。它看着"像没有底"是设计意图，⛔ 别再为了"看清面板"
                                把 popup 的面改成 surface2 / d.bg——试过两次，用户都判"变灰了 / 变实心了"。
                                区分靠的是那圈白色内描边和边缘高光，不是底色深浅。 */

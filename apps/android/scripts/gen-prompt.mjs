@@ -5,7 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 /* 仓库根 = 本文件往上三层（apps/android/scripts → 仓库根）。
-   以前这里写死了本机的绝对路径，换机器/克隆到别处就跑不了，
+   ★ 以前这里写死了本机的绝对路径，换机器/克隆到别处就跑不了，
      协作包导出时还会被「本机盘符」判据拦下 ⇒ 改成按脚本自身位置推。 */
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 const ROOT_URL = ROOT.split(path.sep).join('/')

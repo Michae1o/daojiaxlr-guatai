@@ -15,7 +15,7 @@
  *
  * **交互（批 1 本轮实现的部分）** —— 逐条对应早期版本监听器：
  *   已实现：`#setBack`/Esc 关闭 · **`#setNav` 点击滚动（早期版本 L789-794；2026-10-13 补 —— 此前漏抄，
- *   见下方 注）** · 左栏随滚动高亮(L958-970，**照抄早期版本只算 s-llm/s-skin/s-data/s-about 四屏、
+ *   见下方 ★ 注）** · 左栏随滚动高亮(L958-970，**照抄早期版本只算 s-llm/s-skin/s-data/s-about 四屏、
  *   不含 s-contact**）· `#stGuide`(L748-757) ·
  *   服务商卡片点击(L817-844) · `prov-del` 删除(L798-816) · `#stCustomGo`+Enter 起名(L728-744) ·
  *   `#stAgain`/`#stStart`(L500-514) · `#stEye`(L847-851) · 三个输入框(L853-868) ·
@@ -31,19 +31,19 @@ import { useEffect, useRef, useState } from 'react';
 import { SettingsCore as C } from '../data/settingsCore.js';
 /* 「MCP接入」那一节：桥在 data/mcpBridge.js，这里只摆 DOM（见 McpSection.jsx 头注） */
 import McpSection from './McpSection.jsx';
-/* 出网那两处（测试连接 / 拉模型）改走 llmEndpoint ——
+/* ★ 出网那两处（测试连接 / 拉模型）改走 llmEndpoint ——
    智谱官方地址在网页版与安卓上要换成本站中转；带 /anthropic 的地址要换请求形状。 */
 import { endpoint as epOf, headers as hdrsOf, payload as pyOf, textOf, errOf, resolveBase, isAnth, IS_TAURI } from '../data/llmEndpoint.js';
 import { fetchLLM } from '../llm/llmFetch.js';
-/* （要求）：「设置 → 常见问题」那一栏的条目，按平台过滤（本端专属 + 通用） */
+/* ★ （要求）：「设置 → 常见问题」那一栏的条目，按平台过滤（本端专属 + 通用） */
 import { faqList } from '../data/faq.js';
 import { SkinsCore } from '../data/skinsCore.js';
 import { applySkin, currentSkin } from '../data/skinApply.js';
-/* （要求）：数据栏的「准则」导出/清空 +「旧数据导入」——
+/* ★ （要求）：数据栏的「准则」导出/清空 +「旧数据导入」——
    准则是 RecordsStore 的第二个库（RULE_KEY = 'xlr-rules'），与卦例本同一个 store ⇒ 读写走同一份原语，
    不自己碰 localStorage（与 recordsStore 的规矩一致）。 */
 import { RecordsStore } from '../data/recordsStore.js';
-/* （app 内更新·桌面档 B）：关于页的「版本更新」——查清单 → 下整包 → 自动重启 */
+/* ★ （app 内更新·桌面档 B）：关于页的「版本更新」——查清单 → 下整包 → 自动重启 */
 import * as Upd from '../data/updateCore.js';
 
 const VER = 'v1.0';   /* L16 `var VER = 'v1.0'` */
@@ -65,7 +65,7 @@ function ProvButton({ k, n, note, rec, del, pv, got }) {
 }
 
 export default function SettingsScreen({ open, onClose, preload }) {
-  /* ：
+  /* ★ ：
   const PORTABLE = false;   /* 开源版只有一份包，没有便携变体 */
   /* 打开时解析"当前在用的是哪家服务商" —— 逐字对应 open() 前的 wire() L758-761：
        pv = loadProv(); if (!pvValid(pv)) pv = guessProv(load()); saveProv(pv);
@@ -98,7 +98,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
      ⇒ `#stModels` 保持静态 `none`。 */
   const [, setTick] = useState(0);
   const [eyeOn, setEyeOn] = useState(false);
-  /* （现象：「本地没部署 qwen，点 Ollama 却说我已配置」）：
+  /* ★ （现象：「本地没部署 qwen，点 Ollama 却说我已配置」）：
      null = 正在探 / 还没探；true = 那台「本机模型」真在跑；false = 连不上。
      只对**本地地址**（localhost / 127.0.0.1）用；云端各家不探（白花请求、还容易被限流）。 */
   const [localUp, setLocalUp] = useState(null);
@@ -113,7 +113,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
   const tempRef = useRef(null);     /* `#stTemp` */
   const proxyRef = useRef(null);    /* `#stProxy` */
   const msgRef = useRef(null);      /* `#stMsg`（say()/quiet() 直接改它，L456-459） */
-  /* 新增（出网两条接线）：前四个 ref 存的是 **DOM 节点**（在下面那支 effect 里用
+  /* ★ 新增（出网两条接线）：前四个 ref 存的是 **DOM 节点**（在下面那支 effect 里用
      `getElementById` 取；**故意不在 JSX 上加 `ref`** —— 那要登记进结构核对器的声明表 = 改判据）；
      第五个 `modelsRef` 存早期版本那个闭包数组 `models`（L581）的数据。 */
   const pullRef = useRef(null);       /* `#stPull`（节点） */
@@ -154,7 +154,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     setTick(t => t + 1);
   };
 
-  /* ---------- 出网两条：拉取可用模型 / 测试连接（接线，用户「第二条接」）----------
+  /* ---------- 出网两条：拉取可用模型 / 测试连接（★ 接线，用户「第二条接」）----------
      逐条照抄 `36-script.txt`：`renderModels()` L583-605 · `pull()` L607-670 · `test()` L672-718 ·
      清单点击 L890-901 · Key 失焦自动拉 L904-908 · 两颗按钮的禁用/文案（L615-616/667-668、L680-681/715-716）。
      ⚠ 早期版本用闭包 `models` 与缓存的 `el.stPull/…`；这里用上面那些 ref 持同一份东西，
@@ -186,7 +186,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     });
   };
 
-  /* （现象：「本地没部署 qwen，点 Ollama 却说我已配置…你这个本地接口作假了吧」）：
+  /* ★ （现象：「本地没部署 qwen，点 Ollama 却说我已配置…你这个本地接口作假了吧」）：
      实测确认三处「假」——
        ① 状态卡只判「地址 + 模型名填了没有」（`missing()`），**从不探本机** ⇒ 没装 Ollama 也写「已配置」；
        ② 拉取失败时回退 `FALLBACK`（写死的 qwen2.5:7b 等）⇒ 看着像「拉到了」；
@@ -224,7 +224,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     }
     if (pb) { pb.disabled = true; pb.textContent = '拉取中…'; }
     if (hint) hint.textContent = '正在连 ' + base + ' …';
-    /* 先清空旧清单：换过服务商的话，留着上家的列表比没有更误导 */
+    /* ★ 先清空旧清单：换过服务商的话，留着上家的列表比没有更误导 */
     modelsRef.current = [];
     if (box) box.style.display = 'none';
 
@@ -236,7 +236,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
         body: JSON.stringify({ base: base, key: s2.key, path: '/models', method: 'GET' })
       }).then((r) => r.text().then((t) => ({ ok: r.ok, st: r.status, t: t })));
     } else {
-      /* 走 llmEndpoint 换算后的地址（网页版 / 安卓上智谱官方地址会自动换成本站中转） */
+      /* ★ 走 llmEndpoint 换算后的地址（网页版 / 安卓上智谱官方地址会自动换成本站中转） */
       p = fetch(resolveBase(base).replace(/\/+$/, '') + '/models', {
         method: 'GET', headers: { 'Authorization': 'Bearer ' + s2.key }
       }).then((r) => r.text().then((t) => ({ ok: r.ok, st: r.status, t: t })));
@@ -262,7 +262,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     })
       .catch((e) => {
         const why = C.esc(String(e.message || e).slice(0, 170));
-        /* 本地地址**不许**回退内置清单 —— 那份清单是写死的（qwen2.5:7b 等），
+        /* ★ 本地地址**不许**回退内置清单 —— 那份清单是写死的（qwen2.5:7b 等），
            本机没装 Ollama 时它会假装「拉到了」，用户以为配好了，等解卦才报连不上。
            ⇒ 本地这条直接把「怎么把它跑起来」说清楚。 */
         if (isLocalBase(base)) {
@@ -316,10 +316,10 @@ export default function SettingsScreen({ open, onClose, preload }) {
       })
       .catch((e) => {
         const m = C.esc(String(e.message || e));
-        /* （已定的口径）：不解释机制，只说下一步 ——
+        /* ★ （已定的口径）：不解释机制，只说下一步 ——
            「无法连接。请检查网络设置，或更换供应商。」
            网络层失败不把 Failed to fetch 甩给用户；HTTP 错误（Key 错/余额）留服务商原话。
-           设置里「联系」并入「关于」、那一栏已删 ⇒ 文案改指【关于】。 */
+           ★ 设置里「联系」并入「关于」、那一栏已删 ⇒ 文案改指【关于】。 */
         const netFail = !ep.proxy && /Failed to fetch|NetworkError|Load failed|网络/i.test(String(e.message));
         say('bad', (netFail ? '✗ 无法连接。<br>' : '✗ 没通：' + m + '<br>') +
           '请检查网络设置，或更换供应商。');
@@ -352,7 +352,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     if (s2.key || /localhost|127\.0\.0\.1/.test(s2.base || '')) pull();
   };
 
-  /* 接线一律走**原生监听**（照早期版本 `el.stPull.addEventListener` 那一套），**不在 JSX 上加 `ref`/`onClick`**：
+  /* ★ 接线一律走**原生监听**（照早期版本 `el.stPull.addEventListener` 那一套），**不在 JSX 上加 `ref`/`onClick`**：
      那些「动态属性」要登记进 `tools/_check-settings-skeleton.mjs` 的声明表，而**改判据要已定** ⇒ 避开这条路。
      节点用 `getElementById` 取（同一份 DOM，id 与早期版本逐字相同），存进上面那几个 ref 供处理函数用。 */
   useEffect(() => {
@@ -383,7 +383,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
   /* ---------- 事件（逐条照抄 36-script.txt） ---------- */
   const onGuide = () => {                                             /* L748-757 */
     try { localStorage.removeItem('xlr-onboarded-2'); } catch (e) { }
-    /* （现象：：「点了只有提醒，页面还是设置页」）：legacy 的引导层 `.onb` z-index = **90**
+    /* ★ （现象：：「点了只有提醒，页面还是设置页」）：legacy 的引导层 `.onb` z-index = **90**
        （`legacy.css` L1071），而设置页 `.setscreen` z-index = **600** ⇒ 从设置页里点开引导，
        引导**确实开出来了、但被设置页整个盖住**（实测：`#onbLayer` 已拿到 `.on`/`display:flex`/1280×900，
        但 `elementFromPoint` 在屏幕中心命中的仍是设置页）。
@@ -495,7 +495,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
   const onProxy = (e) => {                                           /* L866-868 */
     const s2 = C.load(); s2.proxy = e.target.value.trim(); C.save(s2); quiet();
   };
-  /* （要求）：智谱的地址一键切换 ——
+  /* ★ （要求）：智谱的地址一键切换 ——
      标准 API 走 `api/paas/v4`，token plan（编码套餐）走 `api/anthropic`（Claude 协议，软件自己认地址换形状）。
      点「这里」就换一次、记住；再点一次换回来。 */
   const onZipToggle = (e) => {
@@ -514,7 +514,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
   const onSave = () => {                                             /* L876-881 */
     const s2 = C.load();
     C.save(s2);
-    /* 本地地址保存后**当场探一次**再说「成功」——
+    /* ★ 本地地址保存后**当场探一次**再说「成功」——
        原来只写 localStorage 就报「已保存」，用户没装 Ollama 也会以为配好了（解卦时才报连不上）。 */
     if (isLocalBase(s2.base)) {
       say('', '已保存，正在检查本机模型…');
@@ -529,7 +529,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     say('good', '✓ 已保存。回到主界面点「让模型解卦」就会用它。');
     renderLike();
   };
-  /* ：「导出按钮后面都加一个打开导出文件夹」。
+  /* ★ ：「导出按钮后面都加一个打开导出文件夹」。
      记下最后一次真正落盘的路径 —— 点了就让资源管理器选中它；没导出过就开「下载」目录。 */
   const lastExport = useRef('');
 
@@ -583,7 +583,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     say('good', '✓ 已重置。');
   };
 
-  /* ══════════ （要求）：准则的导出/清空 + 旧数据导入 ══════════
+  /* ══════════ ★ （要求）：准则的导出/清空 + 旧数据导入 ══════════
      原文：「数据那一栏里只有卦例本的导出和清空和全部重置。我希望加入一个准则，可以导出和清空。
      再加一个旧数据导入功能，旁边有个导入键，点开导入时，让用户选择，导入卦例、导入准则、导入卦例+准则。」
      口径：
@@ -694,7 +694,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     rd.readAsText(f, 'utf-8');
   };
 
-  /* （app 内更新·桌面档 B）：关于页那一行。
+  /* ★ （app 内更新·桌面档 B）：关于页那一行。
      分两步 —— 先「检查更新」拿清单，有新版时按钮变「立即更新」，再点才真下载换装。
      ⛔ 不合并成一下就装：换装会让窗口自己关掉再开，得让人先看见它在干什么。 */
   const [verTxt, setVerTxt] = useState('');
@@ -702,7 +702,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
   const [updReady, setUpdReady] = useState(false);
   const updInfo = useRef(null);
 
-  /* ：下载百分比来自 Rust 侧的 atomic，250ms 轮一次。
+  /* ★ ：下载百分比来自 Rust 侧的 atomic，250ms 轮一次。
      ⛔ 不用 Tauri 事件 —— 那要在 capabilities 里多开一条 core:event 权限，为这点小数据不值。 */
   const [updPct, setUpdPct] = useState(-1);
   const pollRef = useRef(null);
@@ -711,7 +711,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
   };
   useEffect(() => () => stopPoll(), []);
 
-  /* ：「点了去更新转到页面，检查更新的按钮应该会自动变成立即更新，
+  /* ★ ：「点了去更新转到页面，检查更新的按钮应该会自动变成立即更新，
      需要用户点击立即更新才可以」⇒ 这里只预置清单条目与按钮状态，**不自动开始下载**；
      并把这页滚到「关于」那一节，省得人自己找。 */
   useEffect(() => {
@@ -778,7 +778,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
     );
   };
 
-  /* ：一键把这页填过的东西全清掉。
+  /* ★ ：一键把这页填过的东西全清掉。
      ⚠ 输入框是**非受控**的（defaultValue + ref）⇒ 清完必须手工把 5 个框写回默认值，
         否则屏幕上还留着旧字，看着像没清。 */
   const onClearAll = () => {
@@ -800,12 +800,12 @@ export default function SettingsScreen({ open, onClose, preload }) {
   const s = C.load();                 /* L479 */
   const bad = C.missing(s);           /* L481 */
   const ok = !bad;                    /* L482 */
-  /* 本地预设（没 Key + 地址是本机）要**真探过**才敢说「已配置」 */
+  /* ★ 本地预设（没 Key + 地址是本机）要**真探过**才敢说「已配置」 */
   const localOnly = ok && !s.key && isLocalBase(s.base);
   const customs = C.loadCustoms();    /* gridHtml() 里那一支 */
   let caseN = 0;
   try { caseN = (JSON.parse(localStorage.getItem(C.KEYS.cases) || '[]') || []).length; } catch (e) { caseN = 0; }  /* L566-567 */
-  /* （要求）：准则条数 —— 与 caseN 一样现读，renderLike() 之后自动跟上 */
+  /* ★ （要求）：准则条数 —— 与 caseN 一样现读，renderLike() 之后自动跟上 */
   let ruleN = 0;
   try { ruleN = (RecordsStore.loadRules() || []).length; } catch (e) { ruleN = 0; }
 
@@ -826,8 +826,8 @@ export default function SettingsScreen({ open, onClose, preload }) {
     } else {
       de.style.overflow = '';
       de.classList.remove('set-lock');
-      /* 引导层层级归还 —— 设置页关掉了 ⇒ 回到 legacy 的基础值 90
-         （见 onGuide 的 注：只在设置页里点「重看引导」时才抬到 640）。 */
+      /* ★ 引导层层级归还 —— 设置页关掉了 ⇒ 回到 legacy 的基础值 90
+         （见 onGuide 的 ★ 注：只在设置页里点「重看引导」时才抬到 640）。 */
       const ob = document.getElementById('onbLayer');
       if (ob) ob.style.zIndex = '';
     }
@@ -877,7 +877,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
         b.setAttribute('aria-current', b.getAttribute('data-to') === best ? 'true' : 'false');
       });
     };
-    /* 补：`#setNav` 点击 → 滚到对应段落 —— **早期版本 L789-794 逐字照抄**。
+    /* ★ 补：`#setNav` 点击 → 滚到对应段落 —— **早期版本 L789-794 逐字照抄**。
        此前只抄了下面的滚动高亮，漏了这一条 ⇒ 用户点「外观 / 数据」时页面纹丝不动
        （三臂实测：早期版本点「外观」`.setbody` scrollTop 0→1402、高亮跟着走；新版恒 0）。
        `block:'start'` + `behavior:'smooth'` 与早期版本一致；`closest('button[data-to]')` 同早期版本。 */
@@ -897,7 +897,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
   }, [open]);
 
   const provs = C.PROVS.filter(p => p.k !== 'custom');
-  /* 「常见问题」按平台过滤（本端专属 + 通用），模块加载后算一次即可 */
+  /* ★ 「常见问题」按平台过滤（本端专属 + 通用），模块加载后算一次即可 */
   const faqs = faqList();
   /* L547-548：`p` **只在 PROVS 里找**（自定义家不在其中 ⇒ `p` 为 null ⇒ 走 else 分支），照抄 */
   const cur = C.PROVS.find(x => x.k === pv) || null;
@@ -1044,16 +1044,16 @@ export default function SettingsScreen({ open, onClose, preload }) {
                 {/* L569-570：`disabled = n === 0`（空卦例本 ⇒ 两个按钮都置灰） */}
                 <button className="sbtn" type="button" id="stCaseExp" disabled={caseN === 0} onClick={onCaseExp}>导出</button>
                 <button className="sbtn" type="button" id="stCaseClr" disabled={caseN === 0} onClick={onCaseClr}>清空</button>
-                {/* （用户要）：导出后不用自己照路径去找 —— 点这个让资源管理器选中它 */}
+                {/* ★ （用户要）：导出后不用自己照路径去找 —— 点这个让资源管理器选中它 */}
                 {IS_TAURI ? <button className="sbtn" type="button" onClick={onOpenFolder}>打开导出文件夹</button> : null}</div>
-              {/* （要求）：准则一行 —— 与卦例本同构（导出 / 清空），空时两个按钮置灰 */}
+              {/* ★ （要求）：准则一行 —— 与卦例本同构（导出 / 清空），空时两个按钮置灰 */}
               <div className="datarow"><div className="m"><b>准则</b>
                 <p>复盘里你逐条确认过的修正，解卦时会一起交给模型。导出带得走，换机器不至于从零调教。</p></div>
                 <span className="n" id="stRuleN">{ruleN + ' 条'}</span>
                 <button className="sbtn" type="button" id="stRuleExp" disabled={ruleN === 0} onClick={onRuleExp}>导出</button>
                 <button className="sbtn" type="button" id="stRuleClr" disabled={ruleN === 0} onClick={onRuleClr}>清空</button>
                 {IS_TAURI ? <button className="sbtn" type="button" onClick={onOpenFolder}>打开导出文件夹</button> : null}</div>
-              {/* （要求）：旧数据导入 —— 点「导入」先问导什么（卦例 / 准则 / 两者），再挑文件；
+              {/* ★ （要求）：旧数据导入 —— 点「导入」先问导什么（卦例 / 准则 / 两者），再挑文件；
                  只加不覆盖，重复的跳过。隐藏 input 复用同一个 ref。 */}
               <div className="datarow"><div className="m"><b>旧数据导入</b>
                 <p>从早期版本或别的机器带来的备份。只往里加，不覆盖本机已有的，重复的自动跳过。</p></div>
@@ -1086,12 +1086,12 @@ export default function SettingsScreen({ open, onClose, preload }) {
               <McpSection />
             </section>
 
-            {/* （用户定）：「关于移动到数据的后面」；这一栏只留版本号与更新入口 ——
+            {/* ★ （用户定）：「关于移动到数据的后面」；这一栏只留版本号与更新入口 ——
                 简介与三条前提已搬到「说明」栏最前面。 */}
             <section className="setsec about" id="s-about">
               <h3>关于</h3>
               <p><b>道家小六壬 · 卦台</b>　{verTxt ? 'v' + verTxt : VER}</p>
-              {/* （app 内更新·桌面档 B）：下好整包 → 换装 → 自己重启。
+              {/* ★ （app 内更新·桌面档 B）：下好整包 → 换装 → 自己重启。
                   只在桌面 exe 里出现（网页版没有 __TAURI__，也不能替换自己的文件 ⇒ 不显示这一行）。 */}
               {IS_TAURI ? (
                 <div className="datarow"><div className="m"><b>版本更新</b>
@@ -1110,7 +1110,7 @@ export default function SettingsScreen({ open, onClose, preload }) {
               ) : null}
             </section>
 
-            {/* （要求）：常见问题 —— 只显示问题，点一下才出解法；
+            {/* ★ （要求）：常见问题 —— 只显示问题，点一下才出解法；
                 条目按平台过滤（Win 端只出 Win + 通用、安卓只出安卓 + 通用、网页版不出安卓），
                 样式不写死颜色：用 --ink / --line / --dim2 这些皮肤变量，九套皮肤与昼夜自动跟着变。 */}
             <section className="setsec" id="s-faq">
@@ -1126,13 +1126,13 @@ export default function SettingsScreen({ open, onClose, preload }) {
               </div>
             </section>
 
-            {/* （要求）：「设置里的关于里面加点内容，想加点免责条款……然后把联系的内容
+            {/* ★ （要求）：「设置里的关于里面加点内容，想加点免责条款……然后把联系的内容
                 都移动到关于吧，再把联系栏删了。」⇒ 原 `#s-contact` 整节删除，两处联系方式并进本页；
                 免责声明按「它是什么 → 不能拿它干什么 → 数据与模型 → 责任 → 用法」分层写。
-                ：这一整块后续已拆成「关于」（数据之后，只留版本与更新）＋「说明」
+                ★ ：这一整块后续已拆成「关于」（数据之后，只留版本与更新）＋「说明」
                 （末尾，简介 + 三条前提 + 免责声明 + 联系 + 仓库）—— 原位于此处的旧 `#s-about` 已删。 */}
 
-            {/* （要求）：「既然你要放检查更新在关于里，那就再开一个说明栏」⇒
+            {/* ★ （要求）：「既然你要放检查更新在关于里，那就再开一个说明栏」⇒
                 免责声明 / 联系维护者 / 开源仓库 从「关于」搬到独立的「说明」栏。
                 用 `setsec about` 类是为了复用 `.about .ab-h` / `.ab-list` 那套排版
                 （样式唯一样源在 src/styles/legacy.css 与 tailwind.css，⛔ 不在这边写样式）。 */}

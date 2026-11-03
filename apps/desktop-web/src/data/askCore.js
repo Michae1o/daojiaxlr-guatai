@@ -91,7 +91,7 @@ function renderGreet() {
 }
 function refreshClock() {
   var t = clockNums(), p = function (x) { return (x < 10 ? '0' : '') + x; };
-  /* 手改过就不再被时钟覆盖（收起九数、或换起卦方式即恢复自动） */
+  /* ★ 手改过就不再被时钟覆盖（收起九数、或换起卦方式即恢复自动） */
   if (!window.__numManual) {
     for (var i = 1; i <= 3; i++) { document.getElementById('n' + i).value = String(t.nums[i - 1]); }
   }
@@ -104,7 +104,7 @@ function refreshClock() {
   var postT = window.__numManual
     ? ' 起卦 · ' + zhi[t.zi - 1] + '时（收起九数就回到自动）'
     : ' ⇒ 按 ' + t.nums.join(' / ') + ' 起卦 · ' + zhi[t.zi - 1] + '时（软件自动读取，起卦以当时为准）';
-  /* 口径：（2026-10-09）：「一切动画结束、其他元素浮现完毕之后，方框内还是会闪一下变成空再恢复」。
+  /* ★ 口径：（2026-10-09）：「一切动画结束、其他元素浮现完毕之后，方框内还是会闪一下变成空再恢复」。
      真因就是这两行老代码——每次刷新都用 innerHTML **整块重写**，里面的 <b>（时刻）被销毁重建，
      所以每 2 秒就闪一次。改成**原地更新文本节点**：结构只建一次，之后只改 nodeValue/textContent。 */
   var kn = mini.childNodes, n1 = kn[0], nb = kn[1], n3 = kn[2];
@@ -128,7 +128,7 @@ function setCastOpen(v) {
   var f = document.getElementById('castFields'), b = document.getElementById('castToggle');
   if (!f) return;
   if (v) f.classList.remove('off'); else f.classList.add('off');
-  /* （口径：·详情位置要固定）：数字那一块被覆盖层搬到了「框下面」的
+  /* ★ （口径：·详情位置要固定）：数字那一块被覆盖层搬到了「框下面」的
      #castPanel（modern.js 的 buildCastPanel），开关要一并带上它。 */
   var p = document.getElementById('castPanel');
   if (p) { if (v) p.classList.remove('off'); else p.classList.add('off'); }
@@ -174,11 +174,11 @@ function setMode(m) {
     refreshClock();
   }
   document.getElementById('modeHint').textContent = m === 'num' ? '报数' : (m === 'time' ? '月日时' : '时间取数');
-  /* 离开「时间取数」就清掉手改标记；九数默认撑开状态跟着方式走
+  /* ★ 离开「时间取数」就清掉手改标记；九数默认撑开状态跟着方式走
      （时间取数是自动取数 ⇒ 默认收起；报数 / 月日时必须填 ⇒ 默认展开）。 */
   if (m !== 'clock') window.__numManual = false;
-  /* 「起卦方式点到月日时，不用自动跳出来详情，到报数才用」。
-     （口径：）：「一旦点开详情，除非手动再点详情，就不要再自动收回 —— 哪怕切换取数方式」
+  /* ★ 「起卦方式点到月日时，不用自动跳出来详情，到报数才用」。
+     ★ （口径：）：「一旦点开详情，除非手动再点详情，就不要再自动收回 —— 哪怕切换取数方式」
      ⇒ 只在切到「报数」时自动展开；切到时间取数 / 月日时**不动**。 */
   if (m === 'num') setCastOpen(true);
   var cfM = document.getElementById('castFields');

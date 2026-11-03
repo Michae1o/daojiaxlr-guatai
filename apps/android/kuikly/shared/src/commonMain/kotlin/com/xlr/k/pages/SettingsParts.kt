@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 
 /* 设置（旧 apps/mobile-web/src/components/SettingsScreen.jsx）
    早期版本是一页式：左栏点哪一栏、右栏 scrollIntoView 滚到那一段。
-   口径（第二次改）：**顶上横排几个栏位，点到哪个就切哪个**，
+   ★ 口径（第二次改）：**顶上横排几个栏位，点到哪个就切哪个**，
      要丝滑过渡，**不要总览页**。所以这里是「顶栏 tab + 内容切换」，六个栏各自一份内容。 */
 
 internal data class SetPage(val k: String, val n: String)
@@ -220,7 +220,8 @@ internal fun SettingsOverlay() {
                 }
             }
             /* 指示条：第 i 格中心 − 文字半宽 ⇒ 压在这格文字正下方。
-               ⇒ 不做「当帧瞬移」，也不做原来那 280ms 慢悠悠：**短时长 + 强 ease-out**
+               ★ 
+                 ⇒ 不做「当帧瞬移」，也不做原来那 280ms 慢悠悠：**短时长 + 强 ease-out**
                     （KY_EASE_OUT = cubic-bezier(.22,1,.36,1)：起手就把大部分路走完，尾巴轻轻收住），
                     看上去是被手带过去、拖一下停稳，而不是「等页面切完才慢慢挪」。 */
             val tabIdx = SET_PAGES.indexOfFirst { it.k == tab }.coerceAtLeast(0)
@@ -463,7 +464,7 @@ internal fun SetBtn(
     /* 卡通：实黑粗边（早期版本 .go/.tbtn 都是 2px 黑边 + 800 字重），其它皮肤维持原来的淡描边 */
     val lineColor = if (bru) Skin.def.ink else Color(base.red, base.green, base.blue, lineA)
     val fillColor = if (bru) Color(base.red, base.green, base.blue, if (fillA > 0f) fillA else 0f) else Color(base.red, base.green, base.blue, fillA)
-    /* ：
+    /* ★ ：
        保持玻璃面不动（他点名不许换实心），只把「主」这一档的**边与字**提到 accent：
        1.2dp 的 accent 描边（0.55，按下 0.85）+ accent 字 → 深浅皮肤都自带对比。 */
     val solidPrimary = primary && !bru

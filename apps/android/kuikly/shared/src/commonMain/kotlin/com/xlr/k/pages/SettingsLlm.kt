@@ -28,7 +28,7 @@ import com.tencent.kuikly.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 /* 设置 · 大模型（旧 SettingsScreen.jsx 的 #s-llm，五步向导）
-   口径：预设**不要列表**，要早期版本那种「一格一家」的贴片（legacy.css .provs/.prov：
+   ★ 口径：预设**不要列表**，要早期版本那种「一格一家」的贴片（legacy.css .provs/.prov：
      grid auto-fill minmax(148px,1fr) / gap 10px；名字 13.5px 600、注 11px dim2）；
      并且补上「拉取可用模型」。 */
 
@@ -396,7 +396,7 @@ internal fun LlmPage() {
                     Text_(text = "共 " + d.models.size + " 个", fontSize = 11f, lineHeight = 18f, color = KY_DIM2)
                     Spacer(modifier = Modifier.width(10.dp))
                     Box(modifier = Modifier.weight(1f)) {
-                        /* 口径：这一格就是「选中的模型」——选中之后它显示模型名，
+                        /* ★ 口径：这一格就是「选中的模型」——选中之后它显示模型名，
                            继续打字就变成过滤（过滤不中时把整份清单放回来，别让人以为清单空了）。 */
                         SetField(d.model, { d.model = it; msg = "" }, ph = "输入几个字过滤，或直接填模型名")
                     }

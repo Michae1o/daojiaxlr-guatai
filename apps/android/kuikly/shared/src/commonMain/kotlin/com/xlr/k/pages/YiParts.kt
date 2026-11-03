@@ -67,11 +67,11 @@ import com.tencent.kuikly.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/* 动画口径（定）：**一律非线性**。
+/* ★ 动画口径（定）：**一律非线性**。
    所有位移/缩放/透明度/尺寸过渡都走下面这几条缓动曲线，⛔ 不用 LinearEasing、⛔ 不做 1:1 线性插值。
    出场类（进场、升起、落位）用 OUT；收起类用 IN；带回弹的用 BACK。 */
 internal val KY_EASE_OUT = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
-/* 需要「慢慢起、慢慢收」的一段（卡片撑开 + 键盘收起这两条要严丝合缝地叠在一起），
+/* ★ 需要「慢慢起、慢慢收」的一段（卡片撑开 + 键盘收起这两条要严丝合缝地叠在一起），
    用 ease-in-out。起手轻 ⇒ 两条动画之间的半帧错位在画面上看不出来。 */
 internal val KY_EASE_IO = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
 internal val KY_EASE_IN = CubicBezierEasing(0.4f, 0f, 1f, 1f)
@@ -114,7 +114,7 @@ internal fun DrawScope.softGlow(
     alpha: Float,
     rings: Int = 46,
 ) {
-    /* （第三轮，）
+    /* ★★ （第三轮，）
 
        实测（放大 4 倍逐点看 + 关掉这层对照）：斜纹就是**斜向线性渐变**画出来的 ——
        Kuikly 画 45° 渐变会在卡面留下 6~8px 的斜向台阶；而卡片自己那条**竖向**渐变是干净的。
@@ -132,7 +132,7 @@ internal fun DrawScope.softGlow(
 }
 
 /* 一条轴上「光心亮、两端透明」的 stop 表。
-   第一版写错了：光心落在画布外（比如 fy>1）时会产出两个相同 t 的 stop，颜色直接乱掉
+   ★ 第一版写错了：光心落在画布外（比如 fy>1）时会产出两个相同 t 的 stop，颜色直接乱掉
      —— 敦煌的暖沙当场变灰绿就是它。现在改成**按位置求值**：在 t=0 / 光心 / t=1 三处算 alpha，
      光心在画布外时中间那点夹到边界，自然退化成单向斜升/斜降。 */
 private fun glowStops(
@@ -430,7 +430,7 @@ internal fun AskCard(onCast: () -> Unit) {
                 .graphicsLayer { alpha = revOp }
                 .padding(start = 14.dp, top = 10.dp, end = 14.dp, bottom = 8.dp)
         ) {
-            /* ：
+            /* ★ ：
                字段高度 = 30dp + (行数-1) × 27.2dp，最多 4 行；下面是 30dp 的老空档，所以单行时总高仍是 60dp，
                与改动前完全一致，多一行就真长一行。
                ⚠ 更正 2026-10-31：之前记的「字段一高、下面整排按钮点不动」是**测量错误**——
@@ -455,7 +455,7 @@ internal fun AskCard(onCast: () -> Unit) {
                 BasicTextField(
                     value = Session.q,
                     onValueChange = { Session.q = it },
-                    /* ：
+                    /* ★ ：
                        Kuikly 的 BasicTextField 是**原生 EditText 叠在画布上**，它不吃上层的 pointerInput ——
                        开屏那层 tapSwallow 即使吃掉了点击，原生输入框照样获焦弹键盘（实测：开屏淡出到
                        alpha≈0 的那 1.6 秒里点输入框位置，logcat 有 XLR_SPLASH_EAT，键盘也开了）。
@@ -473,7 +473,7 @@ internal fun AskCard(onCast: () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))
-            /* ：
+            /* ★ ：
                ① 卡只留 输入框＋取数方式＋起卦键（原来 271dp ⇒ 现在约 136dp）；
                ② 详情**不做浮层**、也不做「三个点」——。
                   改为卡里一句「详情」：点它先收输入法，再在卡里撑开三段（补充背景 / 取数细节 / 事类）。 */
@@ -486,7 +486,7 @@ internal fun AskCard(onCast: () -> Unit) {
             }
             /* 报数：三个数直接在卡里报（2026-10-30 用户：为写三个数去撑开详情太占地方）。
                只在报数模式出现，高度 44dp（8 间距 + 30 控件 + 6 垫底），跟别处一样缓动开合。
-               用户同日：「一旦展开详情，这个小格子就隐藏」——详情里的三个步进才是完整版，
+               ★ 用户同日：「一旦展开详情，这个小格子就隐藏」——详情里的三个步进才是完整版，
                  两个同时出现会重复 ⇒ 报数 且 详情展开时收起便捷格。 */
             val numH by animateFloatAsState(
                 targetValue = if (Session.mode == "num" && !Session.moreOpen) 44f else 0f,
@@ -552,7 +552,7 @@ private fun DetailButton() {
             .clip(RoundedCornerShape(999.dp))
             .glassMaterial(RoundedCornerShape(999.dp), pressed = light, control = true)
             .tapPressable({ held = it }) {
-                /* 用户改口径：「不要两拍，一次成型，就像详情把键盘顶下去」——
+                /* ★★ 用户改口径：「不要两拍，一次成型，就像详情把键盘顶下去」——
                    点下去同一帧就干两件事：叫键盘收、撑卡。
                    宿主那边 hideIme 会**当场**把底部补间推回 0（200ms），撑卡也是 200ms 同一曲线
                    ⇒ 卡片的顶边几乎不动、底边跟着往下去换键盘的位置，看起来就是一次。
@@ -566,7 +566,7 @@ private fun DetailButton() {
                     Session.detailOpen = true
                     Session.moreOpen = true
                     if (Platform.imeVisible) {
-                        /* 用户定的算法：「键盘高 100、详情只有 80，差 20 ⇒
+                        /* ★★ 用户定的算法：「键盘高 100、详情只有 80，差 20 ⇒
                            点开详情的同时整张卡再一起回落 20」。
                            卡片长高 D 刚好吃掉键盘让出来的 D，(kb − D) 交给整卡回落
                            ⇒ 顶边钉住不动，只有下面被撑开。
@@ -590,7 +590,7 @@ private fun DetailButton() {
         /* 选 B：加号（DeepSeek 那种「更多」）。
            用 drawLine 两笔画，不用字符 ＋（字符的笔画粗细和字心跟圆对不齐）。
            展开时原地转 45° 变 ×＝收起来。
-           同日第二轮：「+ 的颜色深了点，要和亮起来之后的起卦箭头一个色号」
+           ★ 同日第二轮：「+ 的颜色深了点，要和亮起来之后的起卦箭头一个色号」
              ⇒ 直接取 GoButton 里那支箭头的颜色（卡通＝onAccent，其余＝近黑 45% 透明）。 */
         val ic = if (Skin.cur == "bru") Skin.def.onAccent else KY_INK
         Canvas(modifier = Modifier.size(14.dp).graphicsLayer { rotationZ = rot }) {

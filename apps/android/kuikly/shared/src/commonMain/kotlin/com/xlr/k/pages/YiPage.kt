@@ -33,7 +33,7 @@ import kotlinx.datetime.toLocalDateTime
  * 已知差异：没有 backdrop-filter（毛玻璃用半透明叠色代替）；柔光用同心圆叠（框架无圆形渐变）。
  */
 
-/* 这些颜色从「常量」改成「读当前皮肤」——名字不变，所有调用处一行不用改，
+/* ★ 这些颜色从「常量」改成「读当前皮肤」——名字不变，所有调用处一行不用改，
    换肤时自动跟着重组（皮肤表在 Skin.kt，值逐字抄自手机端 legacy.css 的 data-skin 各块）。 */
 internal val KY_INK: Color get() = Skin.def.ink
 internal val KY_DIM: Color get() = Skin.def.dim
@@ -130,9 +130,9 @@ internal fun AuraLayer() {
 @Composable
 internal fun YiContent(onCast: () -> Unit) {
     /* （第一轮红框）：底部 71dp 是给手势条/留白用的，键盘一上来就该收成 12dp。
-       第二轮：详情展开时「键盘高 − 详情高」那截要落在**页面自己的留白**里
+       ★ 第二轮：详情展开时「键盘高 − 详情高」那截要落在**页面自己的留白**里
          （Platform.anchorPadDp），不能靠宿主内边距——那会露出窗口底色（白条）。 */
-    /* 第三轮：
+    /* ★★ 第三轮：
        卡片高度、页面留白、宿主底部内边距**必须同一个进度推进**。原先内边距走原生 ValueAnimator、
        高度走 Compose 时钟，两者差几帧 ⇒ 卡片先掉过头（掉到屏幕外）再回弹＝果冻/坠。
        现在只留一个进度 openP，其余全由它算，内边距每帧写给宿主。 */

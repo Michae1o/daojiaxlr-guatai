@@ -484,7 +484,7 @@ internal fun Modifier.glassMaterial(
             1f to d.ink.copy(alpha = 0.055f),
         ))
         .border(Skin.borderW, glassEdge.copy(alpha = if (Skin.dark) 0.18f else 0.50f), shape)
-    /* ：
+    /* ★ ：
        Kuikly 没有实时背景模糊（backdrop-filter 那套在这里不存在），"透"这个观感没法靠模糊解决，
        只能把面做实。所以 popup 单独走这条：面用**不透明的 surface**（不是灰、不是 surface2），
        玻璃感交给顶部 rim 高光 + 白色内描边 + 底部淡暗边 —— 面不透字，边还在发亮。
@@ -494,7 +494,8 @@ internal fun Modifier.glassMaterial(
         /* ⚠ 另一条踩过的坑（留着备用）：`background(Color)` 不吃带 alpha 的纯色
            （实测 0.96/0.985 都等于没画，菜单区显示的是被遮罩压过的背景 208）。
            以后真要做半透面，必须走 Brush 渐变，别用 background(Color.copy(alpha=…))。 */
-        /* 面回到**不透明的 surface**——菜单不透字，玻璃感靠 rim 高光 + 白内描边 + 底部淡暗边。
+        /* ★ 
+           面回到**不透明的 surface**——菜单不透字，玻璃感靠 rim 高光 + 白内描边 + 底部淡暗边。
            半透档（0.90/0.94）在深色皮肤上与列表只差十几级，看着就是没有面板。 */
         return background(d.surface)
             .background(Brush.verticalGradient(

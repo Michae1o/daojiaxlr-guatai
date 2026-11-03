@@ -82,7 +82,7 @@ private val CAST_LB = mapOf(
    ⚠ 必须走 rememberUpdatedState：`pointerInput(Unit)` 只建一次，直接捕 onTap 会**永远执行第一次
    那个 lambda**（闭包里读到的状态也是旧的）——2026-10-28 踩到：设置顶栏 tab 点回「大模型」没反应，
    因为第一次组合时它是选中态、闭包里 `if (!on)` 一直是 false。 */
-/* ：
+/* ★ ：
    根因就是下面那个 tapNoIndication 的按下反馈（缩 0.965 + 压 0.82）——它本来是给"小按钮"用的，
    挂到一整块面板/整层开屏上，按住的几百毫秒里整块都在变淡。
    整层/整面板只吃点击、不做任何视觉反馈。 */
@@ -96,7 +96,8 @@ internal fun Modifier.tapSwallow(onTap: () -> Unit = {}): Modifier {
 
 @Composable
 internal fun Modifier.tapNoIndication(onTap: () -> Unit): Modifier {
-    /* 盘查：全仓 56 处按点击走的是这个 `tapNoIndication`（原本**一点按下反馈都没有**），
+    /* ★ 
+       盘查：全仓 56 处按点击走的是这个 `tapNoIndication`（原本**一点按下反馈都没有**），
        只有 2 处用了 tapPressable 自己演。与其一个个改，不如把反馈做进这里 ——
        一处生效、56 个按钮跟着有反馈：
          · 按下缩到 0.965、透明度压到 0.82（90ms 进，松手 130ms 回）
@@ -203,15 +204,15 @@ internal fun setAskMode(m: String) {
     if (prev != "num" && m == "num") Session.setNums(Session.numsStash ?: listOf("", "", ""))
     Session.mode = m
     if (m != "clock") Session.numManual = false
-    /* 口径（第三次修正）：
+    /* ★ 口径（第三次修正）：
        「取数方式点到报数时，会展开详情，此时如果我点回时间取数、月日时，我希望详情收回，除非我手动点开详情」
        ⇒ 切到「报数」仍然自动展开（detailManual 归零＝这是自动展开的）；
          从「报数」切回别的 → 只有**不是**手动展开的才自动收回；用户自己点开过就保持原样。 */
-    /* 用户改口径：「展开详情之后，任何都别收回了，因为整体逻辑变了」
+    /* ★★ 用户改口径：「展开详情之后，任何都别收回了，因为整体逻辑变了」
        —— 旧实现（2026-10-29 那次）是「切回别的模式就自动收」，现在详情是卡片自己的一部分，
        切模式只换里头的控件（日期 ↔ 九数），不许收。只有用户点「详情」才收起。 */
     if (m != prev && m == "num") {
-        /* ⇒ 三个数改到**卡里**直接报
+        /* ★★ ⇒ 三个数改到**卡里**直接报
            （AskCard 里的 NumRowCompact），这里就**不再**自动撑开详情了。 */
         Session.detailOpen = true
         Session.detailManual = false
@@ -296,7 +297,7 @@ internal fun ModeSeg() {
     /* 药丸可以**直接拿手拖着走**（：「我想要胶囊移动的那种丝滑拖拽感」）：
        按下就抓住药丸，手指到哪它到哪；松手时按药丸中心落在哪一格就切到哪一格，
        剩下的距离交回上面的 spring 收尾。
-       ：
+       ★ ：
          **前缘跟手、后缘拖半拍** ⇒ 药丸被拉长一截（最多 75% 宽），同时略扁一点（scaleY 0.9），
          松手弹回原长/落格 —— 就是橡皮筋那种「被拉扯」的形变，不是一块硬牌子平移。 */
     var rowW by remember { mutableStateOf(0f) }
@@ -613,7 +614,7 @@ private fun NumStep(i: Int) {
 
 /* 报数：三个数直接摆在卡里（2026-10-30 ）。
    和详情里的 NumStep 共用同一份状态（Session.nums），改哪边都同步。
-   用户同日第二轮：「视觉上有点怪，没做到统一」⇒ 改成**跟取数方式那条药丸同款的容器**，
+   ★ 用户同日第二轮：「视觉上有点怪，没做到统一」⇒ 改成**跟取数方式那条药丸同款的容器**，
      里面三格 + 细分割线，读起来是「一格一组数字」，不再像三颗孤零零的胶囊。 */
 @Composable
 internal fun NumRowCompact() {

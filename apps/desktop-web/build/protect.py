@@ -60,7 +60,7 @@ def _splash_taiji() -> str:
     ⚠ 2026-11-02 起**加载层不再用它**；
        函数与自检保留在这里，回退时把 SHELL 里的 @STARMAP@ 换回 @TAIJI@ 即可。
 
-    （用户：「加密壳的加载动画不要大太极变小了，就改成开屏页的太极，
+    ★★ （用户：「加密壳的加载动画不要大太极变小了，就改成开屏页的太极，
        原样式，原位置，只是在转」）：
        以前这层画的是一颗**自己现算几何**的无鱼眼太极（200px，纯黑纯白），落定时再缩到开屏那颗珠子上；
        用户要的是「就是开屏那颗，别缩」。⇒ 直接从**开屏的源**里把那份 SVG 抠出来用，
@@ -85,7 +85,7 @@ def _splash_taiji() -> str:
 def _starmap_svg() -> str:
     """加载层的星图（外环二十四簇星宿 + 中间一柄北斗），与开屏星空同一套视觉语言。
 
-    ：
+    ★★ ：
        开屏的星图是 React 的 .sl-orbit + 九套 webp 贴图（9×49 张）；壳里没有 React，
        也不该把整套贴图再内联一遍。这里按它的构图**矢量复刻**：一圈星宿连线的暗点、
        中间一盏暖金的北斗。壳不认皮肤，所以走中性色（灰褐星点 + 暖金北斗），
@@ -142,7 +142,7 @@ def _starmap_svg() -> str:
 STARMAP_INNER = _starmap_svg()
 
 # ======================================================================================
-# （用户：「我只是想让加密壳看起来只剩下屏幕左侧还在动的星图而已，
+# ★★ （用户：「我只是想让加密壳看起来只剩下屏幕左侧还在动的星图而已，
 #   和真正开屏相比没有右边的文字、太极、入口」）：
 #   加载层 = **开屏左侧那片星图在跑**。做法：把 SplashOrbit.jsx 那套逐帧逻辑原样搬到壳里。
 #   · 数据+贴图：tools/build-boot-sky.py 生成 boot-sky.json（9 套 × 轨道数据 + 49 张 base64）
@@ -175,7 +175,7 @@ SHELL = """<!DOCTYPE html>
 <style id="xlrBootCss">
   /* 加载层的底色/星色跟着皮肤走（开屏也是同一片天）：壳里读不到 CSS 变量，
      只能把九套（含 jin/mo/term/ye 四套后加的）的 --bg/--ink 在这里列一份。
-     皮肤改了色值要回来同步这张表（就这两列）。 */
+     ★ 皮肤改了色值要回来同步这张表（就这两列）。 */
   html{--btBg:#f5f3ee;--btInk:#1b1a17}
   html[data-sk="bw"]{--btBg:#f4f4f5;--btInk:#0b0b0c}
   html[data-sk="bru"]{--btBg:#ffffff;--btInk:#0d0d0d}
@@ -192,7 +192,7 @@ SHELL = """<!DOCTYPE html>
   html[data-sk="ye"]{--btBg:#0d1220;--btInk:#dde5f2}
   html,body{margin:0;height:100%;background:var(--btBg);color:var(--btInk);
     font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
-  /* 开机占位必须是「浮层」而不是「占位块」：
+  /* ★ 开机占位必须是「浮层」而不是「占位块」：
      document.open()+write() 在 Chromium 里是替换，但在 WebView2（Tauri）里实测是**追加**。
      若用 height:100%，它会实打实占掉一整屏，把追加进来的应用顶到第二屏
      （用户第一眼只看到占位、还得往下拉）。改成 fixed 就不占布局空间，两种引擎都对。
@@ -206,7 +206,7 @@ SHELL = """<!DOCTYPE html>
     font-size:15px;letter-spacing:.42em;text-indent:.42em;color:#1b1a17;opacity:.88}
 
   /* ==================================================================================
-     加载层（2026-11-02 用户：「加密壳加载的时候还是一个太极，能不能换成我们开屏
+     ★★ 加载层（2026-11-02 用户：「加密壳加载的时候还是一个太极，能不能换成我们开屏
      动画的星图」）⇒ 从「一颗转太极」换成「一片缓慢转的星图」：外环二十四簇星宿
      （灰褐、错峰呼吸）+ 中间一柄暖金北斗（带光晕），构图照开屏的 .sl-orbit。
      · 尺寸放 145% 是为了旋转时不露四角（对角半径 ≈0.707 屏宽 < 0.725 屏宽）。
@@ -227,7 +227,7 @@ SHELL = """<!DOCTYPE html>
   }
 
   /* ==================================================================================
-     交接态（2026-10-23）：开屏 #xlrSplash 不透明、z-index 10000 压住本层 9999
+     ★★ 交接态（2026-10-23）：开屏 #xlrSplash 不透明、z-index 10000 压住本层 9999
      ⇒ 要把本层临时抬到 10002、底色转透明（开屏自己铺满整屏，不会露底），
        同一颗太极在两份里重合，等珠子入场走完再整层淡掉。只在开屏挂上来之后加。 */
   .boot.land{background:transparent;z-index:10002;pointer-events:none}
@@ -306,7 +306,7 @@ SHELL = """<!DOCTYPE html>
         PER = [3000, 4000, 4800, 6000], TURN = 24000;
     function fit() { cv.style.transform = "scale(" + ((el.clientWidth || 1) / CANVAS) + ")"; }
     fit(); window.addEventListener("resize", fit);
-    /* 相位基准用 performance.now() 的绝对值 —— 与开屏 SplashOrbit.jsx 同一口径，
+    /* ★ 相位基准用 performance.now() 的绝对值 —— 与开屏 SplashOrbit.jsx 同一口径，
        交接时两层星图逐帧重合（各算各的会让用户看到两片星错开成重影）。 */
     function tick(now) {
       if (window.__btStop) return;
@@ -351,7 +351,7 @@ SHELL = """<!DOCTYPE html>
     }
     return o;
   }
-  /* 解密**之前**先把「加载层」的两块东西抓成引用 ——
+  /* ★ 解密**之前**先把「加载层」的两块东西抓成引用 ——
      document.open() 会把整棵文档清掉（Chromium 是替换、WebView2 是追加），节点从树上掉了
      但 JS 引用还在；write 完再挂回去，它才能接着在开屏那颗太极上换手。 */
   var bootEl = document.querySelector('.boot');
@@ -367,7 +367,7 @@ SHELL = """<!DOCTYPE html>
     // 占位块已改成 position:fixed（不占布局空间），这里只负责写完把它摘掉。
     document.open();
     document.write(txt);
-    // 修正：原先写完无条件补发一个合成 DOMContentLoaded。实测在
+    // ★ 修正：原先写完无条件补发一个合成 DOMContentLoaded。实测在
     //   Chromium/Tauri 里**真实事件也会来** ⇒ 挂在它上面的初始化跑两遍；对
     //   「开关式」监听（皮肤面板：点一下开、再点一下关）就是瞬间开→关互相抵消，
     //   用户看到的现象＝「外观按钮点了没反应」。改为「真实事件没来才补」：
@@ -386,7 +386,7 @@ SHELL = """<!DOCTYPE html>
     }, 80);
 
     // 应用渲染出来后摘掉开机占位（Chromium 下 write 已替换整页，这里找不到也是正常的）
-    // 质感改版：加「最短展示 700ms」，随后淡出 320ms 再摘——开屏要看得清，
+    // ★ 质感改版：加「最短展示 700ms」，随后淡出 320ms 再摘——开屏要看得清，
     //   也不能久留（8 秒兜底强制淡出，绝不让它一直盖着应用）。
     function hideBoot() {
       window.__btStop = 1;   /* 停了 rAF：节点马上就摘，别继续空转 */
@@ -395,7 +395,7 @@ SHELL = """<!DOCTYPE html>
       b.classList.add('out');
       setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 380);
     }
-    /* （用户：「不要大太极变小了，就改成开屏页的太极，原样式，原位置，只是在转」）
+    /* ★★ （用户：「不要大太极变小了，就改成开屏页的太极，原样式，原位置，只是在转」）
        交接改成**原地换手**：不缩、不飞、不改尺寸 —— 开屏一挂上就把本层抬到它上面
        （`.land`：底色转透明、z-index 10002），同一颗太极在两份里重合；
        等珠子自己的入场动画走完（slOrb：.95s）再整层淡掉（.32s），看不出接缝。
@@ -459,7 +459,7 @@ print("=== 自检 ===")
 print("  壳里出现的理论字样 =", leak or "无 ✓")
 
 # 署名核对：壳里只该出现一次，且必须是那行正当署名
-# （变更记录）：那行署名已从**看得见的开机占位层**挪到 `<meta name="author">`（屏幕上不画，
+# ★ （变更记录）：那行署名已从**看得见的开机占位层**挪到 `<meta name="author">`（屏幕上不画，
 #   否则用户看到的是「先跳出一个假开屏，再跳到真开屏」）⇒ 这条判据的读数不变（仍是 1 次）。
 _n = txt.count("邵一尘")
 _ok = (_n == 1 and "基于邵一尘老师" in txt)
