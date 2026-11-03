@@ -9,7 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
-import com.tencent.kuikly.compose.foundation.selection.toggleable
+import com.tencent.kuikly.compose.ui.layout.onSizeChanged
+import com.tencent.kuikly.compose.ui.platform.LocalDensity
 import com.tencent.kuikly.compose.ui.semantics.Role
 import com.tencent.kuikly.compose.foundation.background
 import com.tencent.kuikly.compose.foundation.border
@@ -72,19 +73,24 @@ internal fun SkinPage() {
                 SetBtn(label = if (Skin.dark) "切到白天" else "切到黑夜", small = true) { Skin.toggleDayNight() }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+            Column(
+                Modifier.fillMaxWidth().padding(bottom = 12.dp)
                     .clip(RoundedCornerShape(12.dp)).background(veil(0.42f))
-                    .toggleable(value = Skin.fogMotion, role = Role.Switch, onValueChange = { Skin.updateFogMotion(it) })
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
             ) {
-                Column(Modifier.weight(1f)) {
-                    Text_("背景雾气动态", fontSize = 13f, lineHeight = 21f, weight = 500)
-                    Text_("关闭后保留静态雾色，减少持续动画开销。", fontSize = 11f, lineHeight = 18f, color = KY_DIM2)
+                Text_("背景雾气", fontSize = 13f, lineHeight = 21f, weight = 500)
+                Spacer(Modifier.height(10.dp))
+                FogLevelControl()
+                Spacer(Modifier.height(8.dp))
+                val hint = when {
+                    Skin.cur == "bru" -> "卡通保持清爽底色，不叠加雾气。"
+                    Skin.fogLevel == 0 -> "淡雾静置，减少动态消耗。"
+                    Skin.fogFrozen -> "已定格当前雾景，停止持续动画与生成。"
+                    Skin.fogLevel == 1 -> "雾气沿平滑路径缓缓游移。"
+                    !realtimeFogAvailable() -> "当前系统使用轻柔流动，实时流雾需要 Android 13 或以上。"
+                    else -> "雾形持续变化、交织流动。"
                 }
-                Spacer(Modifier.width(8.dp))
-                GlassSwitch(checked = Skin.fogMotion, onChange = { Skin.updateFogMotion(it) })
+                Text_(hint, fontSize = 11f, lineHeight = 18f, color = KY_DIM2)
             }
 
             var i = 0
@@ -571,5 +577,98 @@ internal fun GlassSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
                     shape,
                 )
         )
+    }
+}
+
+/** Three discrete stops; direct manipulation while dragging, eased settling on release. */
+@Composable
+private fun FogLevelControl() {
+    val level = Skin.fogLevel
+    val position = remember { Animatable(level.toFloat()) }
+    val scope = rememberCoroutineScope()
+    var dragging by remember { mutableStateOf(false) }
+    var pull by remember { mutableStateOf(0f) }
+    val press by animateFloatAsState(if (dragging) 1f else 0f, tween(if (dragging) 100 else 420, easing = KY_EASE_OUT))
+    val stretch by animateFloatAsState(if (dragging) pull else 0f, tween(160, easing = KY_EASE_OUT))
+    var widthPx by remember { mutableStateOf(1f) }
+    val density = LocalDensity.current
+    val latestLevel by rememberUpdatedState(level)
+    val shape = RoundedCornerShape(999.dp)
+    val easing = com.tencent.kuikly.compose.animation.core.CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
+    LaunchedEffect(level) {
+        if (!dragging) position.animateTo(level.toFloat(), tween(360, easing = easing))
+    }
+    fun settle(target: Int) {
+        Skin.updateFogLevel(target)
+        scope.launch { position.animateTo(target.toFloat(), tween(360, easing = easing)) }
+    }
+    Box(Modifier.fillMaxWidth().height(42.dp).clip(shape)
+        .glassMaterial(shape, control = true)
+        .onSizeChanged { widthPx = it.width.toFloat().coerceAtLeast(1f) }
+        .pointerInput(Unit) {
+            detectHorizontalDragGestures(
+                onDragStart = { dragging = true; pull = 0f },
+                onHorizontalDrag = { _, amount ->
+                    pull = (amount / 18f).coerceIn(-1f, 1f)
+                    val next = (position.value + amount / (widthPx / 3f)).coerceIn(0f, 2f)
+                    scope.launch { position.snapTo(next) }
+                },
+                onDragEnd = {
+                    dragging = false
+                    settle(kotlin.math.round(position.value).toInt().coerceIn(0, 2))
+                },
+                onDragCancel = {
+                    dragging = false
+                    settle(latestLevel)
+                },
+            )
+        },
+    ) {
+        val cell = with(density) { (widthPx / 3f).toDp() }
+        Box(Modifier.offset(x = cell * position.value + 3.dp, y = 3.dp)
+            .width((cell - 6.dp).coerceAtLeast(0.dp)).height(36.dp)
+            .graphicsLayer {
+                scaleX = 1f + 0.055f * press + 0.065f * kotlin.math.abs(stretch)
+                scaleY = 1f - 0.07f * press - 0.025f * kotlin.math.abs(stretch)
+                rotationZ = stretch * 1.2f
+            }
+            .clip(shape).glassMaterial(shape, control = true, pressed = press)
+            .background(KY_ACCENT.copy(alpha = 0.12f + 0.04f * press)))
+        Row(Modifier.fillMaxSize()) {
+            listOf("静态雾景", "轻柔流动", "实时流雾").forEachIndexed { index, title ->
+                Box(Modifier.weight(1f).height(42.dp).clip(shape)
+                    .clickable { settle(index) }, contentAlignment = Alignment.Center) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text_(title, fontSize = 12f, lineHeight = 20f,
+                            weight = if (level == index) 600 else 400,
+                            color = if (level == index) KY_ACCENT else KY_DIM2)
+                        if (index > 0 && Skin.cur != "bru") {
+                            Spacer(Modifier.width(3.dp))
+                            FogFreezeButton(index)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun FogFreezeButton(level: Int) {
+    val frozen = Skin.isFogFrozen(level)
+    val light by animateFloatAsState(if (frozen) 1f else 0f, tween(220, easing = KY_EASE_OUT))
+    val shape = RoundedCornerShape(999.dp)
+    Box(Modifier.size(24.dp).clip(shape)
+        .glassMaterial(shape, control = true, pressed = light)
+        .background(KY_ACCENT.copy(alpha = 0.22f * light))
+        .border(0.7.dp, KY_ACCENT.copy(alpha = 0.10f + 0.55f * light), shape)
+        .clickable {
+            Skin.updateFogLevel(level)
+            Skin.toggleFogFrozen(level)
+        }, contentAlignment = Alignment.Center) {
+        Text_("冻", fontSize = 10f, lineHeight = 16f,
+            weight = if (frozen) 700 else 400,
+            color = if (frozen) KY_ACCENT else KY_DIM2)
     }
 }

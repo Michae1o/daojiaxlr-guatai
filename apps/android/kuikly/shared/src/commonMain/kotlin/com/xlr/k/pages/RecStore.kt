@@ -26,7 +26,7 @@ internal object RecStore {
     fun load(): List<Rec> = loadRaw().filter { (it["deleted"] ?: "").isEmpty() }
 
     fun save(a: List<Rec>) {
-        Platform.put?.invoke(KEY, dumpRows(a.takeLast(200)))
+        Platform.put?.invoke(KEY, dumpRows(a))
     }
 
     /** 起一卦就记一条（同一卦不重复记：调用方传已有 id 就跳过） */
@@ -201,7 +201,7 @@ internal object RecStore {
             added++
         }
         if (added > 0) {
-            saveRules(cur.sortedBy { it["at"] ?: "" }.takeLast(100))
+            saveRules(cur.sortedBy { it["at"] ?: "" })
         }
         return added
     }

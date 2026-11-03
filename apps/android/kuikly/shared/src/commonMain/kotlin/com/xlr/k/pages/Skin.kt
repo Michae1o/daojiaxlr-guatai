@@ -174,7 +174,8 @@ private val DARK_SKINS = setOf("hei", "mg")
 
 private const val KEY_SKIN = "K_SKIN"
 private const val KEY_PREV_LIGHT = "K_SKIN_PREVLIGHT"
-private const val KEY_FOG_MOTION = "K_FOG_MOTION"
+private const val KEY_FOG_LEVEL = "K_FOG_LEVEL"
+private const val KEY_FOG_FROZEN = "K_FOG_FROZEN"
 
 /** 宿主在创建 Kuikly 视图前调一次：把皮肤与雾开关从本地读回来。
  *  皮肤原先只在 RootPage 组合时 Skin.load()，第一帧已经用默认 bw 画完了，
@@ -186,12 +187,37 @@ internal object Skin {
     var cur by mutableStateOf("bw")
         private set
 
-    var fogMotion by mutableStateOf(true)
+    // 0: pre-generated still, 1: moving PNG, 2: realtime (where supported).
+    var fogLevel by mutableStateOf(0)
         private set
 
-    fun updateFogMotion(enabled: Boolean) {
-        fogMotion = enabled
-        Platform.put?.invoke(KEY_FOG_MOTION, enabled.toString())
+    fun updateFogLevel(level: Int) {
+        fogLevel = level.coerceIn(0, 2)
+        Platform.put?.invoke(KEY_FOG_LEVEL, fogLevel.toString())
+    }
+
+    private var pngFrozen by mutableStateOf(false)
+    private var realtimeFrozen by mutableStateOf(false)
+    val fogFrozen: Boolean get() = isFogFrozen(fogLevel)
+
+    fun isFogFrozen(level: Int): Boolean = when (level) {
+        1 -> pngFrozen
+        2 -> realtimeFrozen
+        else -> false
+    }
+
+    fun toggleFogFrozen(level: Int) {
+        if (level !in 1..2) return
+        val frozen = !isFogFrozen(level)
+        if (level == 1) pngFrozen = frozen else realtimeFrozen = frozen
+        Platform.put?.invoke("${KEY_FOG_FROZEN}_$level", frozen.toString())
+    }
+
+    fun fogPngPhase(skin: String): Float =
+        Platform.get?.invoke("K_FOG_PHASE_$skin")?.toFloatOrNull()?.coerceIn(0f, 1f) ?: 0f
+
+    fun saveFogPngPhase(skin: String, phase: Float) {
+        Platform.put?.invoke("K_FOG_PHASE_$skin", phase.toString())
     }
 
     val def: SkinDef get() = SKINS.firstOrNull { it.key == cur } ?: SKINS[0]
@@ -199,7 +225,9 @@ internal object Skin {
 
     /** 从本地读回来（App 启动时调一次） */
     fun load() {
-        fogMotion = Platform.get?.invoke(KEY_FOG_MOTION) != "false"
+        pngFrozen = Platform.get?.invoke("${KEY_FOG_FROZEN}_1") == "true"
+        realtimeFrozen = Platform.get?.invoke("${KEY_FOG_FROZEN}_2") == "true"
+        fogLevel = Platform.get?.invoke(KEY_FOG_LEVEL)?.toIntOrNull()?.coerceIn(0, 2) ?: 0
         val k = Platform.get?.invoke(KEY_SKIN)
         if (k != null && SKINS.any { it.key == k }) cur = k
         val p = Platform.get?.invoke(KEY_PREV_LIGHT)
@@ -274,68 +302,66 @@ internal fun SkinBackdropLayer() {
     }
 }
 
-/* 纸纹（只给「宣纸」用）：固定种子的伪随机 ⇒ 每次重绘一模一样，不会闪。
-   Kuikly 没有噪声/贴图接口，只能拿 Canvas 一条条画。三层结构（第一版太淡，4 倍放大仍像平色，全部往上提了）：
-     ① 帘纹：抄纸时竹帘压出来的**细横线**，间距 26px —— 这是「宣纸」最像纸的一笔
-     ② 纤维：几百根长短不一的斜/横向细线
-     ③ 纸屑：几百颗 1~2.6px 的小点
-   强度控制在 3~9% 透明度：看得见颗粒，又不至于像脏了。 */
+/* 宣纸：极淡断续帘纹 + 短纤维 + 微小纸屑。固定种子，不随雾气移动。
+ * 尺寸按 dp 换算，避免高密度屏上变成刮痕或横格纸。
+ */
 internal fun DrawScope.paperGrain(ink: Color, white: Color, w: Float, h: Float) {
     var seed = 0x5DEECE66DL
     fun rnd(): Float {
         seed = (seed * 6364136223846793005L + 1442695040888963407L) and 0x7FFFFFFFFFFFFFFFL
-        return ((seed ushr 33) and 0x7FFFFFFF).toFloat() / 0x7FFFFFFF.toFloat()
+        // Positive 63-bit state: shift by 32 yields 31 bits spanning the entire [0,1) range.
+        return ((seed ushr 32) and 0x7FFFFFFF).toFloat() / 2147483648f
     }
+    val u = density
+    val area = (w / u) * (h / u)
 
-    /* ① 帘纹（横）＋ 每 5 道加一道略重的 */
-    val laid = ink.copy(alpha = 0.030f)
-    var y = 0f
-    var i = 0
+    // The laid impression stays faint and broken, without full-width ruled lines.
+    var y = rnd() * 10f * u
     while (y < h) {
-        val a = if (i % 5 == 0) 0.042f else 0.026f
-        drawLine(
-            ink.copy(alpha = a),
-            Offset(0f, y),
-            Offset(w, y),
-            strokeWidth = if (i % 5 == 0) 1.6f else 1.1f,
-        )
-        y += 26f
-        i++
+        var x = -rnd() * 45f * u
+        while (x < w) {
+            val length = (14f + rnd() * 40f) * u
+            val yy = y + (rnd() - 0.5f) * 1.2f * u
+            drawLine(ink.copy(alpha = 0.007f + rnd() * 0.006f),
+                Offset(x, yy), Offset(x + length, yy + (rnd() - 0.5f) * 0.3f * u),
+                strokeWidth = 0.24f * u)
+            x += length + (5f + rnd() * 19f) * u
+        }
+        y += (9f + rnd() * 3f) * u
     }
 
-    /* ② 纤维 */
-    repeat(700) {
+    // Short, gently bent fibers, scattered over the full sheet instead of long scratches.
+    repeat((area / 640f).toInt().coerceIn(150, 850)) {
         val x = rnd() * w
         val yy = rnd() * h
-        val len = 30f + rnd() * 190f
-        val dy = (rnd() - 0.5f) * 10f
-        drawLine(
-            ink.copy(alpha = 0.035f + rnd() * 0.035f),
-            Offset(x, yy),
-            Offset(x + len, yy + dy),
-            strokeWidth = 0.9f + rnd() * 1.2f,
-        )
+        val length = (2f + rnd() * 11f) * u
+        val rise = (rnd() - 0.5f) * 5f * u
+        val mid = Offset(x + length * 0.48f, yy + rise * 0.35f + (rnd() - 0.5f) * u)
+        val color = ink.copy(alpha = 0.022f + rnd() * 0.024f)
+        val width = (0.20f + rnd() * 0.16f) * u
+        drawLine(color, Offset(x, yy), mid, strokeWidth = width)
+        drawLine(color.copy(alpha = color.alpha * 0.65f), mid,
+            Offset(x + length, yy + rise), strokeWidth = width * 0.75f)
     }
 
-    /* ③ 纸屑 / 颗粒 */
-    repeat(900) {
-        drawCircle(
-            ink.copy(alpha = 0.030f + rnd() * 0.030f),
-            radius = 0.9f + rnd() * 1.7f,
-            center = Offset(rnd() * w, rnd() * h),
-        )
+    // Small inclusions add a soft paper tooth; no large dark speckles.
+    repeat((area / 185f).toInt().coerceIn(500, 2600)) {
+        drawCircle(ink.copy(alpha = 0.024f + rnd() * 0.030f),
+            radius = (0.16f + rnd() * 0.25f) * u,
+            center = Offset(rnd() * w, rnd() * h))
     }
-
-    /* ④ 亮纤维（纸面反光，和暗纤维交错才有毛感） */
-    repeat(260) {
+    // Pale fibers and flecks break up dark specks into a paper surface.
+    repeat((area / 320f).toInt().coerceIn(300, 1800)) {
+        drawCircle(white.copy(alpha = 0.16f + rnd() * 0.18f),
+            radius = (0.20f + rnd() * 0.28f) * u,
+            center = Offset(rnd() * w, rnd() * h))
+    }
+    repeat((area / 1600f).toInt().coerceIn(80, 350)) {
         val x = rnd() * w
         val yy = rnd() * h
-        drawLine(
-            white.copy(alpha = 0.06f + rnd() * 0.05f),
-            Offset(x, yy),
-            Offset(x + 20f + rnd() * 90f, yy + (rnd() - 0.5f) * 8f),
-            strokeWidth = 0.9f + rnd() * 0.8f,
-        )
+        drawLine(white.copy(alpha = 0.06f + rnd() * 0.04f),
+            Offset(x, yy), Offset(x + (2f + rnd() * 7f) * u, yy + (rnd() - 0.5f) * 2f * u),
+            strokeWidth = (0.20f + rnd() * 0.16f) * u)
     }
 }
 
