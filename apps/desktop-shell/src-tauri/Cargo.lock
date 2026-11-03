@@ -4883,7 +4883,7 @@ dependencies = [
 
 [[package]]
 name = "xiaoliuren"
-version = "1.261026.3"
+version = "1.261103.2"
 dependencies = [
  "reqwest 0.12.28",
  "serde",

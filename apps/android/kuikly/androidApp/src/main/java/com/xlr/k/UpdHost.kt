@@ -31,7 +31,8 @@ object UpdHost {
        清单形状（与手机端网页版、桌面端共用）：
        { "android": { "cn.guatai.xiaoliuren": {"versionName":"…","versionCode":2610291,"url":"…","sha256":"…"}, … } } */
     private fun checkManifest(pkg: String): com.xlr.k.pages.UpdItem? {
-        if (MANIFEST_URL.isBlank()) return null        val body = fetchText(MANIFEST_URL + "?t=" + System.currentTimeMillis())
+        if (MANIFEST_URL.isBlank()) return null
+        val body = fetchText(MANIFEST_URL + "?t=" + System.currentTimeMillis())
         val j = try {
             org.json.JSONObject(body)
         } catch (e: Exception) {
