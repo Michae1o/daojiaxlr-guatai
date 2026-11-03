@@ -1,11 +1,31 @@
-"""Generate transparent, locally feathered fog textures; no axis-aligned colour bands."""
+"""Generate domain-warped volumetric fog. Original textures are kept intact."""
 from pathlib import Path
 import numpy as np
 from PIL import Image
 out = Path(__file__).resolve().parents[1] / 'kuikly/androidApp/src/main/assets/common/fog'
 out.mkdir(parents=True, exist_ok=True)
-y, x = np.mgrid[0:960, 0:640].astype(float)
-x /= 639; y /= 959
+H, W = 768, 512
+y, x = np.mgrid[0:H, 0:W].astype(float)
+x /= W-1; y /= H-1
+
+def noise(u, v, seed):
+    """Smooth deterministic value noise, evaluated in warped coordinates."""
+    ix, iy = np.floor(u).astype(int), np.floor(v).astype(int)
+    fx, fy = u-ix, v-iy
+    fx = fx*fx*fx*(fx*(fx*6-15)+10)
+    fy = fy*fy*fy*(fy*(fy*6-15)+10)
+    def h(a, b):
+        z = np.sin(a*127.1+b*311.7+seed*74.7)*43758.5453
+        return z-np.floor(z)
+    return ((1-fx)*h(ix,iy)+fx*h(ix+1,iy))*(1-fy) + ((1-fx)*h(ix,iy+1)+fx*h(ix+1,iy+1))*fy
+
+def fbm(u, v, seed):
+    result = np.zeros_like(u)
+    for octave, weight in enumerate((.78,.18,.04)):
+        f = 2**octave
+        result += weight*noise(u*f,v*f,seed+octave*13)
+    return result
+
 rng = np.random.default_rng(1030)
 for name, color, cx, cy, sx, sy, strength in [
     ('pink', (223, 158, 196), .27, .30, .26, .22, .24),
@@ -27,12 +47,26 @@ for name, color, cx, cy, sx, sy, strength in [
     ('mg-blue', (56, 102, 154), .71, .65, .32, .28, .28),
     ('mg-ember', (157, 87, 46), .36, .85, .31, .22, .16),
 ]:
-    # Quartic compact falloff: value and first derivative vanish at the boundary.
-    r2 = ((x-cx)/sx)**2 + ((y-cy)/sy)**2
-    alpha = np.maximum(0, 1-r2/4)**4 * strength
-    alpha *= np.sin(np.pi*x)**2 * np.sin(np.pi*y)**2
-    rgba = np.zeros((960,640,4), dtype=np.uint8)
-    rgba[:,:,:3] = color
-    rgba[:,:,3] = np.clip(np.floor(alpha*255 + rng.random(alpha.shape)),0,255).astype(np.uint8)
-    Image.fromarray(rgba).save(out / (name+'.png'), optimize=True)
-print('Fog assets generated')
+    for layer, suffix in enumerate(('flow', 'wisp')):
+        seed = sum(map(ord,name)) + layer*137
+        # Two-stage domain warp bends continuous density into curls and channels.
+        u, v = x*2.2, y*3.0
+        qx = fbm(u+.3,v,seed)
+        qy = fbm(u+5.2,v+1.3,seed+31)
+        rx = fbm(u+0.85*qx+1.7,v+0.85*qy,seed+67)
+        ry = fbm(u+0.85*qx,v+0.85*qy+8.1,seed+97)
+        density = fbm(u+1.1*rx,v+1.1*ry,seed+123)
+        # A wandering ribbon, not an elliptical envelope. Transparent holes survive.
+        spine = cx + .15*np.sin(y*5+seed) + .05*np.sin(y*9+seed*.3)
+        envelope = np.exp(-((x-spine)/(.26+.10*qy))**2)
+        edge = np.clip(np.minimum.reduce([x,1-x,y,1-y])*9,0,1)
+        edge = edge*edge*(3-2*edge)
+        body = np.clip((density-.25)/.50,0,1)**1.3
+        if layer == 1:
+            body = np.clip((density-.32)/.48,0,1)**1.5
+        alpha = body*envelope*edge*strength*(1.65 if layer == 0 else .75)
+        rgba = np.zeros((H,W,4), dtype=np.uint8)
+        rgba[:,:,:3] = color
+        rgba[:,:,3] = np.clip(np.rint(alpha*255),0,255).astype(np.uint8)
+        Image.fromarray(rgba).save(out / (name+'-'+suffix+'.png'), optimize=True)
+print('Domain-warped fog assets generated; original PNGs preserved')

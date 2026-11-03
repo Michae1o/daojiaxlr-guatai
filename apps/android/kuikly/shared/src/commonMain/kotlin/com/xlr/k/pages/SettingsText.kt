@@ -1,6 +1,7 @@
 package com.xlr.k.pages
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -520,6 +521,11 @@ internal fun GlassSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
         if (!dragging && p.targetValue != t) p.animateTo(t, tween(200, easing = KY_EASE_OUT))
     }
 
+    // pointerInput(Unit) lives across recompositions. Its gesture callbacks must
+    // read the latest model/callback, not the checked value at first composition.
+    val latestChecked by rememberUpdatedState(checked)
+    val latestOnChange by rememberUpdatedState(onChange)
+
     Box(
         modifier = Modifier
             .size(trackW, trackH)
@@ -533,12 +539,12 @@ internal fun GlassSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
                     onDragEnd = {
                         dragging = false
                         val on = p.value >= 0.5f
-                        if (on != checked) onChange(on)
+                        if (on != latestChecked) latestOnChange(on)
                         else scope.launch { p.animateTo(if (on) 1f else 0f, tween(200, easing = KY_EASE_OUT)) }
                     },
                     onDragCancel = {
                         dragging = false
-                        scope.launch { p.animateTo(if (checked) 1f else 0f, tween(200, easing = KY_EASE_OUT)) }
+                        scope.launch { p.animateTo(if (latestChecked) 1f else 0f, tween(200, easing = KY_EASE_OUT)) }
                     },
                     onHorizontalDrag = { _, amount ->
                         val next = (p.value + amount / travelPx).coerceIn(0f, 1f)

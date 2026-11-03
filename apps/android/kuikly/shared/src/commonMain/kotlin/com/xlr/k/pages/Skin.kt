@@ -155,11 +155,12 @@ internal val SKINS: List<SkinDef> = listOf(
         accentLine = rgba(145, 79, 64, 0.34f),
         jyc = c(0x3C647B), ok = c(0x467568), warn = c(0x86672E), bad = c(0xA8322B),
     ),
-    /* 莫高窟 —— 提灯入窟：暖褐壁 + 金 + 群青 */
+    /* 莫高窟：回到原版提灯入窟（暖褐壁 + 金 + 群青）。
+       仅略提次级文字明度，保留最初的配色关系。 */
     SkinDef(
         "mg", "莫高窟", "深 · 提灯入窟", true,
         bg = c(0x2A1A12), surface = c(0x3A2A1E), surface2 = c(0x4A3422),
-        ink = c(0xF2E6D0), dim = c(0xC0A98C), dim2 = c(0x9C8768),
+        ink = c(0xF2E6D0), dim = c(0xC8B496), dim2 = c(0xAF997A),
         line = rgba(242, 230, 208, 0.14f), line2 = rgba(242, 230, 208, 0.28f),
         accent = c(0xE5B751), onAccent = c(0x131316),
         accentBg = rgba(229, 183, 81, 0.10f), accentBg2 = rgba(229, 183, 81, 0.20f),
@@ -174,6 +175,11 @@ private val DARK_SKINS = setOf("hei", "mg")
 private const val KEY_SKIN = "K_SKIN"
 private const val KEY_PREV_LIGHT = "K_SKIN_PREVLIGHT"
 private const val KEY_FOG_MOTION = "K_FOG_MOTION"
+
+/** 宿主在创建 Kuikly 视图前调一次：把皮肤与雾开关从本地读回来。
+ *  皮肤原先只在 RootPage 组合时 Skin.load()，第一帧已经用默认 bw 画完了，
+ *  冷启动会闪一帧黑白。 */
+fun preloadSkinForHost() { Skin.load() }
 
 internal object Skin {
     /** 当前皮肤 key */

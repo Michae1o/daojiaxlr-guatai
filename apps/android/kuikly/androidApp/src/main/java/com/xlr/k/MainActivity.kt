@@ -31,6 +31,10 @@ class MainActivity : AppCompatActivity() {
         com.xlr.k.LlmHost.install(applicationContext)
         com.xlr.k.LlmHost.activity = this
         com.xlr.k.UpdHost.install(applicationContext)
+        /* ：
+           皮肤原先在 RootPage 组合里才 Skin.load()，第一帧已经用默认的 bw 画完了，
+           读到 K_SKIN 再切 ⇒ 冷启动闪一帧黑白。这里在 Kuikly 视图创建前先读回来。 */
+        com.xlr.k.pages.preloadSkinForHost()
         setupImmersiveMode()
 
         val container = findViewById<ViewGroup>(R.id.hr_container)
@@ -134,10 +138,17 @@ class MainActivity : AppCompatActivity() {
         com.xlr.k.pages.Platform.exitApp = {
             runOnUiThread { finish() }
         }
-        val delegate = object : KuiklyRenderViewBaseDelegatorDelegate {}
+        val delegate = object : KuiklyRenderViewBaseDelegatorDelegate {
+            override fun registerExternalRenderView(export: com.tencent.kuikly.core.render.android.IKuiklyRenderExport) {
+                export.renderViewExport("XLRRealtimeFog", { context -> com.xlr.k.fog.RealtimeFogView(context) })
+            }
+        }
         delegator = KuiklyRenderViewBaseDelegator(delegate)
         // contextCode 传 ""，即 JVM 模式：共享模块的 Kotlin 代码直接编进 APK
         delegator.onAttach(container, "", PAGE_NAME, mapOf<String, Any>("appId" to 1))
+        /* 全新安装（本地没数据）但「下载/道家小六壬/」里还留着上次卸载前的备份 ⇒ 问一句要不要恢复。
+           延后一点，别把开屏动画盖住。 */
+        com.xlr.k.BackupHost.scheduleRestoreCheck(this)
     }
 
     /* 返回键先问共享层（浮层 → 设置 → 记录抽屉 → 三页两次退出），它没消化才真的退 Activity。
@@ -157,6 +168,8 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         if (::delegator.isInitialized) delegator.onPause()
+        /* 切后台立刻把备份落盘（防着起完一卦就被系统杀掉，3 秒的合并窗口还没到） */
+        com.xlr.k.BackupHost.flush()
     }
 
     override fun onDestroy() {

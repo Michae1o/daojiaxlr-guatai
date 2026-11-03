@@ -9,11 +9,18 @@ import java.net.URL
    shared 里不碰 Android API（KMP commonMain），网络与 SharedPreferences 都住在这里。 */
 object LlmHost {
 
+    /* 全部用户数据的落点：卦例本 / 准则 / API Key / 模型预设 / 皮肤 / 引导标记都在这一份里
+       （BackupHost 也按这个名字读写，改这里要一起改）。 */
+    internal const val SP_NAME = "xlr-k-llm"
+
     fun install(ctx: Context) {
-        val sp = ctx.getSharedPreferences("xlr-k-llm", Context.MODE_PRIVATE)
+        val sp = ctx.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+        /* 卸载/重装兜底：先挂上，后面的每次写才会被记成「该备份了」 */
+        BackupHost.install(ctx)
         com.xlr.k.pages.Platform.get = { k -> sp.getString(k, null) }
         com.xlr.k.pages.Platform.put = { k, v ->
             sp.edit().putString(k, v).apply()
+            BackupHost.markDirty()
         }
         com.xlr.k.pages.Platform.chat = { url, headers, body -> post(url, headers, body) }
         com.xlr.k.pages.Platform.list = { url, headers -> get(url, headers) }
@@ -59,7 +66,7 @@ object LlmHost {
        名字一直往后排（实测把 (1) 排到了 (10)）。做法：先在 Downloads 里找出**同一族的行**
        （基名本身，或「基名 (N)」），有就原地覆写、多余的同族收掉；实在没有才新建。
        ⇒ 连导多少次都只留一个文件。 */
-    private fun saveToDownloads(ctx: Context, name: String, text: String): String? {
+    internal fun saveToDownloads(ctx: Context, name: String, text: String): String? {
         return try {
             if (android.os.Build.VERSION.SDK_INT >= 29) {
                 val rows = familyRows(ctx, name)

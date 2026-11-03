@@ -142,7 +142,7 @@ internal val ORBIT_GLASS_L = floatArrayOf(
 internal val ORBIT_GLASS = OrbitSet(
     key = "glass", cx = 658.52f, cy = 643.54f, a = 639.71f, b = 290.68f, tiltDeg = 41.39f,
     bx0 = 78.0f, by0 = 115.0f, bx1 = 1255.0f, by1 = 1170.0f,
-    nx = 146f, ny = 366f, nw = 977f, nh = 722f,
+    nx = 172f, ny = 385f, nw = 951f, nh = 703f,
     g = ORBIT_GLASS_G, l = ORBIT_GLASS_L, ids = intArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
 )
 
@@ -222,7 +222,7 @@ internal val ORBIT_QING_L = floatArrayOf(
 internal val ORBIT_QING = OrbitSet(
     key = "qing", cx = 669.15f, cy = 668.70f, a = 627.70f, b = 277.82f, tiltDeg = 41.73f,
     bx0 = 102.0f, by0 = 149.0f, bx1 = 1250.0f, by1 = 1186.0f,
-    nx = 156f, ny = 381f, nw = 953f, nh = 710f,
+    nx = 162f, ny = 396f, nw = 939f, nh = 695f,
     g = ORBIT_QING_G, l = ORBIT_QING_L, ids = intArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
 )
 
@@ -302,7 +302,7 @@ internal val ORBIT_BRU_L = floatArrayOf(
 internal val ORBIT_BRU = OrbitSet(
     key = "bru", cx = 671.27f, cy = 643.13f, a = 680.69f, b = 318.46f, tiltDeg = 44.11f,
     bx0 = 74.0f, by0 = 59.0f, bx1 = 1293.0f, by1 = 1224.0f,
-    nx = 202f, ny = 421f, nw = 892f, nh = 638f,
+    nx = 202f, ny = 421f, nw = 891f, nh = 627f,
     g = ORBIT_BRU_G, l = ORBIT_BRU_L, ids = intArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
 )
 
@@ -321,7 +321,7 @@ internal val ORBIT_DH_G = floatArrayOf(
     117f, 343f, 117f, 117f, 175.344307f, 401.040004f, 2.434348f,
     91f, 217f, 117f, 117f, 149.305449f, 275.899086f, 2.736935f,
     84f, 51f, 208f, 211f, 187.892344f, 156.873295f, 3.141593f,
-    247f, 54f, 114f, 113f, 303.9调试端口5f, 110.205429f, 3.546251f,
+    247f, 54f, 114f, 113f, 303.987985f, 110.205429f, 3.546251f,
     381f, 77f, 100f, 101f, 430.621372f, 127.590969f, 3.848837f,
     492f, 116f, 116f, 115f, 550.16099f, 173.938165f, 4.095052f,
     599f, 173f, 126f, 127f, 662.043129f, 236.716952f, 4.312819f,
