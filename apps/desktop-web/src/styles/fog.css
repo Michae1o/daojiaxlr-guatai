@@ -65,25 +65,42 @@ html[data-fog="1"][data-skin="mg"]{
 #xlrFog[data-skin="xuan"] .fg-stage{filter:brightness(0.80) saturate(1.3)}
 #xlrFog[data-skin="qing"] .fg-stage{filter:brightness(0.90) saturate(1.18)}
 
+/* 莫高窟的纸纹单独一份：底色里那层纸纹改成**整屏一次性铺开**（不平铺就没有 tile 接缝，
+   见下面 mg 底色那段），所以频率要按「300px → 整屏」的拉伸比补偿一次，
+   否则噪声被拉大成糊斑（实测看着脏）。0.043/0.028 ≈ 原 0.01 乘 4.3 / 2.8。 */
+html[data-fog="1"][data-skin="mg"]{
+  --m-paper-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='mgp'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.043 0.028' numOctaves='2' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='-1' intercept='1'/%3E%3CfeFuncG type='linear' slope='-1' intercept='1'/%3E%3CfeFuncB type='linear' slope='-1' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23mgp)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
 /* ---------- 莫高窟的「图片拼接感」 ----------
    实测（1264×861 真 exe 逐像素）：接缝不在雾层，而在**皮肤自己的底色**——
-   skin-backdrop 里那块 900×640、alpha .20 的群青径向光晕停在 70% 处，色相从暖砂
+   原来那块 900×640、alpha .20 的群青径向光晕停在 70% 处，色相从暖砂
    跳到冷蓝、亮度却几乎不变，人眼会把「纯色相跳变」读成一条竖直的接缝（Mach 带）。
-   治法（只动莫高窟）：把群青从「圆盘」改成横跨整屏的斜向渐变，再加一道同方向的明暗
-   渐变，让暖→冷同时伴随「亮→暗」，眼睛读成打光而不是两张图；雾层顺带加到 28px 模糊。 */
+   ⚠ 2026-11-06：上一版把「圆盘」改成斜向渐变只解决了一部分 —— 停点仍然是断崖
+   （gold 到 40% 突然归零、压暗那团从 38% 才开始），实机上依旧能看到一条凸起的线。
+   这次重写成：每团四站以上、第一站就是 0、色相变化一律配同方向的明暗、收尾落在屏幕外。
+   与 skin-backdrop.css 里那份**必须逐字一致**（两份都 !important，谁后谁赢，别只改一边）。 */
 html[data-skin="mg"],
 html[data-skin="mg"] body{
   background-image:
-    linear-gradient(104deg, rgba(229,183,81,.10) 0%, rgba(229,183,81,0) 40%, rgba(4,8,18,.32) 100%),
-    radial-gradient(1400px 900px at 50% -18%, rgba(229,183,81,.14), rgba(229,183,81,0) 78%),
-    radial-gradient(1500px 1100px at 50% 46%, rgba(8,4,2,0) 34%, rgba(8,4,2,.55) 100%),
+    /* ① 提灯天光（顶部暖金） */
+    linear-gradient(180deg, rgba(229,183,81,.17) 0%, rgba(229,183,81,.11) 14%, rgba(229,183,81,.05) 32%, rgba(229,183,81,.015) 50%, rgba(229,183,81,0) 66%),
+    /* ② 群青（右上冷调）→ 斜向横跨整屏，五站 */
+    linear-gradient(118deg, rgba(23,114,180,0) 24%, rgba(23,114,180,.07) 46%, rgba(23,114,180,.14) 66%, rgba(23,114,180,.06) 84%, rgba(23,114,180,0) 98%),
+    /* ③ 左下一点金 */
+    linear-gradient(20deg, rgba(229,183,81,.085) 0%, rgba(229,183,81,.045) 22%, rgba(229,183,81,.012) 44%, rgba(229,183,81,0) 62%),
+    /* ④ 洞窟周缘压暗（正中心 0 起，四站） */
+    radial-gradient(1500px 1100px at 50% 44%, rgba(8,4,2,0) 0%, rgba(8,4,2,.07) 34%, rgba(8,4,2,.20) 64%, rgba(8,4,2,.34) 84%, rgba(8,4,2,.5) 100%),
     var(--m-paper-l),
     linear-gradient(180deg,
       color-mix(in srgb, var(--bg) 96%, #fff) 0%,
       var(--bg) 42%,
       color-mix(in srgb, var(--bg) 84%, #000) 100%) !important;
-  background-size: auto, auto, auto, 220px 220px, auto !important;
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  /* ⚠ 纸纹层**不再平铺**：平铺时每块之间的接缝在实机 GPU 上会被采样成一条 1px 的线，
+     1280 宽正好能数出「六等份、五条分割线」（的描述：像整个页面罩了一层
+     透明罩子、碎镜拼起来的效果）。改成整屏一次性铺开——没有 tile 就没有 tile 边界。 */
+  background-size: auto, auto, auto, auto, 100% 100%, auto !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat !important;
 }
 /* ⚠ 这里不再给莫高窟的雾加 filter:blur()：实测 blur 会把整层栅格化成多块，
    块与块之间会露出直边的「竖条」（圈出来的就是它），而且糊住之后
@@ -124,7 +141,7 @@ html[data-skin="qing"]{--fg-face:rgba(253,251,247,.52);--fg-top:.64;--fg-side:.2
 html[data-skin="dou"]{--fg-face:rgba(253,251,247,.60);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.72)}
 html[data-skin="dh"]{--fg-face:rgba(253,251,247,.64);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.72)}
 html[data-skin="mg"]{--fg-face:rgba(42,26,18,.70);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:242,230,208;--fg-edge:rgba(242,230,208,.20)}
-html[data-skin="bru"]{--fg-face:#ffffff;--fg-top:0;--fg-side:0;--fg-bottom:0;--fg-tint:0;--fg-rim:13,13,13;--fg-edge:#0d0d0d}
+/* 卡通（bru）已从桌面端下架（2026-11-06）：这里原本给它单独一套玻璃参数，一并删掉。 */
 
 /* 外框 + 面：面用 surface 的 alpha，玻璃感全靠上下缘高光与描边 */
 .fg-glass{
@@ -153,7 +170,7 @@ html[data-skin="bru"]{--fg-face:#ffffff;--fg-top:0;--fg-side:0;--fg-bottom:0;--f
   background:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 97%, var(--accent) 100%);
   opacity:var(--fg-tint);
 }
-html[data-skin="bru"] .fg-glass{box-shadow:inset 0 0 0 1px var(--ink)}
+/* 卡通（bru）已从桌面端下架（2026-11-06）：原来这里给它把玻璃描边换成 --ink 实线，一并删掉。 */
 
 /* 三档分段：轨道 42px，滑块 = 一格宽 − 6px，跟手拖动 */
 .fg-seg{height:42px;display:flex;position:relative;touch-action:none;user-select:none;cursor:pointer}

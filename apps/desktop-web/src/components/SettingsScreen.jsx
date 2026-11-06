@@ -1058,13 +1058,12 @@ export default function SettingsScreen({ open, onClose, preload }) {
                 <div className="fog-head">背景雾气<em>会记住，换皮肤各自接着走</em></div>
                 <FogLevelControl level={fogLevel} onLevel={onFogLevel} />
                 <div className="fog-hint" id="stFogHint">
-                  {skin === 'bru' ? '卡通保持清爽底色，不叠加雾气。'
-                    : fogLevel === 0 ? '淡雾静置，减少动态消耗。'
-                      : fogLevel === 1 ? '雾气沿平滑路径缓缓游移。'
-                        : !FogCore.realtimeAvailable() ? '当前环境不支持实时流雾，已退回轻柔流动。'
-                          : '雾形持续变化、交织流动。'}
+                  {fogLevel === 0 ? '淡雾静置，减少动态消耗。'
+                    : fogLevel === 1 ? '雾气沿平滑路径缓缓游移。'
+                      : !FogCore.realtimeAvailable() ? '当前环境不支持实时流雾，已退回轻柔流动。'
+                        : '雾形持续变化、交织流动。'}
                 </div>
-                {fogLevel > 0 && skin !== 'bru' ? (
+                {fogLevel > 0 ? (
                   <FogSwitch checked={fogFrozen} onChange={onFogFreeze} label="冻结雾气"
                     hint={fogFrozen ? '已停在当前画面，关闭后继续流动。'
                       : (fogLevel === 2 && FogCore.realtimeAvailable())

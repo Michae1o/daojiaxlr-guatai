@@ -87,18 +87,28 @@ html[data-skin="mg"] body,
 html[data-skin="mg"] .setscreen,
 html[data-skin="mg"] #sdb .sdb-p {
   background-color: var(--bg) !important;
+  /* ⚠ 2026-11-06：原来四团**径向**渐变，各自的停点是 64%/70%/72%，其中「洞窟周缘压暗」
+     那团还是从 38% 才开始（38% 之前恒为 0）。这种「值连续、斜率突然拐」的收边，人眼会读成
+     一条凸起的缝（Mach 带）——2 档、3 档都看得到，因为它画在雾层**下面**，跟雾怎么渲染无关。
+     重写原则：每团至少四站、第一站就是 0（不再有「先保持 0 再突然开始」的折点），
+     色相变化一律配同方向的明暗，收尾都落在屏幕外。 */
   background-image:
-    radial-gradient(1000px 560px at 50% -8%, rgba(229, 183, 81, .17), rgba(229, 183, 81, 0) 64%),
-    radial-gradient(900px 640px at 86% 10%, rgba(23, 114, 180, .20), rgba(23, 114, 180, 0) 70%),
-    radial-gradient(700px 560px at 8% 78%, rgba(229, 183, 81, .09), rgba(229, 183, 81, 0) 72%),
-    radial-gradient(1200px 900px at 50% 46%, rgba(8, 4, 2, 0) 38%, rgba(8, 4, 2, .55) 100%),
+    /* ① 提灯天光（顶部暖金） */
+    linear-gradient(180deg, rgba(229,183,81,.17) 0%, rgba(229,183,81,.11) 14%, rgba(229,183,81,.05) 32%, rgba(229,183,81,.015) 50%, rgba(229,183,81,0) 66%),
+    /* ② 群青（右上冷调）→ 斜向横跨整屏，五站 */
+    linear-gradient(118deg, rgba(23,114,180,0) 24%, rgba(23,114,180,.07) 46%, rgba(23,114,180,.14) 66%, rgba(23,114,180,.06) 84%, rgba(23,114,180,0) 98%),
+    /* ③ 左下一点金 */
+    linear-gradient(20deg, rgba(229,183,81,.085) 0%, rgba(229,183,81,.045) 22%, rgba(229,183,81,.012) 44%, rgba(229,183,81,0) 62%),
+    /* ④ 洞窟周缘压暗（正中心 0 起，四站） */
+    radial-gradient(1500px 1100px at 50% 44%, rgba(8,4,2,0) 0%, rgba(8,4,2,.07) 34%, rgba(8,4,2,.20) 64%, rgba(8,4,2,.34) 84%, rgba(8,4,2,.5) 100%),
     var(--m-paper-l),
+    /* ⑤ 三段色阶（手机端同一条公式） */
     linear-gradient(180deg,
       color-mix(in srgb, var(--bg) 96%, #fff) 0%,
       var(--bg) 42%,
       color-mix(in srgb, var(--bg) 84%, #000) 100%) !important;
-  background-size: auto, auto, auto, auto, 220px 220px, auto !important;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-size: auto, auto, auto, auto, 100% 100%, auto !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat !important;
 }
 
 html[data-skin="mg"] .onb {

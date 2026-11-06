@@ -1,9 +1,15 @@
-/*
+/* skinPrepaint.js —— 由脚本生成（/批 变更记录：首屏预绘 = 皮肤 + 明暗）
+   来源：apps/desktop-web/src/legacy/parts/32-script.txt（换皮肤模块 IIFE 里解析期那几块）
+   生成：node tools/extract-skin-prepaint.mjs
+   规矩：**原样搬运** —— 下面每一段都是从源文件**逐字节搬运**搬来的原文；工具每次运行都做四条核对。
+        改行为要改 legacy 源再重跑本工具（砍段后本文件升为真源）。
    ⚠ 本文件是**经典脚本**（不是 ES module）⇒ 由产出链（tools/make-doc-entry.mjs）内联进 HTML。
      不能改成模块：皮肤/明暗必须在**画第一帧之前**定到 html 上，defer 模块赶不上第一帧。
+   ⚠ 工具加的外包装（不是 legacy 正文）：外层 IIFE、末尾 apply(cur)、以及只读登记 window.__xlrPrepaint。
    ⚠ 源里「挂 window.XLR_SKINS / XLR_SKIN_APPLY / XLR_SKIN_CUR」那三行**不在这里** ——
      由本仓模块在模块期指向本仓实现（src/shell/main.jsx 的 mountSkins；模块期晚于解析期 ⇒ 本仓赢）。
-   */
+   
+*/
 (function () {
 var SKINS = [
     { k: 'bw', n: '黑白', t: '浅 · 无色相', bg: '#f4f4f5', ac: '#0f1013' },
@@ -12,11 +18,11 @@ var SKINS = [
     { k: 'xuan', n: '宣纸', t: '浅 · 朱砂', bg: '#f5f3ee', ac: '#9c3b28' },
     { k: 'qing', n: '青瓷', t: '浅 · 靛青', bg: '#eef2f1', ac: '#2f6f6b' },
     { k: 'dou', n: '豆沙', t: '浅 · 陶土', bg: '#f6f1ea', ac: '#a8543c' },
-    { k: 'bru', n: '卡通', t: '浅 · 高对比', bg: '#ffffff', ac: '#e8442a' },
-    /*
+    /* ★ 桌面端下架「卡通」（同 skinsCore.js：Win 端删掉，安卓保留） */
+    /* ★ 此前点名：「删除夜蓝、鎏金、终端、墨这四个主题，加入一个黑夜模式
        （黑白主题的黑色换皮）」⇒ 四个深色主题（mo/term/jin/ye）从表里摘掉，
        补一个 'hei' 黑夜 = 黑白那套无色相配色的深底版（同一个灰阶体系，反相）。 */
-    /*
+    /* ★ 此前点名「了解一下敦煌莫高窟配色，加入我们软件」——
        色值取自**国色官网 zhongguose.com**（国内可访问）的真实中国传统色：
          花青 #2376B7 · 石绿 #57C3C2 · 沙石黄 #E5B751 · 枣红 #7C1823 · 杏黄 #F28E16 · 群青 #1772B4
        敦煌 = 白天站窟外看壁画（沙壁底 + 花青/石绿 + 枣红）；莫高窟 = 夜里提灯进窟（暖褐 + 金 + 群青）。 */
@@ -46,14 +52,17 @@ function apply(k) {
       }
     }
   }
-/* 本仓外包装（**不属于** legacy 正文；见文件头）：
+/* ★ 本仓外包装（**不属于** legacy 正文；见文件头）：
+   ① 若 storage 里那个值**在我们表里**就用它 —— 源的回落判定只认它自己那份 9 套表，而本仓表更全（含追加皮肤）；
       真不在表里的非法值不受影响（保持源的回落 bw）。
+   ② 只读登记 window.__xlrPrepaint（判据据此证「这段确实在解析期跑过」）＋ 暴露 apply 备用。
    ③ **守护**：legacy 的 32-script（body 中段）也在解析期跑，它那份 9 套表不认新皮肤 ⇒ 会把 html 上的
       data-skin 覆盖成它的回落值、并把回落值写回 storage（实测：开机第一眼永远是默认皮肤）。
       这里用 MutationObserver 盯着 data-skin，被改走就按本仓那份合法值改回来。
       ⚠ 为什么用 Observer 而不是「在 body 末尾再内联一段脚本」：后者会**往 DOM 里加节点**，
+        而 shell-checks 的结构签名（DFS over body）要逐节点与旧臂相同 ⇒ 加节点就红（实测 +3 ⇒ FAIL）。
       ⚠ 自身 setAttribute 也会触发一次回调 —— 那时值已经是对的，比一下就不动（不会循环）。
-       */
+      ⚠ **DCL 时断开**：用户切肤都发生在 DCL 之后，不能被这个守护改回去；装配侧（mountSkins）再断一次，双保险。 */
 var want = null;
 try { want = localStorage.getItem(KEY); } catch (eW) { }
 for (var q = 0; q < SKINS.length; q++) if (SKINS[q].k === want) { cur = want; }

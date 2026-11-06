@@ -69,13 +69,17 @@ const ORIGINAL_SKINS = { dh: 1, mg: 1 };
  * ★ 桌面调参：宣纸 / 敦煌 / 莫高窟 反馈「太淡」，浓度上调（安卓那组值在手机上够，
  *   桌面视口大、雾被摊薄）。其余套装保持安卓原值。 */
 const REALTIME_PALETTE = {
-  glass: { colors: [0xdf9ec4, 0x94b5eb, 0xb497db], strength: 0.33 },
+  /* 梦幻：蓝/紫/粉三轮减淡（2026-11-06）。用户两次反馈「还是浓」，这次不再挪 10%：
+     蓝/紫 压到原值 0.30/0.32 倍饱和度（→ 0xB2BCCD / 0xB7AEC4），粉压到 0.50（→ 0xCFAEC1），
+     浓度 strength 0.26→0.17、贴图 gain 1.18→0.85。
+     贴图档的同一组色在 tools/import-fog.py 的 TONE 表里一起压，两边观感才一致。 */
+  glass: { colors: [0xcfaec1, 0xb2bccd, 0xb7aec4], strength: 0.17 },
   bw: { colors: [0x242424, 0xffffff, 0x888888], strength: 0.20, speed: 1.9 },
   hei: { colors: [0xacacac, 0x686868, 0x959595], strength: 0.18 },
   xuan: { colors: [0xc0a587, 0xb8aa97, 0xc8b89f], strength: 0.26 },
   qing: { colors: [0x639f94, 0x819fb2, 0x729c9b], strength: 0.33 },
   dou: { colors: [0xa8746a, 0xb8969d, 0xbd9388], strength: 0.33 },
-  dh: { colors: [0xa96f53, 0x698d7d, 0x647f99], strength: 0.58, relief: 1.45 },
+  dh: { colors: [0xa96f53, 0x698d7d, 0x647f99], strength: 0.44, relief: 1.05 },
   mg: { colors: [0xc69a59, 0x577392, 0xad7955], strength: 0.44 }
 };
 
@@ -88,8 +92,10 @@ const REALTIME_PALETTE = {
 const FOG_SPEED = { mg: 1.9 };
 
 const FOG_GAIN = {
-  bw: 1.55, glass: 1.55, qing: 1.6, dou: 1.6,
-  xuan: 2.3, mg: 1.35, dh: 1.7, hei: 1.25
+  /* mg 从 1.35 提到 2.1：二档改回安卓原图（640×960，alpha 最大只有 44/255，本来是给手机小屏用的），
+     铺到 1200+ 宽以后按原值几乎看不见；原图本身边缘 alpha=0，提浓度不会带出接缝。 */
+  bw: 1.55, glass: 0.85, qing: 1.6, dou: 1.6,
+  xuan: 2.3, mg: 2.1, dh: 1.7, hei: 1.25
 };
 
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -184,9 +190,11 @@ export function sceneFor(skin, level) {
   if (skin === 'bru') return null;                    /* 卡通不叠雾 */
   const clouds = SKIN_CLOUDS[skin];
   if (!clouds) return null;
-  /* 敦煌在「轻柔流动」与「实时流雾」都用褶皱版（flow/wisp）：
-     此前要求两档观感一致，实时档不再走着色器（见 FogField 的 REALTIME_SKINS）。 */
-  const folded = (skin === 'dh' || skin === 'mg');
+  /* 敦煌在「轻柔流动」用褶皱版（flow/wisp，安卓 foldedDunhuang 只在 level 1）：
+     二档褶皱、三档走着色器（见 REALTIME_SKINS）。
+     ⚠ 莫高窟不在这里：安卓 mg 从头到尾用**原 PNG**（SkinClouds 里 original = true），
+     桌面照做 —— 贴图档用原图、实时档走着色器。 */
+  const folded = (skin === 'dh');
   const original = !!ORIGINAL_SKINS[skin] && !folded;
   const historical = folded;
   let layers = [];
@@ -258,9 +266,12 @@ export function shaderPalette(skin) {
 
 export function realtimeSkins() { return Object.keys(REALTIME_PALETTE); }
 
-/* 实时流雾实际启用的皮肤：**不含敦煌 / 莫高窟** —— 这两套的雾是画好的原图（褶皱流纹 / 原 PNG），
-   着色器出来的色块和它们对不上（：实时档的敦煌/莫高窟要跟轻柔流动一致）。 */
-export const REALTIME_SKINS = ['bw', 'hei', 'glass', 'xuan', 'qing', 'dou', 'dh'];
+/* 实时流雾实际启用的皮肤：**除卡通外全部** —— 三档一律走着色器（桌面性能不是瓶颈，
+   着色器是屏幕空间密度场，天然没有贴图拼接）。
+   ★ 莫高窟原先被排掉了（port 时按「两档一致」的理由），结果是二档/三档
+   都拿同一张 512×768 贴图放大 3 倍铺满 Win 窗口 ⇒ 观感与安卓不同、还能看出拼接。
+   现在：二档回原图（与安卓 Original_Clouds 一致）、三档走着色器。 */
+export const REALTIME_SKINS = ['bw', 'hei', 'glass', 'xuan', 'qing', 'dou', 'dh', 'mg'];
 
 /* AGSL → GLSL ES 3.00：逐行照 RealtimeFogView.SOURCE，只换类型名与入口。
    hash/noise3/density/wander/smoke 的常数一字不改，换端不能凭手感。 */

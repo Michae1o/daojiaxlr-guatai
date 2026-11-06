@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "道家小六壬 卦台",
-  "version": "1.261103.2",
+  "version": "1.261106.1",
   "identifier": "cn.guatai.xiaoliuren",
   "build": {
     "frontendDist": "../web"
