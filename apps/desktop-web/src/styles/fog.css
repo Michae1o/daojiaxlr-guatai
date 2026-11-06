@@ -238,3 +238,108 @@ html[data-theme="dark"] .fg-sw .fg-sw-knob{background:#ededf1;box-shadow:inset 0
   .fg-freeze{gap:8px}
   .fg-freeze .fg-d{display:none}
 }
+
+/* ============================================================================
+   2026-11-06（A+B）· 压在雾上、自己没有底的那几类控件补材质
+   ----------------------------------------------------------------------------
+   雾是整页最底层（贴图 rAF / 实时着色器），没有底色的控件等于让雾纹直接透到
+   文字底下。体检（CDP 读 computed，1280×939，黑白皮肤）：问事 / 背景两个 textarea
+   与顶栏 .tbtn / .ibt 全都是 rgba(0,0,0,0)。这里给它们套和 .fg-glass 同一套
+   --fg-* 变量 ⇒ 跟卡片是同一块材质，换皮肤自动跟着走。
+   ⛔ 故意不动的：
+      · .castsw（详情）
+      · select —— 它靠 background-image 画下拉箭头，铺面会把箭头抹掉（本来就有 6% 墨底）；
+      · 铜古 —— skins/tonggu/tonggu.css 有整套金属按钮，别盖；
+      · legacy.css —— 那份按 offset/sha16 切块，追加会截断产物。
+   ========================================================================== */
+/* 顶栏按钮的「面」比卡片厚一档（输入框不铺面：「文本框不要背景」）。
+   实测（1296×939，取框内像素中位色算 WCAG）只给 --fg-face 时莫高窟 4.93 / 黑夜 5.80
+   勉强够；厚一档后顶栏落在 12.9~18.7，稳。 */
+html[data-skin="bw"]{--fg-field:rgba(253,251,247,.52)}
+html[data-skin="hei"]{--fg-field:rgba(26,25,23,.86)}
+html[data-skin="glass"]{--fg-field:rgba(253,251,247,.42)}
+html[data-skin="xuan"]{--fg-field:rgba(253,251,247,.74)}
+html[data-skin="qing"]{--fg-field:rgba(253,251,247,.60)}
+html[data-skin="dou"]{--fg-field:rgba(253,251,247,.68)}
+html[data-skin="dh"]{--fg-field:rgba(253,251,247,.72)}
+html[data-skin="mg"]{--fg-field:rgba(42,26,18,.88)}
+
+/* ★ 口径：「文本框不要背景啊」—— 输入框**保持无底色**（legacy 的
+   background:transparent 原样），只保留下面那条占位字颜色。
+   也就是说这轮 A 只落在「文字」上，不落在「面」上；--fg-field 继续给顶栏按钮用（B）。 */
+/* 占位字原来是浏览器默认的 54% 灰，压在玻璃面上发虚 ⇒ 统一按墨色 55% */
+html[data-fog]:not([data-skin="tonggu"]) textarea::placeholder,
+html[data-fog]:not([data-skin="tonggu"]) input::placeholder{
+  color:color-mix(in srgb, var(--ink) 55%, transparent);
+  opacity:1;
+}
+/* 顶栏那几件：legacy 里有一条 `.top-in .tbtn,.top-in .ibt,.top-in button{background:var(--surface)!important}`
+   （当年为了「顶栏实底、不与内容打架」），要盖它必须同样 !important + 更高特异度。 */
+html[data-fog]:not([data-skin="tonggu"]) .top-in .tbtn,
+html[data-fog]:not([data-skin="tonggu"]) .top-in .ibt{
+  background:var(--fg-field, var(--fg-face)) !important;
+  -webkit-backdrop-filter:blur(2px) !important;
+  backdrop-filter:blur(2px) !important;
+  color:var(--ink);
+}
+html[data-fog]:not([data-skin="tonggu"]) .top-in .tbtn:hover,
+html[data-fog]:not([data-skin="tonggu"]) .top-in .ibt:hover{color:var(--ink)}
+
+/* ============================================================================
+   2026-11-06· 四件事
+   ----------------------------------------------------------------------------
+   ① --dim2 提一档：11~12.5px 小字（label / .pane-h / .stab / 供应商说明 / 雾提示）
+      原来 vs --bg 只有 glass 4.06、qing 3.89、dou 3.90、dh 4.04，都没到 4.5。
+      取法：把原色朝该皮肤的 ink 混 12~16%（色相尽量不偏），实测 4.74。
+   ② 主界面大卡（.pane / .cmain）跟雾控件用同一套玻璃配方：
+      原来 .cmain 只是一层 64% 白平涂，没有上缘高光、没有 rim；同屏两种材质。
+   ③ 设置页（.setscreen）原来实心 rgb(244,244,245)，雾在那页整块消失 ⇒ 改成
+      半透 + blur：翻页时材质不断层。
+   ④ 输入框聚焦：原来只把 1px 边框换成 --line2，几乎看不出来 ⇒ 改 accent 描边
+      （outline，不铺底 —— 守住「文本框不要背景」）。
+   ========================================================================== */
+/* ⚠ 特异度：legacy 里那几套皮肤是 `html[data-skin=X][data-theme=Y]{--dim2:…}`（0,2,1），
+   只写 `html[data-skin=X]`（0,1,1）压不住 —— 所以这里带上 [data-fog]。 */
+html[data-fog][data-skin="glass"]{--dim2:#616879}
+html[data-fog][data-skin="qing"]{--dim2:#5E6E6B}
+html[data-fog][data-skin="dou"]{--dim2:#766960}
+html[data-fog][data-skin="dh"]{--dim2:#7E684C}
+
+/* 大卡本来就带 backdrop blur，缺的是**上缘高光与侧光**这一层（.fg-glass 有）——
+   所以只叠高光，不去动它原有的半透底（动了就等于把雾关掉）。 */
+html[data-fog]:not([data-skin="tonggu"]) .pane,
+html[data-fog]:not([data-skin="tonggu"]) .cmain{
+  background-image:linear-gradient(to bottom,
+    rgba(var(--fg-rim),calc(var(--fg-top) * .5)) 0%,
+    rgba(var(--fg-rim),0) 4.5%,
+    rgba(var(--fg-rim),0) 96%,
+    rgba(27,26,23,calc(var(--fg-bottom) * .3)) 100%),
+    linear-gradient(to right,
+    rgba(var(--fg-rim),calc(var(--fg-side) * .5)) 0%,
+    rgba(var(--fg-rim),0) 2.5%);
+  /* 不另加 inset rim：这两张卡本来就有 1px 边框，再叠一圈会成双线。 */
+}
+
+#setScreen.setscreen,
+html[data-fog] #setScreen.setscreen{
+  background-color:color-mix(in srgb, var(--bg) 84%, transparent) !important;
+  -webkit-backdrop-filter:blur(6px) !important;
+  backdrop-filter:blur(6px) !important;
+}
+
+html[data-fog]:not([data-skin="tonggu"]) textarea:focus,
+html[data-fog]:not([data-skin="tonggu"]) input:focus,
+html[data-fog]:not([data-skin="tonggu"]) select:focus{
+  border-color:var(--accent-line);
+  outline:1px solid var(--accent-line);
+  outline-offset:-0px;
+}
+
+/* ⑤ 供应商卡里那行 11px 说明（`.prov span`）本来就是 --dim2，压在卡片的 12% 墨底上
+   实测只有 bw 3.69 / qing 3.73 / dh 3.24 / mg 2.62 —— 这条跟雾无关，是旧账。
+   11px 的小字按规范要 4.5，直接提到 --dim（≈5.8~10）。 */
+html[data-fog] .prov span{color:var(--dim)}
+/* 敦煌 / 莫高窟再提一档：这两套的 --dim 压在 12% 墨底的卡上仍不够（3.45 / 4.01），
+   因为底色本身带色相（敦煌暖砂、莫高窟深棕）。这两套直接用墨色。 */
+html[data-fog][data-skin="dh"] .prov span,
+html[data-fog][data-skin="mg"] .prov span{color:var(--ink)}
