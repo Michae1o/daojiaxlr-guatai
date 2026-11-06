@@ -782,7 +782,7 @@ private fun RecDetail(r: Rec, onChange: () -> Unit, onBack: () -> Unit, onRuleWr
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     SetLabel("实际情况")
-                    SetField(r["note"] ?: "", { RecStore.setNote(id, it) }, ph = "后来到底怎么着了？写一句，复盘要用它")
+                    SetField(r["note"] ?: "", { RecStore.setNote(id, it) }, ph = "实际结果如何？会用来复盘。")
 
                     /* ---- 在这卦里的追问（早期版本 thread） ---- */
                     val th = threadOf(r)

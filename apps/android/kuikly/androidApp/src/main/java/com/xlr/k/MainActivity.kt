@@ -182,6 +182,8 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         com.xlr.k.LlmHost.onPickResult(resultCode, data)
+        com.xlr.k.LlmHost.onCreateResult(resultCode, data)
+        com.xlr.k.LlmHost.onDirResult(resultCode, data)
     }
 
     private fun setupAdapters() {

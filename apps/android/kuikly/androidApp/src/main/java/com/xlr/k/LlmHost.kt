@@ -13,8 +13,15 @@ object LlmHost {
        （BackupHost 也按这个名字读写，改这里要一起改）。 */
     internal const val SP_NAME = "xlr-k-llm"
 
+    /** 宿主 applicationContext（存 SP / 写文件用） */
+    private var appCtx: Context? = null
+
+    private fun sp(): android.content.SharedPreferences? =
+        appCtx?.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+
     fun install(ctx: Context) {
         val sp = ctx.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+        appCtx = ctx.applicationContext
         /* 卸载/重装兜底：先挂上，后面的每次写才会被记成「该备份了」 */
         BackupHost.install(ctx)
         com.xlr.k.pages.Platform.get = { k -> sp.getString(k, null) }
@@ -35,6 +42,11 @@ object LlmHost {
             cm.setPrimaryClip(android.content.ClipData.newPlainText("卦辞", t))
         }
         com.xlr.k.pages.Platform.saveFile = { name, text -> saveToDownloads(ctx, name, text) }
+        com.xlr.k.pages.Platform.saveFileAs = { name, text, cb -> startExport(name, text, cb) }
+        com.xlr.k.pages.Platform.exportDirLabel = { exportDirLabel() }
+        com.xlr.k.pages.Platform.pickExportDir = { cb -> startPickDir(cb) }
+        com.xlr.k.pages.Platform.openExportDir = { openDir() }
+        com.xlr.k.pages.Platform.resetExportDir = { resetExportDir() }
         com.xlr.k.pages.Platform.pickText = { cb -> startPick(cb) }
         /* 引导 / 「去哪里拿」里那些链接：
            有系统浏览器就交给系统（早期版本是 <a target=_blank>）；
@@ -202,6 +214,246 @@ object LlmHost {
             cb(txt)
         } catch (e: Throwable) {
             cb(null)
+        }
+    }
+
+    /* ---------- 导出：让用户自己挑保存位置（系统「保存到…」面板） -------。走 SAF 的 ACTION_CREATE_DOCUMENT，
+       存哪儿由用户在系统面板里定（下载 / 文档 / U 盘 / 网盘都行），我们只负责把 JSON 写进去。
+       ⚠ 结果回到 onActivityResult，写文件也在那一刻做 —— 内容先攥在这里，别指望 UI 还活着。 */
+    private const val CREATE_REQ = 4712
+    private var createCb: ((String?) -> Unit)? = null
+    private var createText = ""
+
+    private fun startCreate(name: String, text: String, cb: (String?) -> Unit) {
+        val act = activity
+        if (act == null) {
+            cb(null)
+            return
+        }
+        createCb = cb
+        createText = text
+        try {
+            val i = android.content.Intent(android.content.Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(android.content.Intent.CATEGORY_OPENABLE)
+                type = "application/json"
+                putExtra(android.content.Intent.EXTRA_TITLE, name)
+            }
+            act.startActivityForResult(i, CREATE_REQ)
+        } catch (e: Throwable) {
+            /* 有的精简 ROM 没有 DocumentsUI ⇒ 退回原来的固定目录，按钮不能点成死键 */
+            createCb = null
+            createText = ""
+            cb(saveToDownloads(act, name, text))
+        }
+    }
+
+    fun onCreateResult(resultCode: Int, data: android.content.Intent?) {
+        val cb = createCb
+        createCb = null
+        if (cb == null) return
+        val body = createText
+        createText = ""
+        val uri = data?.data
+        if (resultCode != android.app.Activity.RESULT_OK || uri == null) {
+            cb(null)
+            return
+        }
+        try {
+            val resolver = activity?.contentResolver
+            if (resolver == null) {
+                cb(null)
+                return
+            }
+            resolver.openOutputStream(uri, "wt")?.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+            cb(shownNameOf(uri) ?: "已保存")
+        } catch (e: Throwable) {
+            cb(null)
+        }
+    }
+
+    /** 用户挑的那个文件，系统可能改过名字 —— 回显用它的真名 */
+    private fun shownNameOf(uri: android.net.Uri): String? = try {
+        activity?.contentResolver?.query(
+            uri,
+            arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),
+            null, null, null
+        )?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+    } catch (e: Throwable) {
+        null
+    }
+
+    /* ---------- 默认导出目录 ----------
+       设过默认目录 ⇒ 导出直接写进那个文件夹，不再每次弹面板；
+       没设过 ⇒ 还是弹系统「保存到…」。 */
+    private const val K_TREE = "export.tree"
+    private const val K_TREE_LABEL = "export.treeLabel"
+    private const val DIR_REQ = 4713
+    private var dirCb: ((String?) -> Unit)? = null
+
+    private fun exportDirLabel(): String? {
+        /* 每次现算路径，而不是用当初存下来的那串 —— 路径口径改了（比如省掉卷号 UUID）老数据也能跟着变对 */
+        val s = sp()?.getString(K_TREE, null) ?: return null
+        return treeLabel(android.net.Uri.parse(s)) ?: sp()?.getString(K_TREE_LABEL, null)
+    }
+
+    private fun startExport(name: String, text: String, cb: (String?) -> Unit) {
+        val tree = sp()?.getString(K_TREE, null)
+        val c = appCtx
+        if (tree != null && c != null) {
+            val r = writeToTree(c, android.net.Uri.parse(tree), name, text)
+            if (r != null) {
+                cb(r)
+                return
+            }
+            /* 目录被删 / 权限被系统收回 ⇒ 退回下载目录，至少别让按钮没反应 */
+            cb(saveToDownloads(c, name, text))
+            return
+        }
+        startCreate(name, text, cb)
+    }
+
+    private fun startPickDir(cb: (String?) -> Unit) {
+        val act = activity
+        if (act == null) {
+            cb(null)
+            return
+        }
+        dirCb = cb
+        try {
+            val i = android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                addFlags(
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                        android.content.Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                )
+            }
+            act.startActivityForResult(i, DIR_REQ)
+        } catch (e: Throwable) {
+            dirCb = null
+            cb(null)
+        }
+    }
+
+    fun onDirResult(resultCode: Int, data: android.content.Intent?) {
+        val cb = dirCb
+        dirCb = null
+        if (cb == null) return
+        val uri = data?.data
+        if (resultCode != android.app.Activity.RESULT_OK || uri == null) {
+            cb(null)
+            return
+        }
+        val act = activity
+        try {
+            act?.contentResolver?.takePersistableUriPermission(
+                uri,
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+        } catch (e: Throwable) {
+            /* 有些 ROM 不给持久化，当场能写也不影响；下次可能要重选 */
+        }
+        val label = treeLabel(uri) ?: "已选目录"
+        sp()?.edit()?.putString(K_TREE, uri.toString())?.putString(K_TREE_LABEL, label)?.apply()
+        cb(label)
+    }
+
+    /** tree Uri → 人看的路：「primary:Download/道家小六壬」→「下载/道家小六壬」
+        卷号是 UUID / SD 卡序列号那种一串字母数字时省略（模拟器、外置卡都会带，显示出来只是噪声） */
+    private fun treeLabel(uri: android.net.Uri): String? {
+        val id = try {
+            android.provider.DocumentsContract.getTreeDocumentId(uri)
+        } catch (e: Throwable) {
+            return null
+        }
+        val vol = id.substringBefore(':', "")
+        val path = id.substringAfter(':', "")
+        if (path.isEmpty()) return if (vol == "primary" || vol.isEmpty()) "内部存储" else "存储"
+        val shown = path
+            .replace(Regex("^Download(?=/|$)"), "下载")
+            .replace(Regex("^Documents(?=/|$)"), "文档")
+            .replace(Regex("^DCIM(?=/|$)"), "相机")
+            .replace(Regex("^Pictures(?=/|$)"), "图片")
+            .replace(Regex("^Movies(?=/|$)"), "视频")
+            .replace(Regex("^Music(?=/|$)"), "音乐")
+        val looksLikeId = vol.length >= 8 && vol.all { it.isDigit() || it in 'A'..'F' || it in 'a'..'f' || it == '-' }
+        return if (vol == "primary" || vol.isEmpty() || looksLikeId) shown else vol + "/" + shown
+    }
+
+    /** 清掉默认目录（改回「导出时自己选」） */
+    private fun resetExportDir() {
+        sp()?.edit()?.remove(K_TREE)?.remove(K_TREE_LABEL)?.apply()
+    }
+
+    /** 在系统「文件」里打开默认目录；ROM 不接 MIME_TYPE_DIR 就退化成目录选择面板（预置到同一处） */
+    private fun openDir() {
+        val s = sp()?.getString(K_TREE, null) ?: return
+        val act = activity ?: return
+        val uri = android.net.Uri.parse(s)
+        val docId = try {
+            android.provider.DocumentsContract.getTreeDocumentId(uri)
+        } catch (e: Throwable) {
+            null
+        } ?: return
+        val docUri = android.provider.DocumentsContract.buildDocumentUriUsingTree(uri, docId)
+        try {
+            val v = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                setDataAndType(docUri, android.provider.DocumentsContract.Document.MIME_TYPE_DIR)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            if (v.resolveActivity(act.packageManager) != null) {
+                act.startActivity(v)
+                return
+            }
+        } catch (e: Throwable) {
+        }
+        try {
+            act.startActivity(
+                android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                    putExtra("android.provider.extra.INITIAL_URI", docUri)
+                }
+            )
+        } catch (e: Throwable) {
+        }
+    }
+
+    /** 直接写进用户选的目录：先删同名（系统的 createDocument 撞名会自动加「(1)」），再新建 */
+    private fun writeToTree(c: Context, tree: android.net.Uri, name: String, text: String): String? {
+        return try {
+            val resolver = c.contentResolver
+            val docId = android.provider.DocumentsContract.getTreeDocumentId(tree)
+            val parent = android.provider.DocumentsContract.buildDocumentUriUsingTree(tree, docId)
+            try {
+                val kids = android.provider.DocumentsContract.buildChildDocumentsUriUsingTree(tree, docId)
+                resolver.query(
+                    kids,
+                    arrayOf(
+                        android.provider.DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                        android.provider.DocumentsContract.Document.COLUMN_DISPLAY_NAME
+                    ),
+                    null, null, null
+                )?.use { cur ->
+                    while (cur.moveToNext()) {
+                        if (cur.getString(1) == name) {
+                            try {
+                                android.provider.DocumentsContract.deleteDocument(
+                                    resolver,
+                                    android.provider.DocumentsContract.buildDocumentUriUsingTree(tree, cur.getString(0))
+                                )
+                            } catch (e: Throwable) {
+                            }
+                        }
+                    }
+                }
+            } catch (e: Throwable) {
+            }
+            val out = android.provider.DocumentsContract.createDocument(resolver, parent, "application/json", name)
+                ?: return null
+            resolver.openOutputStream(out, "wt")?.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+            name
+        } catch (e: Throwable) {
+            android.util.Log.w("XLREXP", "写默认目录失败：" + e.message)
+            null
         }
     }
 

@@ -50,8 +50,8 @@ import com.tencent.kuikly.compose.ui.input.pointer.pointerInput
 internal fun SkinPage() {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
         item {
-            SetLead("点一下立刻生效，会记住。每套不只是换颜色——底色、卡片、强调色、判词色整套跟着换。")
-
+            /* 此前：原来那两句「点一下立刻生效…」「浅色九套都在这儿…」删掉 ——
+               皮肤格自己看得懂，说明字反而占屏、还把第一屏的卡压下去 */
             /* 明暗：照早期版本 #btnDN 的口径 —— 切到夜就是切到深色那套（黑夜 / 莫高窟），点亮则回上次的浅色套 */
             Row(
                 modifier = Modifier
@@ -111,7 +111,6 @@ internal fun SkinPage() {
                 }
                 i += 2
             }
-            SetHint("浅色九套都在这儿；「黑夜」「莫高窟」本来就是深色套，点上面「切到黑夜」就能过去。")
             Spacer(modifier = Modifier.height(30.dp))
         }
     }
@@ -165,10 +164,11 @@ internal fun DataPage() {
                 count = caseN.toString() + " 则",
                 canExport = caseN > 0,
                 onExport = {
-                    val path = Platform.saveFile?.invoke("道家小六壬-卦例本.json", RecStore.exportCasesText())
-                    msg = if (path == null) "导出失败：写不进「下载」。" else "✓ 已导出 " + caseN + " 则 → " + path
-                    Session.say(msg)
-                    ver++
+                    exportAsk("道家小六壬-卦例本.json", RecStore.exportCasesText()) { ok ->
+                        msg = if (ok == null) "没保存（可能取消了）。" else "✓ 已导出 " + caseN + " 则 → " + ok
+                        Session.say(msg)
+                        ver++
+                    }
                 },
                 onClear = {
                     RecStore.clearAll()
@@ -183,10 +183,11 @@ internal fun DataPage() {
                 count = ruleN.toString() + " 条",
                 canExport = ruleN > 0,
                 onExport = {
-                    val path = Platform.saveFile?.invoke("道家小六壬-准则.json", RecStore.exportRulesText())
-                    msg = if (path == null) "导出失败：写不进「下载」。" else "✓ 已导出 " + ruleN + " 条准则 → " + path
-                    Session.say(msg)
-                    ver++
+                    exportAsk("道家小六壬-准则.json", RecStore.exportRulesText()) { ok ->
+                        msg = if (ok == null) "没保存（可能取消了）。" else "✓ 已导出 " + ruleN + " 条准则 → " + ok
+                        Session.say(msg)
+                        ver++
+                    }
                 },
                 onClear = {
                     RecStore.clearRules()
@@ -239,6 +240,36 @@ internal fun DataPage() {
                 onClear = {},
                 hideClear = true,
             )
+            /* 保存位置
+               设过 ⇒ 导出直接写进那个文件夹，不再每次弹面板；没设 ⇒ 空着，导出时弹系统「保存到…」 */
+            var dirLabel by remember { mutableStateOf(Platform.exportDirLabel?.invoke()) }
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
+                Text_(text = "保存位置", fontSize = 13.5f, lineHeight = 22f, weight = 500)
+                Text_(
+                    text = dirLabel ?: "没设，导出时自己选",
+                    fontSize = 11f,
+                    lineHeight = 18f,
+                    color = if (dirLabel == null) KY_DIM2 else KY_DIM,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SetBtn(if (dirLabel == null) "选文件夹" else "改位置") {
+                        Platform.pickExportDir?.invoke { lbl -> if (lbl != null) dirLabel = lbl }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    SetBtn("打开文件夹", enabled = dirLabel != null) {
+                        Platform.openExportDir?.invoke()
+                    }
+                    if (dirLabel != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        SetBtn("恢复默认", small = true) {
+                            Platform.resetExportDir?.invoke()
+                            dirLabel = null
+                        }
+                    }
+                }
+            }
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(KY_LINE))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -280,10 +311,16 @@ internal fun DataPage() {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text_(text = msg, fontSize = 11.5f, lineHeight = 19f, color = KY_ACCENT, weight = 500)
             }
-            SetHint("导出落在「下载/道家小六壬/」里（系统的「文件」App 能看到）。导入从早期版本或别的机器带来的 .json 直接挑文件。")
             Spacer(modifier = Modifier.height(30.dp))
         }
     }
+}
+
+/* 导出：先弹系统「保存到…」让用户自己挑位置；宿主没实现（老 ROM / 没有文件选择器）
+   就退回写固定「下载/道家小六壬/」。done 拿到的是给用户看的文件名，取消或失败为 null。 */
+private fun exportAsk(name: String, body: String, done: (String?) -> Unit) {
+    val asFn = Platform.saveFileAs
+    if (asFn != null) asFn(name, body, done) else done(Platform.saveFile?.invoke(name, body))
 }
 
 @Composable
@@ -349,12 +386,6 @@ internal fun AboutPage() {
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(KY_LINE))
                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
                     Text_(text = "版本更新", fontSize = 13.5f, lineHeight = 22f, weight = 500)
-                    Text_(
-                        text = "下好会弹出系统的安装提示，点「安装」就覆盖成新版；卦例和配置都保留。",
-                        fontSize = 11f,
-                        lineHeight = 18f,
-                        color = KY_DIM2,
-                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         SetBtn(
@@ -415,8 +446,20 @@ internal fun AboutPage() {
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-            SetHint("起卦、排盘与断卦依据都在本机算；模型断辞由你自己配置的模型服务生成。")
+            /* 此前：这段（版权 + 三条前提）挪到关于页末尾；「版权声明」四个字删掉，
+               换成各模块之间那条普通分割线（跟数据页/关于页其它处同一款：1dp KY_LINE） */
+            Spacer(modifier = Modifier.height(12.dp))
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(KY_LINE))
+            Spacer(modifier = Modifier.height(12.dp))
+            Text_(
+                text = "本软件以邵一尘先生的小六壬神通·卜法卷为基础，部分功能及生成内容由人工智能技术辅助完成，结果仅供参考。所有内容仅供交流、学习使用，不用于商业用途；如涉及版权争议，请权利人联系删除，造成不便敬请谅解。",
+                fontSize = 12f,
+                lineHeight = 21f,
+                color = KY_DIM,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text_(text = "三条前提：无事不卦、心动即卦、一事不二卦。", fontSize = 12f, lineHeight = 21f, weight = 500)
+
             Spacer(modifier = Modifier.height(30.dp))
         }
     }
@@ -466,16 +509,8 @@ internal fun FaqPage() {
 internal fun NotePage() {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
         item {
-            Text_(
-                text = "本软件以邵一尘先生的小六壬神通·卜法卷为基础，部分功能及生成内容由人工智能技术辅助完成，结果仅供参考。所有内容仅供交流、学习使用，不用于商业用途；如涉及版权争议，请权利人联系删除，造成不便敬请谅解。",
-                fontSize = 12f,
-                lineHeight = 21f,
-                color = KY_DIM,
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text_(text = "三条前提：无事不卦、心动即卦、一事不二卦。", fontSize = 12f, lineHeight = 21f, weight = 500)
-
-            Spacer(modifier = Modifier.height(22.dp))
+            /* 此前：「说明」里那段（版权声明 + 三条前提）挪到关于页末尾；
+               「三条前提」保持一行，第一段给它一个小标题、跟其他块同构。 */
             SetSecTitle("免责声明", top = 0)
             listOf(
                 "本软件是传统术数文化的学习与自用工具。起卦、排盘、本机速断与模型断辞都只是按这套体系的推演，不构成预测、承诺或任何专业意见；请当作参考，不必据此替自己做重大决定。",

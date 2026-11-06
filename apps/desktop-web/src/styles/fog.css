@@ -1,0 +1,223 @@
+/* ============================================================================
+   fog.css —— 背景雾气（雾层 + 设置页的液态玻璃控件）
+   来源：安卓 2.261103.4（SkinFogBackdrop / GlassSwitch / FogLevelControl / glassMaterial）
+   ⛔ 不进 legacy.css：那份由 tools/assemble-desktop.mjs 按固定偏移切块，追加会截断。
+   本文件由 tools/make-doc-entry.mjs 单独挂（与 splash-art.css / fog-tiles.css 同路）。
+   ============================================================================ */
+
+/* ---------- 一、雾层 ---------- */
+#xlrFog{
+  position:fixed;top:0;right:0;bottom:0;left:0;inset:0;
+  z-index:-2;                       /* 底色之上、内容之下（#xlrAura 是 -1） */
+  pointer-events:none;
+  overflow:hidden;
+  contain:strict;
+  transition:none !important;       /* 本机 prefers-reduced-motion 会禁用一切过渡；这里也不靠它 */
+}
+#xlrFog .fg-stage{position:absolute;inset:0;opacity:1}
+#xlrFog .fg-cloud{
+  /* 比视口大 25%：贴图要跟着位移走（最多约视口宽的 20%），
+     盒子和视口一样大时，云一挪就会露出图片的直边 ⇒ 看着像「被裁剪的痕迹」。
+     放大一圈后，位移始终发生在余量里，画面里看不到任何图边。 */
+  position:absolute;left:-25%;top:-25%;width:150%;height:150%;
+  background-repeat:no-repeat;
+  /* ★ 不用 100% 100%：雾贴图是 640×960（2:3，手机比例），桌面窗口多为横向，
+     强行铺满等于把云横向拉长一倍多（实测 1264×861 下横向拉伸 2.2×）⇒ 看着「没按窗口比例适配」。
+     cover = 保持贴图比例、铺满窗口（多余部分裁掉），与安卓 FillBounds 在手机上的实际观感一致。 */
+  background-size:cover;background-position:center;
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+  pointer-events:none;
+}
+#xlrFog .fg-canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;pointer-events:none}
+/* 宣纸的朱砂底纹：安卓在雾层之后单独画一张满屏图，不参与流动 */
+#xlrFog .fg-xuan-cinnabar{left:0;top:0;width:100%;height:100%;background-size:100% 100%;opacity:1}
+
+/* 有雾的皮肤不再叠 #xlrAura 那四团固定光晕（安卓的「梦幻」也只有雾，不叠两层） */
+html[data-fog="1"] #xlrAura{display:none}
+
+/* ⚠ 为什么要把 body 的底色去掉：
+   CSS 绘制顺序是「根底色 → 负 z-index 子层 → 普通块背景 → …」，而 legacy 给 **body 也铺了一份
+   不透明的 --bg**（敦煌/莫高窟还带三段色阶与纸纹）⇒ z-index:-2 的雾层被 body 自己的背景整块盖住，
+   实测：开雾前后整屏逐像素只差 1/255（等于没有）。
+   html 上本来就有同一套底色（皮肤变量 + 三段色阶 + 纸纹都在 html 选择器里），
+   把 body 这份重复副本收掉，雾才落在「底色之上、内容之下」。 */
+html[data-fog="1"] body{background-color:transparent !important;background-image:none !important}
+
+/* ---------- 一·五、去掉纸纹里的「颗粒」层 ----------
+   legacy 的 --m-paper 是两段 SVG 噪声：低频大斑（baseFrequency .01，opacity .11）
+   ＋ 高频细颗粒（.92，opacity .52）。后者在 1200+ 宽的桌面上就是一整屏「颗粒感滤镜」，
+   宣纸 / 敦煌 / 莫高窟 三套都铺了它（skin-backdrop 里还各铺了一份）。
+   这里把**高频那一层拿掉**，只留低频纸斑：纸的质感还在，颗粒没有了。 */
+html[data-fog="1"][data-skin="xuan"],
+html[data-fog="1"][data-skin="dh"],
+html[data-fog="1"][data-skin="mg"]{
+  --m-paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='m2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23m2)' opacity='0.09'/%3E%3C/svg%3E");
+  --m-paper-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='-1' intercept='1'/%3E%3CfeFuncG type='linear' slope='-1' intercept='1'/%3E%3CfeFuncB type='linear' slope='-1' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23p2)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* 莫高窟的雾是「画好的整张大图」，层与层交界会露出「两张图拼在一起」的痕迹。
+   2026-11-05 改成 flow/wisp 软雾贴图（边缘 alpha=0），再留一层轻模糊兜底。
+   敦煌按要求回到上一次修改的版本：不加模糊。 */
+/* 宣纸 / 青瓷的雾本来就贴着自己的底色走（宣纸暖雾 c0a587 vs 纸色 #f5f3ee），
+   光加浓度还是「灰蒙蒙一片」。把雾本身压暗一点、饱和度提一点，才和纸色 / 瓷色分得开。
+   2026-11-05 实测：宣纸背景亮度偏差 p95 只有 4.3/255（等于看不见），压暗后才有对比。 */
+#xlrFog[data-skin="xuan"] .fg-stage{filter:brightness(0.80) saturate(1.3)}
+#xlrFog[data-skin="qing"] .fg-stage{filter:brightness(0.90) saturate(1.18)}
+
+/* ---------- 莫高窟的「图片拼接感」 ----------
+   实测（1264×861 真 exe 逐像素）：接缝不在雾层，而在**皮肤自己的底色**——
+   skin-backdrop 里那块 900×640、alpha .20 的群青径向光晕停在 70% 处，色相从暖砂
+   跳到冷蓝、亮度却几乎不变，人眼会把「纯色相跳变」读成一条竖直的接缝（Mach 带）。
+   治法（只动莫高窟）：把群青从「圆盘」改成横跨整屏的斜向渐变，再加一道同方向的明暗
+   渐变，让暖→冷同时伴随「亮→暗」，眼睛读成打光而不是两张图；雾层顺带加到 28px 模糊。 */
+html[data-skin="mg"],
+html[data-skin="mg"] body{
+  background-image:
+    linear-gradient(104deg, rgba(229,183,81,.10) 0%, rgba(229,183,81,0) 40%, rgba(4,8,18,.32) 100%),
+    radial-gradient(1400px 900px at 50% -18%, rgba(229,183,81,.14), rgba(229,183,81,0) 78%),
+    radial-gradient(1500px 1100px at 50% 46%, rgba(8,4,2,0) 34%, rgba(8,4,2,.55) 100%),
+    var(--m-paper-l),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 96%, #fff) 0%,
+      var(--bg) 42%,
+      color-mix(in srgb, var(--bg) 84%, #000) 100%) !important;
+  background-size: auto, auto, auto, 220px 220px, auto !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+}
+/* ⚠ 这里不再给莫高窟的雾加 filter:blur()：实测 blur 会把整层栅格化成多块，
+   块与块之间会露出直边的「竖条」（圈出来的就是它），而且糊住之后
+   连雾在走都看不出来。接缝已经由上面那套底色渐变解决，雾层保持原样即可。 */
+
+/* ⚠ 这条必须留在文件**最后**（级联顺序，不是冗余）。
+   本文件上面那段莫高窟底色又给 `html[data-skin="mg"] body` 写了一份 !important 的
+   background-image，和前面那条同权重、但更晚出现 ⇒ 雾层重新被 body 盖死
+   （实测：开雾/关雾整屏 p95 逐像素差 = 0，等于雾根本没画出来，用户看到的是 body 那层
+   静态色阶，「看起来有雾」但永不流动）。多带一个 [data-skin]，权重压到 (0,2,2)，
+   放到最后，任何皮肤再写 body 底色都盖不掉。 */
+html[data-fog="1"][data-skin] body{
+  background-color:transparent !important;
+  background-image:none !important;
+}
+
+/* ---------- 二、设置页「背景雾气」 ---------- */
+.fogbox{
+  margin-top:14px;padding:14px 12px 12px;
+  border:1px solid var(--line);border-radius:12px;
+  background:transparent;
+}
+.fogbox .fog-head{
+  display:flex;align-items:baseline;gap:8px;
+  font-size:13px;font-weight:600;margin-bottom:10px;
+}
+.fogbox .fog-head em{font-style:normal;font-size:11px;font-weight:400;color:var(--dim2)}
+.fog-hint{margin-top:9px;font-size:11px;line-height:1.65;color:var(--dim2)}
+
+/* 液态玻璃材质（照安卓 glassMaterial：平涂面 + 上缘亮边 + 左右极淡 accent + 1px 描边） */
+/* 每套皮肤的玻璃参数（面/上缘/侧边/下缘/accent 侧光/描边）——与 Kotlin 的 glassFill/GlassLight 对齐 */
+html{--fg-face:rgba(253,251,247,.38);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.72)}
+html[data-skin="bw"]{--fg-face:rgba(253,251,247,.38);--fg-top:.48;--fg-side:.15;--fg-bottom:.055;--fg-tint:.045;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.62)}
+html[data-skin="hei"]{--fg-face:rgba(26,25,23,.58);--fg-top:.30;--fg-side:.12;--fg-bottom:.035;--fg-tint:.035;--fg-rim:234,230,222;--fg-edge:rgba(234,230,222,.16)}
+html[data-skin="glass"]{--fg-face:rgba(253,251,247,.27);--fg-top:.68;--fg-side:.24;--fg-bottom:.055;--fg-tint:.07;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.82)}
+html[data-skin="xuan"]{--fg-face:rgba(253,251,247,.66);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.72)}
+html[data-skin="qing"]{--fg-face:rgba(253,251,247,.52);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.72)}
+html[data-skin="dou"]{--fg-face:rgba(253,251,247,.60);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.72)}
+html[data-skin="dh"]{--fg-face:rgba(253,251,247,.64);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:255,255,255;--fg-edge:rgba(255,255,255,.72)}
+html[data-skin="mg"]{--fg-face:rgba(42,26,18,.70);--fg-top:.64;--fg-side:.26;--fg-bottom:.12;--fg-tint:.12;--fg-rim:242,230,208;--fg-edge:rgba(242,230,208,.20)}
+html[data-skin="bru"]{--fg-face:#ffffff;--fg-top:0;--fg-side:0;--fg-bottom:0;--fg-tint:0;--fg-rim:13,13,13;--fg-edge:#0d0d0d}
+
+/* 外框 + 面：面用 surface 的 alpha，玻璃感全靠上下缘高光与描边 */
+.fg-glass{
+  position:relative;border-radius:999px;
+  background:
+    linear-gradient(to bottom,
+      rgba(var(--fg-rim),var(--fg-top)) 0%,
+      rgba(var(--fg-rim),calc(var(--fg-top) * .12)) 1.2%,
+      rgba(var(--fg-rim),0) 4.5%,
+      rgba(var(--fg-rim),0) 94%,
+      rgba(27,26,23,calc(var(--fg-bottom) * .35)) 99%,
+      rgba(27,26,23,var(--fg-bottom)) 100%),
+    linear-gradient(to right,
+      rgba(var(--fg-rim),var(--fg-side)) 0%,
+      rgba(var(--fg-rim),0) 2.5%),
+    var(--fg-face);
+  box-shadow:inset 0 0 0 1px var(--fg-edge);
+  overflow:hidden;
+  -webkit-backdrop-filter:blur(2px);
+  backdrop-filter:blur(2px);
+}
+/* 右端那道 accent 侧光：安卓是 accent.copy(alpha = profile.tint)（4.5%~12%），
+   不能直接铺实色 —— 那就成了一块金条。 */
+.fg-glass::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 97%, var(--accent) 100%);
+  opacity:var(--fg-tint);
+}
+html[data-skin="bru"] .fg-glass{box-shadow:inset 0 0 0 1px var(--ink)}
+
+/* 三档分段：轨道 42px，滑块 = 一格宽 − 6px，跟手拖动 */
+.fg-seg{height:42px;display:flex;position:relative;touch-action:none;user-select:none;cursor:pointer}
+.fg-seg .fg-cells{position:absolute;inset:0;display:flex;z-index:1}
+.fg-seg .fg-cells button{
+  flex:1 1 0;min-width:0;background:none;border:0;padding:0;margin:0;
+  font:inherit;font-size:12px;line-height:20px;color:var(--dim2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.fg-seg .fg-cells button[aria-current="true"]{color:var(--accent);font-weight:600}
+.fg-seg .fg-thumb{
+  position:absolute;left:0;top:3px;height:36px;border-radius:999px;
+  background:var(--accent-bg2);
+  box-shadow:inset 0 0 0 1px var(--fg-edge), inset 0 1px 0 rgba(var(--fg-rim),.45);
+  transform-origin:50% 50%;
+  pointer-events:none;
+  will-change:transform;
+}
+.fg-seg .fg-thumb::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:var(--accent);opacity:.10;
+}
+
+/* 冻结一行（独立开关，安卓 2.261103.4 从雾开关里拆出来的那个） */
+.fg-freeze{
+  display:flex;align-items:center;gap:12px;
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--line);
+}
+.fg-freeze .fg-lab{flex:1 1 auto;min-width:0}
+.fg-freeze .fg-t{font-size:13px;line-height:21px;font-weight:500;display:flex;align-items:center;gap:8px}
+.fg-freeze .fg-t em{font-style:normal;font-size:10px;line-height:18px;font-weight:600;color:var(--accent)}
+.fg-freeze .fg-t em.off{color:var(--dim2);font-weight:400}
+.fg-freeze .fg-d{font-size:11px;line-height:18px;color:var(--dim2)}
+
+/* 开关：44×26，旋钮 20，内边距 3 ⇒ 可走 18 */
+.fg-sw{
+  position:relative;flex:0 0 auto;width:44px;height:26px;border-radius:999px;
+  cursor:pointer;touch-action:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.fg-sw .fg-sw-track{
+  position:absolute;inset:0;border-radius:999px;
+  background:linear-gradient(to bottom,
+      rgba(var(--fg-rim),calc(var(--fg-top) * .55)) 0%,
+      rgba(var(--fg-rim),0) 6%,
+      rgba(var(--fg-rim),0) 94%,
+      rgba(27,26,23,calc(var(--fg-bottom) * .5)) 100%),
+    var(--fg-face);
+  box-shadow:inset 0 0 0 1px var(--fg-edge);
+}
+.fg-sw .fg-sw-on{
+  position:absolute;inset:0;border-radius:999px;background:var(--accent);opacity:0;
+}
+.fg-sw .fg-sw-knob{
+  position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:999px;
+  background:#fff;box-shadow:inset 0 0 0 1px rgba(27,26,23,.18), 0 1px 2px rgba(0,0,0,.10);
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+html[data-theme="dark"] .fg-sw .fg-sw-knob{background:#ededf1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+
+/* 窄窗口：设置页本来就窄，控件保持一行不折行 */
+@media (max-width:520px){
+  .fg-freeze{gap:8px}
+  .fg-freeze .fg-d{display:none}
+}

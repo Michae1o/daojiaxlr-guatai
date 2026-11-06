@@ -1,0 +1,46 @@
+/* fog-tiles.css —— 由 tools/import-fog.py 生成，不要手改。
+   来源：安卓 common/fog 素材（flow / wisp / 原图）→ WebP q90。
+   类名：.fg-<name> = 原图 · .fg-<name>-flow · .fg-<name>-wisp */
+.fg-pink-flow{background-image:url(../assets/fog/pink-flow.webp)}
+.fg-pink-wisp{background-image:url(../assets/fog/pink-wisp.webp)}
+.fg-blue-flow{background-image:url(../assets/fog/blue-flow.webp)}
+.fg-blue-wisp{background-image:url(../assets/fog/blue-wisp.webp)}
+.fg-violet-flow{background-image:url(../assets/fog/violet-flow.webp)}
+.fg-violet-wisp{background-image:url(../assets/fog/violet-wisp.webp)}
+.fg-bw-ink-flow{background-image:url(../assets/fog/bw-ink-flow.webp)}
+.fg-bw-ink-wisp{background-image:url(../assets/fog/bw-ink-wisp.webp)}
+.fg-bw-light-flow{background-image:url(../assets/fog/bw-light-flow.webp)}
+.fg-bw-light-wisp{background-image:url(../assets/fog/bw-light-wisp.webp)}
+.fg-hei-light-flow{background-image:url(../assets/fog/hei-light-flow.webp)}
+.fg-hei-light-wisp{background-image:url(../assets/fog/hei-light-wisp.webp)}
+.fg-hei-ink-flow{background-image:url(../assets/fog/hei-ink-flow.webp)}
+.fg-hei-ink-wisp{background-image:url(../assets/fog/hei-ink-wisp.webp)}
+.fg-xuan-warm-flow{background-image:url(../assets/fog/xuan-warm-flow.webp)}
+.fg-xuan-warm-wisp{background-image:url(../assets/fog/xuan-warm-wisp.webp)}
+.fg-qing-jade-flow{background-image:url(../assets/fog/qing-jade-flow.webp)}
+.fg-qing-jade-wisp{background-image:url(../assets/fog/qing-jade-wisp.webp)}
+.fg-qing-blue-flow{background-image:url(../assets/fog/qing-blue-flow.webp)}
+.fg-qing-blue-wisp{background-image:url(../assets/fog/qing-blue-wisp.webp)}
+.fg-dou-rose-flow{background-image:url(../assets/fog/dou-rose-flow.webp)}
+.fg-dou-rose-wisp{background-image:url(../assets/fog/dou-rose-wisp.webp)}
+.fg-dou-mauve-flow{background-image:url(../assets/fog/dou-mauve-flow.webp)}
+.fg-dou-mauve-wisp{background-image:url(../assets/fog/dou-mauve-wisp.webp)}
+.fg-dh-ochre{background-image:url(../assets/fog/dh-ochre.webp)}
+.fg-dh-ochre-flow{background-image:url(../assets/fog/dh-ochre-flow.webp)}
+.fg-dh-ochre-wisp{background-image:url(../assets/fog/dh-ochre-wisp.webp)}
+.fg-dh-mineral{background-image:url(../assets/fog/dh-mineral.webp)}
+.fg-dh-mineral-flow{background-image:url(../assets/fog/dh-mineral-flow.webp)}
+.fg-dh-mineral-wisp{background-image:url(../assets/fog/dh-mineral-wisp.webp)}
+.fg-dh-azurite{background-image:url(../assets/fog/dh-azurite.webp)}
+.fg-dh-azurite-flow{background-image:url(../assets/fog/dh-azurite-flow.webp)}
+.fg-dh-azurite-wisp{background-image:url(../assets/fog/dh-azurite-wisp.webp)}
+.fg-mg-gold{background-image:url(../assets/fog/mg-gold.webp)}
+.fg-mg-gold-flow{background-image:url(../assets/fog/mg-gold-flow.webp)}
+.fg-mg-gold-wisp{background-image:url(../assets/fog/mg-gold-wisp.webp)}
+.fg-mg-blue{background-image:url(../assets/fog/mg-blue.webp)}
+.fg-mg-blue-flow{background-image:url(../assets/fog/mg-blue-flow.webp)}
+.fg-mg-blue-wisp{background-image:url(../assets/fog/mg-blue-wisp.webp)}
+.fg-mg-ember{background-image:url(../assets/fog/mg-ember.webp)}
+.fg-mg-ember-flow{background-image:url(../assets/fog/mg-ember-flow.webp)}
+.fg-mg-ember-wisp{background-image:url(../assets/fog/mg-ember-wisp.webp)}
+.fg-xuan-cinnabar{background-image:url(../assets/fog/xuan-cinnabar.webp)}

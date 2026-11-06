@@ -19,7 +19,7 @@
  *   外层 .sl-orbit 仍用旧的 left/top/width/opacity 那套（splash-art.css），所以九套的
  *   视觉大小、落点与旧静态星图一模一样。
  */
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { SkinsCore } from '../data/skinsCore.js';
 import { ORBIT_SETS } from '../data/splashOrbitData.js';
 
@@ -96,7 +96,10 @@ export default function SplashOrbit() {
 
   const n = set.g.length / 7;
 
-  useEffect(() => {
+  /* ⚠ 必须是 useLayoutEffect：贴图先按 bbox 原坐标排好、位移要等这里算出来。
+     用 useEffect 的话，第一帧会先画一遍「所有宿组挤在原位」的画面，下一帧才跳进轨道 ⇒
+     开屏看着「闪一下 / 抖一下」。layout effect 在绘制前跑完，再把首帧同步算一次。 */
+  useLayoutEffect(() => {
     const stage = stageRef.current;
     const cv = cvRef.current;
     const map = mapRef.current;
@@ -158,6 +161,8 @@ export default function SplashOrbit() {
       }
       raf = requestAnimationFrame(tick);
     };
+    /* 首帧同步算一次（不等 rAF）：否则第一次绘制是「没位移」的那一版 */
+    tick(performance.now());
     raf = requestAnimationFrame(tick);
 
     let ro = null;

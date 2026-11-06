@@ -120,3 +120,8 @@ html[data-skin="mg"] .onb {
    直接开会让敦煌满屏冷蓝。要开就得先给 dh / mg 各写一套四团（敦煌＝花青/沙石黄/石绿/枣红，
    莫高窟＝群青/金/枣红），再 `html[data-skin="dh"] #xlrAura{display:block}`。
    ============================================================ */
+
+/* 安卓 2.261103.x：莫高窟次级文字提亮一档（Skin.kt dim 0xC0A98C→0xC8B496 / dim2 0x9C8768→0xAF997A）。
+   ⛔ 不改 legacy.css：那份按 offset/sha16 切块，改色值要重跑 port-legacy-css.mjs。
+   这里同权重、更晚出现，覆盖同一套皮肤变量。 */
+html[data-skin="mg"]{--dim:#C8B496;--dim2:#AF997A}

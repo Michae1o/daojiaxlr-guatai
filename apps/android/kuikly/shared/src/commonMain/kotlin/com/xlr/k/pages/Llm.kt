@@ -65,6 +65,17 @@ object Platform {
     var lite: Boolean = false
     /** 写一个文件到「下载/道家小六壬/」，返回给用户看的路径（失败 null） */
     var saveFile: ((String, String) -> String?)? = null
+    /** 导出时弹系统「保存到…」面板让用户自己挑位置：写完后回调给用户看的文件名，取消/失败 null。
+     *  此前：「导出能不能让用户自己修改路径」——宿主没实现就退回 saveFile。 */
+    var saveFileAs: ((String, String, (String?) -> Unit) -> Unit)? = null
+    /** 默认导出目录的可读路径；null = 没设过（还走每次弹面板 / 内置「下载」） */
+    var exportDirLabel: (() -> String?)? = null
+    /** 让用户挑一个文件夹当默认导出目录；回调新的可读路径，取消 null */
+    var pickExportDir: (((String?) -> Unit) -> Unit)? = null
+    /** 在系统「文件」里打开默认导出目录（没设过就什么都不做） */
+    var openExportDir: (() -> Unit)? = null
+    /** 清掉默认导出目录，改回「导出时自己选」 */
+    var resetExportDir: (() -> Unit)? = null
     /** 让用户挑一个文本文件来读；读到内容（或 null）后回调 —— 旧数据导入用 */
     var pickText: (((String?) -> Unit) -> Unit)? = null
     /** 打开系统浏览器（引导里那条智谱链接，早期版本是 <a target=_blank>） */

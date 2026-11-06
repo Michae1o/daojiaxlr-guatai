@@ -15,7 +15,7 @@
  *   2 路由：跟踪 html[data-step]（旧界面的步进），对外给一个只读的步进 API
  *   3 加载状态：把「外壳就绪 / 界面就绪」报出来，供 Phase 3 与调试用
  */
-/* ★ 产物身份（口径：「一个 exe 一个 apk 这么好区分，为什么还要用屏幕宽度区分？」）
+/* ★★ 产物身份（口径：「一个 exe 一个 apk 这么好区分，为什么还要用屏幕宽度区分？」）
    平台判定一律读这个常量，**不再用 innerWidth/matchMedia** —— 桌面窗口拉窄、模拟器 WebView
    没吃到 viewport meta（实测模拟器里 innerWidth=760，而本仓 viewport 写的是 390）都会让宽度判据
    把手机端错判成"宽屏"，于是开屏走了桌面那一套（自动退场 + 珠子飞向「壹」）。 */
@@ -46,7 +46,7 @@ import { Globals } from '../data/globals.js';
 import { OpenOut } from '../data/openOut.js';
 import { SetDot } from '../data/setDot.js';
 import { SettingsCore } from '../data/settingsCore.js';
-/* ★ 变更记录（砍段前置）：旧「设置对话框」两块列表的填充 ——
+/* ★ 变更记录（砍段前置，此前放行第 1 条）：旧「设置对话框」两块列表的填充 ——
    `#presets`（10 个预设按钮）＋ `#modelMenu`（7 条模型）。早期实现由 `24-script` 在**解析期**填；
    砍段后必须由本仓补，否则 `tools/shell-checks.mjs` 第 5 项结构核对少 31 个节点（实测）。
    生成物（改动后重新构建）：src/data/llmDialogCore.js ← tools/extract-llm-dialog.mjs（import 即执行，与早期实现同款）。 */
@@ -60,6 +60,8 @@ import { StepCore } from '../data/stepCore.js';
 import { ShowCore } from '../data/showCore.js';
 import { VariantC } from '../data/variantC.js';
 import { SplashCore } from '../data/splashCore.js';
+/* 背景雾气（安卓 2.261103.4）：渲染层与状态分开（fogCore = 数据/运动学，fogField = 画面） */
+import { FogField } from '../components/fogField.js';
 
 const VERSION = '0.1.0-phase2';
 
@@ -158,7 +160,7 @@ if (typeof window !== 'undefined' && typeof window.flushSidecar !== 'function') 
 /* MCP接入：上次退出时接入点若开着，这里连回去（地址与开关在 localStorage `xlr-mcp`）；没填地址则不出网。 */
 try { McpBridge.boot(); } catch (eMcp) { /* 接入点异常不影响开屏 */ }
 
-/* ============ 背景光晕（`#xlrAura`）改由本仓这套建 ============
+/* ============背景光晕（`#xlrAura`）改由本仓这套建 ============
  * 源：`38-script` L72–80 `buildAura()`（逐字切片在 `src/data/aura.js`，`tools/extract-aura.mjs` 生成）。
  * 幂等闸 = **共用的 `#xlrAura` id**（谁先建谁赢、后来者看到就跳过）⇒ 它对 legacy 与我们是同一道闸，
  *   所以**不需要改名**（与 B1 那几件的"闸名归 legacy 独用"是两码事）。
@@ -181,7 +183,20 @@ function mountAura() {
 }
 mountAura();
 
-/* ============ 脚注（`.mfoot`）改由本仓这套建 ============
+/* ============ 背景雾气（安卓 2.261103.4 移植） ============
+ * 挂载点：模块期一次（与 #xlrAura 同一时机）——雾层是纯背景，早建就早出画面。
+ * 幂等闸 = 共用的 `#xlrFog` id（谁先建谁赢；legacy 没有这份，永远是我们建）。
+ * ⚠ 状态（档位/冻结/相位）在 src/data/fogCore.js；画面在 src/components/fogField.js。
+ * ⚠ 与 #xlrAura 的层序：雾在 -2、光晕在 -1；有雾的皮肤会隐藏光晕（安卓只有雾，不叠两层）。 */
+try {
+  FogField.mount();
+  api.fog = { owner: 'react', mounted: true, status: () => FogField.status(), update: () => FogField.update() };
+  api.s3bOwn('fog');
+} catch (eFog) {
+  api.fog = { owner: 'react', mounted: false, error: String((eFog && eFog.message) || eFog) };
+}
+
+/* ============脚注（`.mfoot`）改由本仓这套建 ============
  * 源：`38-script` L35–56 `buildFooter()`（逐字切片在 `src/data/footer.js`，`tools/extract-footer.mjs` 生成）。
  * 幂等闸 = **共用节点判定**（`if (!wrap || document.querySelector('.mfoot')) return;`）——
  *   它对 legacy 与我们是同一道闸 ⇒ **不需要改名**（与 B1 那几件的"闸名归 legacy 独用"是两码事）。
@@ -209,7 +224,7 @@ function mountFooter() {
 }
 mountFooter();
 
-/* ============ I 段的三个全局小函数改由本仓这套装 ============
+/* ============I 段的三个全局小函数改由本仓这套装 ============
  * 源与接管手法见 `src/data/globals.js` 头注（`tools/extract-globals.mjs` 生成，**原样搬运**）：
  *   ① 顶栏吸顶 `markTop`（`18-script` L11–14，**零声明差异**）：先按名摘掉早期实现那条 scroll 监听，再装我们这份
  *      —— 早期实现那份绑的是 18-script 的**全局函数**，所以「按名摘」是确定性的；摘完只剩我们这一条。
@@ -339,7 +354,7 @@ function mountOpenOut() {
 }
 mountOpenOut();
 
-/* ============ 开屏引导分步（`#onbLayer`）改由本仓这套跑 ============
+/* ============开屏引导分步（`#onbLayer`）改由本仓这套跑 ============
  * 源与接管手法见 `src/data/guideCore.js` 头注（`tools/extract-guide.mjs` 生成，**原样搬运**）：
  *   ① `buildWelcome()`（`36-script` L267–357，**声明差异 1 处**：`show()` 幂等早退）：建 `#onbLayer`
  *      ＋ 接线（下一步 / 上一步 / 跳过 / 点层外跳过）＋ `goConfig()`，并导出 `window.__xlrGuideShow`；
@@ -350,7 +365,7 @@ mountOpenOut();
  *   ⚠ **位置**：早期实现是在 DCL 的 `init()` 里把它 append 在 **`#setScreen` 之后**；我们比它早建（模块顶层，
  *     共用 id 闸因此把早期实现那份挡掉）⇒ 落点在 body 末尾 ⇒ **必须在 DCL 调 `placeGuide()` 归位**，
  *     否则 `shell-checks` 第 3/5 项的结构签名会与早期产物不同。
- *   ⚠ **有意差异**（登记见 `历史记录` 原记录）：「去配置」那一击改由**本仓**这套开设置页 ——
+ *   ⚠ **有意差异**（登记见 `docs/--改动清单.md` 原记录）：「去配置」那一击改由**本仓**这套开设置页 ——
  *     只读实测（`(实测探针)`）旧路径开的是**早期实现那份**设置页（`#setScreen` 节点没换、
  *     `s2settings.mountedAt=null`）；本仓的设置页与它逐条同形，落点照旧由下面那条 `#gNext` 纠正兜着。
  *   ⚠ **自动弹在开屏在场时是死路**（`maybeWelcome` 第一条就早退；实测两臂都不弹）⇒ 真实入口 = `window.__xlrGuideShow`
@@ -457,7 +472,7 @@ function installGuideRetry() {
 }
 installGuideRetry();
 
-/* ============ 步进条一族（`.vstep` ＋ `html[data-step]`）改由本仓这套跑 ============
+/* ============步进条一族（`.vstep` ＋ `html[data-step]`）改由本仓这套跑 ============
  * 源与接管手法见 `src/data/stepCore.js` 头注（`tools/extract-step.mjs` 生成，**原样搬运**、正文零声明差异）：
  *   ① 状态（`STEPS`/`revealMax`）· ② 判据（`currentStep`/`hasCtx`）· ③ 骨架 `buildStepper()`（含药丸几何）
  *   ④a `placePill` · ④b IIFE 顶层 `resize` 监听 · ④c `placeSpill`（分段控件那颗药丸）
@@ -600,7 +615,7 @@ mountSplash();
  * 挂载（照 `开发计划` 原记录「过渡形态」）：
  *   · legacy 的 `build()` 在 DCL 就跑过、`#setScreen` 平时就躺在 body 里（`.setscreen{display:none}`、
  *     靠 `.on` 才 `display:grid`）。**首次接管时先 `remove()` 掉它** —— 不 remove 就会出现**两个同 id 节点**，
- *     而 `#setScreen{…}` 是按 id 命中的 ⇒ 样式双份命中、`getElementById` 只认第一个（ 同族的坑：
+ *     而 `#setScreen{…}` 是按 id 命中的 ⇒ 样式双份命中、`getElementById` 只认第一个（同族的坑：
  *     隐藏旧节点会留下重复 `<defs>` id，见下面开屏那段注释）。
  *   · 本项目的根挂在一个**脱离文档**的容器上，再把 host（`display:contents`，不引入额外盒）append 到 body，
  *     与开屏 `mountSplash()` 同一套做法。
@@ -899,7 +914,7 @@ function mountRecords() {
   };
   api.s2records = st;
 
-  /* ★ 已定（真坑一 + 真坑二，都在 C3 靶区）：把「点抽屉外面关抽屉」的**所有权**
+  /* ★★ 已定（真坑一 + 真坑二，都在 C3 靶区）：把「点抽屉外面关抽屉」的**所有权**
      从 legacy 的 document 级几何判定收到外壳（React）自己身上。三步照口径：
        ① legacy 那条**不再生效**；
        ② 外壳**自己**实现「点抽屉真正外面才关」，判据 = 抽屉的实际 DOM 边界（`#sdb` 整棵，
@@ -947,7 +962,7 @@ function mountRecords() {
     /* 前置 B：组件还没注册刷新函数时**静默早退**（不抛、不落 legacy 渲染） */
     try { if (typeof window.__xlrRecordsRefresh === 'function') return window.__xlrRecordsRefresh(); } catch (eR) { }
   };
-  /* ★ A4①（2026-10-13）**存储层收口**：把 legacy 的五个存储原语换成 React 侧那一份
+  /* ★★ A4①（2026-10-13）**存储层收口**：把 legacy 的五个存储原语换成 React 侧那一份
      （`src/data/recordsStore.js`＝`tools/extract-records-store.mjs` 从 `20-script.txt` L9–47 逐字切片）。
      换掉之后全应用**只有一份真相**：
        · React 侧（`Records.jsx`）直接 import 这份；
@@ -976,7 +991,7 @@ function mountRecords() {
      （A4③ 的 `ReviewCore.reviewCase`）。⚠ 抽屉那条路径**不在 setFb 里当场跑**（React 的 setState 是异步的：
      早期版本是 setFb → renderSdb 同步重建 DOM → reviewCase 找得到 `#rv-<id>`；React 里要等渲染提交）
      ⇒ 抽屉先把钩子挂空做本地标记，再由 Records.jsx 的 rvPending effect 在渲染后跑，见那里的注释。 */
-  /* ★ A4③（2026-10-13）**复盘 / 准则那条线**也搬到 React（逐字切片：`tools/extract-review-core.mjs`）：
+  /* ★★ A4③（2026-10-13）**复盘 / 准则那条线**也搬到 React（逐字切片：`tools/extract-review-core.mjs`）：
      `reviewCase`（复盘主流程，**会出网**——走设置那套出口，口径不变）/ `reviewBlock` / `ruleBlock` /
      `confirmRule`（只有用户点「写入准则」才写库）。换掉之后 React 抽屉直接用这一份；
      legacy 里剩下的调用者（`setFb` → 钩子、解卦链 → `ruleBlock`）也落到同一份上。 */
@@ -993,7 +1008,7 @@ function mountRecords() {
   });
   RecordsStore.setReviewHook(ReviewCore.reviewCase);
 
-  /* ★ 有意行为变更（登记 **变更记录**）：**修 legacy 的「写回 `loadCases()` ⇒ 把回收站写没」数据破坏 bug**。
+  /* ★★ 有意行为变更（登记 **变更记录**）：**修 legacy 的「写回 `loadCases()` ⇒ 把回收站写没」数据破坏 bug**。
      全枚举（`grep 'saveCases(' / 'loadCases()'`，20/22/26-script）—— 入参取自 `loadCases()` 的**都是**这个 bug：
        · `addCase`（20 L63）· `updateCaseDuanci`（L70-73）· `markModelAnswered`（L81-82）
        · `setFb`（L85-93）· `setNote`（L97-99）              ← **本批可达**（抽屉四条写路径 + 每次起卦）
@@ -1005,7 +1020,7 @@ function mountRecords() {
        **想真删**的记录又补回来，被比对第 11 步当场抓到（22 项 FAIL，差异字段 `trashSum`/`trashRows`/`ls`）。
      ⇒ 正确做法 = **只包那几个有 bug 的写入者**：调完原函数后，把「这次被它丢掉的已删记录」按
        `loadCasesRaw()` 的**原序**补回；**没丢就什么都不做**（那些写入者本来正确的语义一字不动）。
-     ★ 原先那两条开关（`VITE_S2_RECORDS` 等）已随段退役。 */
+     ★ （）：原先那两条开关（`VITE_S2_RECORDS` 等）已随段退役。 */
   st.legacySaveCases = window.saveCases;   /* ⚠ 只留引用，**不替换** */
   st.wrappedWriters = [];
   const mergeBack = (before, cur) => {
@@ -1129,7 +1144,7 @@ function mountMain() {
      ⚠ 上面 ① 那条 `#right` 的 innerHTML 封条**留着**：它是「DOM 归 React」的守卫（本仓这份已不写 DOM）。
      ⚠ 自由变量：本仓那份里的 `bindResult`/`playWalk` 转发 window（**已是本仓**：resultCore/walkCore）；
        `updateSetDot`/`addCase` 转发 window（**仍是早期实现**：设置页小红点 / 记录自动记账）⇒ 本批不收，已登记。
-     ★ 原先的 `VITE_S2_MAIN` 一键回退开关已随段退役。 */
+     ★ （）：原先的 `VITE_S2_MAIN` 一键回退开关已随段退役。 */
   const inner = window.show;
   /* ★ （砍段前置，(会话)）：**安装不再依赖「早期实现的 window.show 已就位」**。
      原来这里是 `if (typeof inner !== 'function') { …; return; }` —— 那是 变更记录 之前的口径（当时本块只是
@@ -1167,7 +1182,7 @@ function mountMain() {
   /** 供判据取证：本仓这条链跑过几次、每跑一次现场登记（态是不是本仓写的）；
       ⚠ 读**外壳侧**这份（`st.showHits` / `st.showLast`）—— 模块作用域那份在打包后读不到（见上面注释） */
   st.showState = function () { return { hits: st.showHits || 0, last: st.showLast || null }; };
-  /* ③ ★ `bindResult()` **整函数搬进 React**。
+  /* ③ `bindResult()` **整函数搬进 React**。
      它原来挂三处监听：复制「干净一卦」/「让模型解卦」/ 断卦依据折叠 —— 现在由两个组件用 `onClick` 接
      （见 `DivinationPane.jsx` · `EvidencePane.jsx` 的 A3① 段；切片在 `src/data/resultCore.js`）。
      ⇒ 这里把 legacy 那份换成 React 侧收尾件，只留它**唯一不属于那两个组件**的一步 `renderSdb()`
@@ -1186,7 +1201,7 @@ function mountMain() {
   };
   api.s3bOwn('bindResult');
 
-  /* ④ ★ **走宫改由 React 发起**。
+  /* ④ **走宫改由 React 发起**。
      `WalkCore.installWalk()`（切片在 `src/data/walkCore.js`）把 `window.playWalk` 换成
      「切片版 playWalk + 切片版 calmWalk 的瞬时化」，最外层照 `38-script` 的 `wireWalk()` 先切到「起卦」步
      （调的是 legacy 自己暴露的 `window.__xlrSetStep`，那是它 IIFE 里唯一的对外入口）。
@@ -1253,7 +1268,7 @@ function mountAsk() {
      （原先在这里定义 ⇒ S2/MAIN 块调不到，A3 的 `bindResult` 就登记不进去。） */
   /* 四拍由 React 播时，每播一次报一次（判据读 `fxPlays`） */
   api.markFxPlay = function () { st.fxPlays += 1; };
-  /* ★ **常置** `window.__xlrCasting = 1` ⇒ 38-script 那个 legacy 拦截器（它只认这一个旗）
+  /* **常置** `window.__xlrCasting = 1` ⇒ 38-script 那个 legacy 拦截器（它只认这一个旗）
      整体空转，四拍只由 React 的 `CastFx.installCastFx` 播 ⇒ 不会两套并存播两遍。 */
   try { window.__xlrCasting = 1; } catch (eC) { }
 
@@ -1287,9 +1302,9 @@ function mountAsk() {
   });
 
   /* ④ 事件转发：新节点 → 旧节点（旧监听器照常跑到 legacy 的全局函数）
-     ★ 方式三键 / 详情键 / 九数 input / 时辰 change **已搬进 React**（`AskPanel`）
+     方式三键 / 详情键 / 九数 input / 时辰 change **已搬进 React**（`AskPanel`）
        ⇒ 对应的转发**逐条撤掉**（转发还在 = 两套写者抢同一个态）。
-     ★ **`#btnGo` 那条也撤掉** —— 整条起卦链改由 `CastCore.goCast()`
+     **`#btnGo` 那条也撤掉** —— 整条起卦链改由 `CastCore.goCast()`
        （18-script 那段 handler 的逐字切片）发起 ⇒ **本块不再转发任何事件**（FWD 空表）。
        ⚠ 四拍动画不受影响：38-script 的 `wireCastFx()` 挂在 document 捕获阶段、按 `closest('#btnGo')` 命中，
          与「按钮由谁渲染」无关；它拦下首次点击、2400ms 后补发 click 交给应用（= React 的 handler）。 */
@@ -1308,7 +1323,7 @@ function mountAsk() {
     try { requestAnimationFrame(function () { if (st.placeSpill) st.placeSpill(true); }); } catch (eP) { }
   });
 
-  /* ⑤ 初值补齐 —— ★ **已搬进 `AskPanel`**
+  /* ⑤ 初值补齐 —— **已搬进 `AskPanel`**
      （「`#h1/#h2` 初值 = `clockNums().zi`」「`#dt` = 今天」「`setMode(window.__mode || 'clock')` 一次补齐」
       四件都在组件里的那个 effect 里，同一套规则、同一套函数）。
      这里只留一件 **legacy 侧的中和**：把 `window.refreshClock` 覆盖成 no-op。
@@ -1399,7 +1414,7 @@ function mountVariantC() {
 }
 mountVariantC();
 
-/* ★ （）老三条 ②：开场 `#q` **丢焦点** —— 在「节点已经定下来之后」补同一次聚焦
+/* ★★ （）老三条 ②：开场 `#q` **丢焦点** —— 在「节点已经定下来之后」补同一次聚焦
  *
  * 现场读数（（生成过程），1280×900，两臂对照；本节数字都是实测）：
  *   旧臂：[133ms] `focusIN textarea#q`（`setStep` 里那句 focus）⇒ 之后 1240/1245/1366/3070/3773ms 焦点**一直在**（同一个节点）

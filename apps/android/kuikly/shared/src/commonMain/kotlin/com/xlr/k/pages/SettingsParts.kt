@@ -398,13 +398,17 @@ internal fun SetField(value: String, onChange: (String) -> Unit, hint: String = 
             .border(Skin.borderW, KY_CARD_LINE, RoundedCornerShape(10.dp))
             .padding(horizontal = 12.dp, vertical = 9.dp)
     ) {
-        /* 占位文字得自己画：Kuikly 的 BasicTextField 没有 placeholder 参数 */
+        /* 占位文字得自己画：Kuikly 的 BasicTextField 没有 placeholder 参数。
+           ★ 此前报「输入框里的字显示不全」：框高固定 42 - 上下各 9 = 内容只有 24dp，
+            占位字一换行就被 .clip() 切掉第二行（截图上是「复盘要用它」的「它」只露上半截）。
+            口径＝任何时候都只显示一行 ⇒ 占位字 maxLines=1、输入本身 singleLine=true。 */
         if (value.isEmpty() && ph.isNotEmpty()) {
             Text_(
                 text = ph,
                 fontSize = 13f,
                 lineHeight = 20f,
                 color = KY_DIM2,
+                maxLines = 1,
                 modifier = Modifier.padding(start = 1.dp),
             )
         }
@@ -414,6 +418,7 @@ internal fun SetField(value: String, onChange: (String) -> Unit, hint: String = 
             modifier = Modifier.fillMaxWidth(),
             textStyle = TextStyle(fontSize = 13f.sp, lineHeight = 20f.sp, color = KY_INK),
             cursorBrush = SolidColor(KY_INK),
+            singleLine = true,
         )
     }
     if (hint.isNotEmpty()) SetHint(hint)

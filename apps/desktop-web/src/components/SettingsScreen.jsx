@@ -1,4 +1,4 @@
-/* SettingsScreen.jsx —— 设置页 
+/* SettingsScreen.jsx —— C2（设置页）S2 
  *   结构来源（逐字照抄）：`legacy/parts/36-script.txt`
  *     · 外壳/头部/身体   L133–L253（`build()` 里拼的那份 html，L249–253 挂到 body）
  *     · 五个 section     L149–L243 + 五步向导 L159–L194 + 进阶设置 L198–L210
@@ -39,6 +39,10 @@ import { fetchLLM } from '../llm/llmFetch.js';
 import { faqList } from '../data/faq.js';
 import { SkinsCore } from '../data/skinsCore.js';
 import { applySkin, currentSkin } from '../data/skinApply.js';
+/* 背景雾气（安卓 2.261103.4 移植）：档位/冻结存在 FogCore，画面由 FogField 挂的 #xlrFog 承担 */
+import { FogCore } from '../data/fogCore.js';
+import { FogField } from './fogField.js';
+import { FogLevelControl, FogSwitch } from './FogControls.jsx';
 /* ★ （要求）：数据栏的「准则」导出/清空 +「旧数据导入」——
    准则是 RecordsStore 的第二个库（RULE_KEY = 'xlr-rules'），与卦例本同一个 store ⇒ 读写走同一份原语，
    不自己碰 localStorage（与 recordsStore 的规矩一致）。 */
@@ -81,6 +85,21 @@ export default function SettingsScreen({ open, onClose, preload }) {
      早期版本对应 `open()` 里的 `renderThemes()`（L573-578：用 `window.XLR_SKIN_CUR()` 给 `.theme` 标 aria-current）；
      这边把它变成 state：点一下 → `applySkin()` → `setSkin()` ⇒ 重渲染即等价于 renderThemes()。 */
   const [skin, setSkin] = useState(() => currentSkin());
+  /* 背景雾气：档位与「冻结」都读同一份 FogCore（与 #xlrFog 共用，不另存一份） */
+  const [fogLevel, setFogLevel] = useState(() => FogCore.getFogLevel());
+  const [fogFrozen, setFogFrozen] = useState(() => FogCore.isFogFrozen(FogCore.getFogLevel()));
+  const onFogLevel = (n) => {
+    const v = FogCore.setFogLevel(n);
+    setFogLevel(v);
+    setFogFrozen(FogCore.isFogFrozen(v));
+    try { FogField.update(); } catch (e) { }
+  };
+  const onFogFreeze = (on) => {
+    const now = FogCore.isFogFrozen(fogLevel);
+    if (on !== now) FogCore.toggleFogFrozen(fogLevel);
+    setFogFrozen(FogCore.isFogFrozen(fogLevel));
+    try { FogField.update(); } catch (e) { }
+  };
   /* `#stThemes` 点击（L910-915）：`window.XLR_SKIN_APPLY(data-k)` + `renderThemes()` */
   const onTheme = (k) => { applySkin(k); setSkin(k); };
 
@@ -1033,6 +1052,25 @@ export default function SettingsScreen({ open, onClose, preload }) {
                     <b>{s.n}</b>
                   </button>
                 ))}
+              </div>
+              {/* 背景雾气（安卓 2.261103.4 移植）：三档 + 冻结（冻结是独立开关，只在会动的档位出现） */}
+              <div className="fogbox" id="stFogBox">
+                <div className="fog-head">背景雾气<em>会记住，换皮肤各自接着走</em></div>
+                <FogLevelControl level={fogLevel} onLevel={onFogLevel} />
+                <div className="fog-hint" id="stFogHint">
+                  {skin === 'bru' ? '卡通保持清爽底色，不叠加雾气。'
+                    : fogLevel === 0 ? '淡雾静置，减少动态消耗。'
+                      : fogLevel === 1 ? '雾气沿平滑路径缓缓游移。'
+                        : !FogCore.realtimeAvailable() ? '当前环境不支持实时流雾，已退回轻柔流动。'
+                          : '雾形持续变化、交织流动。'}
+                </div>
+                {fogLevel > 0 && skin !== 'bru' ? (
+                  <FogSwitch checked={fogFrozen} onChange={onFogFreeze} label="冻结雾气"
+                    hint={fogFrozen ? '已停在当前画面，关闭后继续流动。'
+                      : (fogLevel === 2 && FogCore.realtimeAvailable())
+                        ? '开启后定格当前雾景，停止持续生成。'
+                        : '开启后停在此刻，减少持续动画开销。'} />
+                ) : null}
               </div>
             </section>
 
